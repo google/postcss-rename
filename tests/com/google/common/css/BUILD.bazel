@@ -23,7 +23,7 @@ java_test(
     test_class = "com.google.common.css.IdentitySubstitutionMapTest",
     deps = [
         "//src/com/google/common/css",
-        "@com_google_truth//jar",
+        "@maven//:com_google_truth_truth",
     ],
 )
 
@@ -36,8 +36,8 @@ java_test(
     test_class = "com.google.common.css.JobDescriptionBuilderTest",
     deps = [
         "//src/com/google/common/css",
-        "@com_google_guava//jar",
-        "@com_google_truth//jar",
+        "@maven//:com_google_guava_guava",
+        "@maven//:com_google_truth_truth",
     ],
 )
 
@@ -50,8 +50,8 @@ java_test(
     test_class = "com.google.common.css.MinimalSubstitutionMapTest",
     deps = [
         "//src/com/google/common/css",
-        "@com_google_guava//jar",
-        "@com_google_truth//jar",
+        "@maven//:com_google_guava_guava",
+        "@maven//:com_google_truth_truth",
     ],
 )
 
@@ -64,7 +64,7 @@ java_test(
     test_class = "com.google.common.css.PrefixingSubstitutionMapTest",
     deps = [
         "//src/com/google/common/css",
-        "@com_google_truth//jar",
+        "@maven//:com_google_truth_truth",
     ],
 )
 
@@ -77,8 +77,8 @@ java_test(
     test_class = "com.google.common.css.RecordingSubstitutionMapTest",
     deps = [
         "//src/com/google/common/css",
-        "@com_google_guava//jar",
-        "@com_google_truth//jar",
+        "@maven//:com_google_guava_guava",
+        "@maven//:com_google_truth_truth",
     ],
 )
 
@@ -92,8 +92,8 @@ java_test(
     deps = [
         "//src/com/google/common/css",
         "//tests/com/google/common/css/compiler/ast/testing",
-        "@com_google_guava//jar",
-        "@com_google_truth//jar",
+        "@maven//:com_google_guava_guava",
+        "@maven//:com_google_truth_truth",
     ],
 )
 
@@ -106,6 +106,6 @@ java_test(
     test_class = "com.google.common.css.SplittingSubstitutionMapTest",
     deps = [
         "//src/com/google/common/css",
-        "@com_google_truth//jar",
+        "@maven//:com_google_truth_truth",
     ],
 )

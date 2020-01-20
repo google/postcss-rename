@@ -25,6 +25,6 @@ java_library(
         "//tests/com/google/common/css/compiler/passes:__pkg__",
     ],
     deps = [
-        "@com_google_guava//jar",
+        "@maven//:com_google_guava_guava",
     ],
 )

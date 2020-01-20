@@ -23,8 +23,8 @@ java_library(
         "//src/com/google/common/css",
         "//src/com/google/common/css/compiler/ast",
         "//src/com/google/common/css/compiler/passes",
-        "@com_google_code_findbugs_jsr305//jar",
-        "@com_google_guava//jar",
+        "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_guava_guava",
     ],
 )
 
@@ -41,9 +41,9 @@ java_library(
         ":commandline",
         "//src/com/google/common/css",
         "//src/com/google/common/css/compiler/ast",
-        "@args4j//jar",
-        "@com_google_code_findbugs_jsr305//jar",
-        "@com_google_guava//jar",
+        "@maven//:args4j_args4j",
+        "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_guava_guava",
     ],
 )
 

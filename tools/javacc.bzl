@@ -48,14 +48,13 @@ javacc = rule(
     attrs={
         "src": attr.label(
             mandatory = True,
-            allow_files = [".jj"],
-            single_file = True,
+            allow_single_file = [".jj"],
         ),
         "outs": attr.string_list(
             mandatory = True,
         ),
         "_compiler": attr.label(
-            default = Label("@javacc//:javacc"),
+            default = Label("//tools:javacc"),
             executable = True,
             cfg = "host",
         ),

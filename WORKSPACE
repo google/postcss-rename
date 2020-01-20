@@ -14,90 +14,44 @@
 
 workspace(name = "com_google_closure_stylesheets")
 
-load("//tools:maven_jar.bzl", "maven_jar")
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
-maven_jar(
-    name = "args4j",
-    artifact_id = "args4j",
-    group_id = "args4j",
-    sha1 = "01ebb18ebb3b379a74207d5af4ea7c8338ebd78b",
-    version = "2.0.26",
-)
+RULES_JVM_EXTERNAL_TAG = "3.1"
+RULES_JVM_EXTERNAL_SHA = "e246373de2353f3d34d35814947aa8b7d0dd1a58c2f7a6c41cfeaff3007c2d14"
 
-maven_jar(
-    name = "com_google_auto_value",
-    artifact_id = "auto-value",
-    group_id = "com.google.auto.value",
-    sha1 = "a3b1b1404f8acaa88594a017185e013cd342c9a8",
-    version = "1.6",
+http_archive(
+    name = "rules_jvm_external",
+    strip_prefix = "rules_jvm_external-%s" % RULES_JVM_EXTERNAL_TAG,
+    sha256 = RULES_JVM_EXTERNAL_SHA,
+    url = "https://github.com/bazelbuild/rules_jvm_external/archive/%s.zip" % RULES_JVM_EXTERNAL_TAG,
 )
 
-maven_jar(
-    name = "com_google_guava",
-    artifact_id = "guava",
-    group_id = "com.google.guava",
-    sha1 = "89507701249388e1ed5ddcf8c41f4ce1be7831ef",
-    version = "20.0",
-)
+load("@rules_jvm_external//:defs.bzl", "maven_install")
 
-maven_jar(
-    name = "com_google_code_gson",
-    artifact_id = "gson",
-    group_id = "com.google.code.gson",
-    sha1 = "751f548c85fa49f330cecbb1875893f971b33c4e",
-    version = "2.7",
+maven_install(
+    name = "maven",
+    artifacts = [
+        "args4j:args4j:2.0.26",
+        "com.google.auto.value:auto-value:1.6",
+        "com.google.code.findbugs:jsr305:3.0.1",
+        "com.google.code.gson:gson:2.7",
+        "com.google.guava:guava:20.0",
+        "com.google.javascript:closure-compiler-unshaded:v20160713",
+        "com.google.truth:truth:0.36",
+        "org.mockito:mockito-all:1.10.19",
+        "net.java.dev.javacc:javacc:jar:6.1.2",
+    ],
+    repositories = [
+        "https://jcenter.bintray.com",
+        "https://maven.google.com",
+        "https://repo1.maven.org/maven2",
+    ],
+    fetch_sources = True,
+    version_conflict_policy = "pinned",
+    # See https://github.com/bazelbuild/rules_jvm_external/#repository-aliases
+    # This can be removed if none of your external dependencies uses `maven_jar`.
+    generate_compat_repositories = True,
 )
+load("@maven//:compat.bzl", "compat_repositories")
+compat_repositories()
 
-new_http_archive(
-    name = "javacc",
-    build_file_content = """
-java_import(
-  name = "javacc_lib",
-  jars = [
-    "bin/lib/javacc.jar",
-  ],
-)
-
-java_binary(
-  name = "javacc",
-  runtime_deps = [":javacc_lib"],
-  main_class = "javacc",
-  visibility = ["//visibility:public"],
-)
-""",
-    sha256 = "c8750906c5495dcc00a7477d6a435440a48dabbc758ea1c4f13a17f25c5fa28a",
-    strip_prefix = "javacc-6.0",
-    url = "https://javacc.org/downloads/javacc-6.0.zip",
-)
-
-maven_jar(
-    name = "com_google_code_findbugs_jsr305",
-    artifact_id = "jsr305",
-    group_id = "com.google.code.findbugs",
-    sha1 = "f7be08ec23c21485b9b5a1cf1654c2ec8c58168d",
-    version = "3.0.1",
-)
-
-maven_jar(
-    name = "com_google_javascript_closure_compiler",
-    artifact_id = "closure-compiler-unshaded",
-    group_id = "com.google.javascript",
-    sha1 = "7df7b683e16c93f65361a15356283599ba012c78",
-    version = "v20160713",
-)
-
-maven_jar(
-    name = "org_mockito_all",
-    artifact_id = "mockito-all",
-    group_id = "org.mockito",
-    sha1 = "539df70269cc254a58cccc5d8e43286b4a73bf30",
-    version = "1.10.19",
-)
-
-maven_jar(
-    name = "com_google_truth",
-    artifact_id = "truth",
-    group_id = "com.google.truth",
-    sha1 = "7485219d2c1d341097a19382c02bde07e69ff5d2",
-    version = "0.36",
-)

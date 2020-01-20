@@ -103,8 +103,8 @@ java_library(
         "//src/com/google/common/css",
         "//src/com/google/common/css/compiler/ast",
         "//src/com/google/common/css/compiler/gssfunctions",
-        "@com_google_code_findbugs_jsr305//jar",
-        "@com_google_guava//jar",
-        "@com_google_javascript_closure_compiler//jar",
+        "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_guava_guava",
+        "@maven//:com_google_javascript_closure_compiler_unshaded",
     ],
 )
