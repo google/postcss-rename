@@ -1,0 +1,24 @@
+body {
+  font-size: 12px;
+}
+
+.a, .b.c {
+  margin: 0 auto;
+  width: 800px;
+}
+
+.a {
+  background: #fff;
+}
+
+.b {
+  box-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
+}
+
+.b.c {
+  box-shadow: none;
+}
+
+.d {
+  width: 100%;
+}

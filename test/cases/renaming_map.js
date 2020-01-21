@@ -1,0 +1,22 @@
+goog.setCssNameMapping([
+  [
+    "a",
+    "container"
+  ],
+  [
+    "b",
+    "image"
+  ],
+  [
+    "c",
+    "full"
+  ],
+  [
+    "d",
+    "width"
+  ],
+  [
+    "e",
+    "size"
+  ]
+]);

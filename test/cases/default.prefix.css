@@ -1,0 +1,24 @@
+body {
+  font-size: 12px;
+}
+
+.x-container, .x-image.x-full-width {
+  margin: 0 auto;
+  width: 800px;
+}
+
+.x-container {
+  background: #fff;
+}
+
+.x-image {
+  box-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
+}
+
+.x-image.x-full-width {
+  box-shadow: none;
+}
+
+.x-full-size {
+  width: 100%;
+}

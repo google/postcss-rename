@@ -1,0 +1,66 @@
+{
+  "name": "postcss-rename",
+  "version": "0.0.0-PLACEHOLDER",
+  "description": "A PostCSS plugin to replace class names based on a customizable renaming scheme.",
+  "keywords": [
+    "postcss",
+    "css",
+    "postcss-plugin"
+  ],
+  "main": "build/index.js",
+  "files": [
+    "build"
+  ],
+  "scripts": {
+    "test": "jest && eslint .",
+    "check": "gts check",
+    "clean": "gts clean",
+    "compile": "tsc -p .",
+    "fix": "gts fix",
+    "prepare": "npm run compile",
+    "pretest": "npm run compile",
+    "posttest": "npm run check"
+  },
+  "license": "Apache-2.0",
+  "repository": "https://github.com/google/postcss-rename",
+  "dependencies": {
+    "@types/node": "^12.12.7",
+    "conditional": "^5.3.0",
+    "guava-js": "github:nerdynick/guava-js#2811ba397343f945e811239dfa7e040eeb44db99",
+    "immutable": "^4.0.0-rc.12",
+    "postcss": "^7.0.18",
+    "postcss-selector-parser": "^6.0.2",
+    "typescript": "^3.7.2"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.7.7",
+    "@babel/preset-env": "^7.7.7",
+    "@logux/eslint-config": "^33.0.0",
+    "@types/conditional": "file:typings/conditional",
+    "@types/jest": "^24.0.25",
+    "@types/mock-fs": "^4.10.0",
+    "babel-jest": "^24.9.0",
+    "eslint": "^6.5.1",
+    "eslint-config-postcss": "^3.0.7",
+    "eslint-config-standard": "^14.1.0",
+    "eslint-plugin-es5": "^1.4.1",
+    "eslint-plugin-import": "^2.18.2",
+    "eslint-plugin-jest": "^22.19.0",
+    "eslint-plugin-node": "^10.0.0",
+    "eslint-plugin-prefer-let": "^1.0.1",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-security": "^1.4.0",
+    "eslint-plugin-standard": "^4.0.1",
+    "eslint-plugin-unicorn": "^12.1.0",
+    "gts": "^1.1.2",
+    "jest": "^24.9.0",
+    "mock-fs": "^4.10.4",
+    "ts-jest": "^24.2.0"
+  },
+  "eslintConfig": {
+    "extends": "eslint-config-postcss"
+  },
+  "engines": {
+    "node": ">=8.0.0"
+  }
+}
