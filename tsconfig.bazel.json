@@ -1,7 +1,5 @@
 {
-  "extends": "./node_modules/gts/tsconfig-google.json",
   "compilerOptions": {
-    "outDir": "build",
     "module": "commonjs",
     "lib": [
       "es5",
@@ -12,14 +10,18 @@
       "dom"
     ],
     "types": [
-      "node",
-      "jest"
+      "node"
     ],
     "target": "es2015",
-    "strict": false,
-    "allowJs": true
+    "strict": true,
+    "typeRoots": [
+      "./node_modules/@types",
+      "./typings"
+    ]
   },
   "include": [
-    "*.ts", "src/com/google/common/css/*.js"
-  ],
+    "src/com/google/common/css/identity-substitution-map.ts",
+    "src/com/google/common/css/substitution-map.ts",
+    "typings/*.ts"
+  ]
 }

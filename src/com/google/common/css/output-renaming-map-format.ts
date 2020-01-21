@@ -14,30 +14,27 @@
  * limitations under the License.
  */
 
-package com.google.common.css;
+import * as Preconditions from 'conditional';
+import {Map as ImmutableMap} from 'immutable';
+import * as readline from 'readline';
+import * as stream from 'stream';
+import * as util from 'util';
+import * as GuavaJS from './guavajs-wrapper';
+import Splitter = GuavaJS.Strings.Splitter;
+import { AssertionError } from 'assert';
 
-
-import com.google.common.base.Preconditions;
-import com.google.common.base.Splitter;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
-import com.google.common.escape.CharEscaperBuilder;
-import com.google.common.escape.Escaper;
-import com.google.common.io.CharStreams;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.Reader;
-import java.io.StringReader;
-import java.io.Writer;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Properties;
+const streamToString = async (stream: stream.Readable) => {
+  return new Promise<string>((resolve, reject) => {
+    let chunks = [];
+    const onData = chunk => chunks.push(chunk);
+    stream.on('data', onData);
+    stream.once('error', reject);
+    stream.once('end', () => {
+      stream.removeListener('data', onData);
+      resolve(Buffer.concat(chunks).toString('utf8'));
+    });
+  });
+};
 
 /**
  * Defines the values for the --output-renaming-map-format flag in Closure
@@ -45,100 +42,18 @@ import java.util.Properties;
  *
  * @author bolinfest@google.com (Michael Bolin)
  */
-public enum OutputRenamingMapFormat {
-  /**
-   * Reads/Writes the mapping as JSON, passed as an argument to
-   * {@code goog.setCssNameMapping()}. Designed for use with the Closure
-   * Library in compiled mode.
-   */
-  CLOSURE_COMPILED("goog.setCssNameMapping(%s);\n"),
+interface OutputRenamingMapFormat {
+  writeRenamingMap(renamingMap: Map<string, string>, renamingMapWriter: stream.Writable): void;
+  readRenamingMap(inReadable: stream.Readable): Promise<ImmutableMap<string, string>>;
+  readMapInto(inReadable: stream.Readable, builder: Map<string, string>): Promise<void>;
+}
 
-  /**
-   * Reads/Writes the mapping as JSON, passed as an argument to
-   * {@code goog.setCssNameMapping()} using the 'BY_WHOLE' mapping style.
-   * Designed for use with the Closure Library in compiled mode where the CSS
-   * name substitutions are taken as-is, which allows, e.g., using
-   * {@code SimpleSubstitutionMap} with class names containing hyphens.
-   */
-  CLOSURE_COMPILED_BY_WHOLE("goog.setCssNameMapping(%s, 'BY_WHOLE');\n"),
+class OutputRenamingMapFormatImpl implements OutputRenamingMapFormat {
+  private readonly formatString: string;
 
-  /**
-   * Before writing the mapping as CLOSURE_COMPILED, split the css name maps by hyphens and write
-   * out each piece individually. see {@code CLOSURE_COMPILED}
-   */
-  CLOSURE_COMPILED_SPLIT_HYPHENS("goog.setCssNameMapping(%s);\n") {
-    @Override
-    public void writeRenamingMap(Map<String, String> renamingMap, Writer renamingMapWriter)
-        throws IOException {
-      super.writeRenamingMap(splitEntriesOnHyphens(renamingMap), renamingMapWriter);
-    }
-  },
-
-  /**
-   * Reads/Writes the mapping as JSON, assigned to the global JavaScript variable
-   * {@code CLOSURE_CSS_NAME_MAPPING}. Designed for use with the Closure
-   * Library in uncompiled mode.
-   */
-  CLOSURE_UNCOMPILED("CLOSURE_CSS_NAME_MAPPING = %s;\n"),
-
-  /**
-   * Reads/Writes the mapping as JSON.
-   */
-  JSON,
-
-  /**
-   * Reads/Writes the mapping from/in a .properties file format, such that it can be read
-   * by {@link Properties}.
-   */
-  PROPERTIES {
-    @Override
-    public void writeRenamingMap(Map<String, String> renamingMap, Writer renamingMapWriter)
-        throws IOException {
-      writeOnePerLine('=', renamingMap, renamingMapWriter);
-      // We write the properties directly rather than using
-      // Properties#store() because it is impossible to suppress the timestamp
-      // comment: http://goo.gl/6hsrN. As noted on the Stack Overflow thread,
-      // the timestamp results in unnecessary diffs between runs. Further, those
-      // who are using a language other than Java to parse this file should not
-      // have to worry about adding support for comments.
-    }
-
-    @Override
-    void readMapInto(
-        BufferedReader in, ImmutableMap.Builder<? super String, ? super String> builder)
-        throws IOException {
-      readOnePerLine('=', in, builder);
-    }
-  },
-
-  /**
-   * This is the current default behavior for output maps. Still used for
-   * legacy reasons.
-   */
-  JSCOMP_VARIABLE_MAP {
-    @Override
-    public void writeRenamingMap(Map<String, String> renamingMap, Writer renamingMapWriter)
-        throws IOException {
-      writeOnePerLine(':', renamingMap, renamingMapWriter);
-    }
-
-    @Override
-    void readMapInto(
-        BufferedReader in, ImmutableMap.Builder<? super String, ? super String> builder)
-        throws IOException {
-      readOnePerLine(':', in, builder);
-    }
-  };
-
-  private final String formatString;
-
-  private OutputRenamingMapFormat(String formatString) {
+  constructor(formatString?: string) {
     Preconditions.checkNotNull(formatString);
-    this.formatString = formatString;
-  }
-
-  private OutputRenamingMapFormat() {
-    this("%s");
+    this.formatString = formatString ?? '%s';
   }
 
   /**
@@ -147,50 +62,27 @@ public enum OutputRenamingMapFormat {
    * @see com.google.common.css.compiler.commandline.DefaultCommandLineCompiler
    *     #writeRenamingMap(Map, PrintWriter)
    */
-  public void writeRenamingMap(Map<String, String> renamingMap, Writer renamingMapWriter)
-      throws IOException {
-    // Build up the renaming map as a JsonObject.
-    JsonObject properties = new JsonObject();
-    for (Map.Entry<String, String> entry : renamingMap.entrySet()) {
-      properties.addProperty(entry.getKey(), entry.getValue());
-    }
-
-    // Write the JSON wrapped in this output format's formatString.
-    Gson gson = new GsonBuilder().setPrettyPrinting().create();
-    renamingMapWriter.write(String.format(formatString,
-        gson.toJson(properties)));
-  }
-
-  /**
-   * Like {@writeRenamingMap(java.util.Map, java.io.Writer)} but does not throw when writes fail.
-   */
-  public final void writeRenamingMap(
-      Map<String, String> renamingMap, PrintWriter renamingMapWriter) {
-    try {
-      writeRenamingMap(renamingMap, (Writer) renamingMapWriter);
-    } catch (IOException ex) {
-      throw (AssertionError) new AssertionError("IOException from PrintWriter").initCause(ex);
-    }
+  writeRenamingMap(renamingMap: Map<string, string>, renamingMapWriter: stream.Writable) {
+    renamingMapWriter.write(util.format(this.formatString,
+        JSON.stringify([...renamingMap], null, 2)));
   }
 
   /**
    * Reads the output of {@link #writeRenamingMap} so a renaming map can be reused from one compile
    * to another.
    */
-  public ImmutableMap<String, String> readRenamingMap(Reader in) throws IOException {
-    String subsitutionMarker = "%s";
-    int formatStringSubstitutionIndex = formatString.indexOf(subsitutionMarker);
-    Preconditions.checkState(formatStringSubstitutionIndex >= 0, formatString);
+  async readRenamingMap(inReadable: stream.Readable): Promise<ImmutableMap<string, string>> {
+    const subsitutionMarker = "%s";
+    const formatStringSubstitutionIndex = this.formatString.indexOf(subsitutionMarker);
+    Preconditions.checkState(formatStringSubstitutionIndex >= 0, this.formatString);
 
-    String formatPrefix = formatString.substring(0, formatStringSubstitutionIndex);
-    String formatSuffix =
-        formatString.substring(formatStringSubstitutionIndex + subsitutionMarker.length());
+    let formatPrefix = this.formatString.substring(0, formatStringSubstitutionIndex);
+    let formatSuffix =
+        this.formatString.substring(formatStringSubstitutionIndex + subsitutionMarker.length);
 
-    // GSON's JSONParser does not stop reading bytes when it sees a bracket that
-    // closes the value.
     // We read the whole input in, then strip prefixes and suffixes and then parse
     // the rest.
-    String content = CharStreams.toString(in);
+    let content = await streamToString(inReadable);
 
     content = content.trim();
     formatPrefix = formatPrefix.trim();
@@ -198,18 +90,17 @@ public enum OutputRenamingMapFormat {
 
     if (!content.startsWith(formatPrefix)
         || !content.endsWith(formatSuffix)
-        || content.length() < formatPrefix.length() + formatSuffix.length()) {
-      throw new IOException("Input does not match format " + formatString + " : " + content);
+        || content.length < formatPrefix.length + formatSuffix.length) {
+      throw new Error("Input does not match format " + this.formatString + " : " + content);
     }
 
-    content = content.substring(formatPrefix.length(), content.length() - formatSuffix.length());
+    content = content.substring(formatPrefix.length, content.length - formatSuffix.length);
 
-    ImmutableMap.Builder<String, String> b = ImmutableMap.builder();
-    BufferedReader br = new BufferedReader(new StringReader(content));
-    readMapInto(br, b);
-    requireEndOfInput(br);
+    const b = new Map<string, string>();
+    const json = JSON.parse(content);
+    this.readMapInto(json, b);
 
-    return b.build();
+    return ImmutableMap.of(b);
   }
 
   /**
@@ -219,89 +110,65 @@ public enum OutputRenamingMapFormat {
    * names to originals into their format string, and may be overridden by formats that do something
    * different.
    */
-  void readMapInto(BufferedReader in, ImmutableMap.Builder<? super String, ? super String> builder)
-      throws IOException {
-    JsonElement json = new JsonParser().parse(in);
-    for (Map.Entry<String, JsonElement> e : json.getAsJsonObject().entrySet()) {
-      builder.put(e.getKey(), e.getValue().getAsString());
+  async readMapInto(inReadable: stream.Readable, builder: Map<string, string>) {
+    const json = JSON.parse(await streamToString(inReadable));
+    for (const [key, value] of Object.entries(json)) {
+      builder.set(key, value.toString());
     }
-  }
-
-  /**
-   * Raises an IOException if there are any non-space characters on in, and consumes the remaining
-   * characters on in.
-   */
-  private static void requireEndOfInput(BufferedReader in) throws IOException {
-    for (int ch; (ch = in.read()) >= 0; ) {
-      if (!Character.isSpace((char) ch)) {
-        throw new IOException("Expected end of input, not '" + escape((char) ch) + "'");
-      }
-    }
-  }
-
-  private static final Escaper ESCAPER =
-      new CharEscaperBuilder()
-          .addEscape('\t', "\\t")
-          .addEscape('\n', "\\n")
-          .addEscape('\r', "\\r")
-          .addEscape('\\', "\\\\")
-          .addEscape('\'', "\\'")
-          .toEscaper();
-
-  private static String escape(char ch) {
-    return ESCAPER.escape(new String(new char[] {ch}));
   }
 
   /** Splitter used for CLOSURE_COMPILED_SPLIT_HYPHENS format. */
-  private static final Splitter HYPHEN_SPLITTER = Splitter.on("-");
+  private static readonly HYPHEN_SPLITTER = Splitter.on("-");
 
   /**
    * <code>{ "foo-bar": "f-b" }</code> => <code>{ "foo": "f", "bar": "b" }</code>.
    *
    * @see SplittingSubstitutionMap
    */
-  private static Map<String, String> splitEntriesOnHyphens(Map<String, String> renamingMap) {
-    Map<String, String> newSplitRenamingMap = Maps.newLinkedHashMap();
-    for (Map.Entry<String, String> entry : renamingMap.entrySet()) {
-      Iterator<String> keyParts = HYPHEN_SPLITTER.split(entry.getKey()).iterator();
-      Iterator<String> valueParts = HYPHEN_SPLITTER.split(entry.getValue()).iterator();
-      while (keyParts.hasNext() && valueParts.hasNext()) {
-        String keyPart = keyParts.next();
-        String valuePart = valueParts.next();
-        String oldValuePart = newSplitRenamingMap.put(keyPart, valuePart);
+  static splitEntriesOnHyphens(renamingMap: Map<string, string>): Map<string, string> {
+    const newSplitRenamingMap: Map<string, string> = new Map();
+    for (const [key, value] of renamingMap.entries()) {
+      const keyParts = OutputRenamingMapFormatImpl.HYPHEN_SPLITTER.split(key).values();
+      const valueParts = OutputRenamingMapFormatImpl.HYPHEN_SPLITTER.split(value).values();
+      
+      let keyPart = keyParts.next();
+      let valuePart = valueParts.next();
+      while (!keyPart.done && !valuePart.done) {
+        const oldValuePart = newSplitRenamingMap.get(keyPart.value);
+        newSplitRenamingMap.set(keyPart.value, valuePart.value);
         // Splitting by part to make a simple map shouldn't involve mapping two old names
         // to the same new name.  It's ok the other way around, but the part relation should
         // be a partial function.
-        Preconditions.checkState(oldValuePart == null || oldValuePart.equals(valuePart));
+        Preconditions.checkState(oldValuePart == null || oldValuePart === valuePart.value);
+
+        keyPart = keyParts.next();
+        valuePart = valueParts.next();
       }
-      if (keyParts.hasNext()) {
-        throw new AssertionError(
+      if (!keyPart.done) {
+        throw new AssertionError({ message:
             "Not all parts of the original class "
                 + "name were output. Class: "
-                + entry.getKey()
+                + key
                 + " Next Part:"
-                + keyParts.next());
+                + keyParts.next().value });
       }
-      if (valueParts.hasNext()) {
-        throw new AssertionError(
+      if (!valuePart.done) {
+        throw new AssertionError({ message:
             "Not all parts of the renamed class were "
                 + "output. Class: "
-                + entry.getKey()
+                + key
                 + " Renamed Class: "
-                + entry.getValue()
+                + value
                 + " Next Part:"
-                + valueParts.next());
+                + valueParts.next().value });
       }
     }
     return newSplitRenamingMap;
   }
 
-  private static void writeOnePerLine(
-      char separator, Map<String, String> renamingMap, Writer renamingMapWriter)
-      throws IOException {
-    for (Map.Entry<String, String> entry : renamingMap.entrySet()) {
-      String key = entry.getKey();
-      String value = entry.getValue();
+  static writeOnePerLine(
+      separator: string, renamingMap: Map<string, string>, renamingMapWriter: stream.Writable) {
+    for (const [key, value] of renamingMap.entries()) {
       Preconditions.checkState(key.indexOf(separator) < 0);
       Preconditions.checkState(key.indexOf('\n') < 0);
       Preconditions.checkState(value.indexOf('\n') < 0);
@@ -313,17 +180,95 @@ public enum OutputRenamingMapFormat {
     }
   }
 
-  private static void readOnePerLine(
-      char separator,
-      BufferedReader in,
-      ImmutableMap.Builder<? super String, ? super String> builder)
-      throws IOException {
-    for (String line; (line = in.readLine()) != null; ) {
-      int eq = line.indexOf(separator);
-      if (eq < 0 && !line.isEmpty()) {
-        throw new IOException("Line is missing a '" + separator + "': " + line);
+  static async readOnePerLine(
+      separator: string, inReadable: stream.Readable, builder: Map<string, string>) {
+    for await (const line of readline.createInterface({input: inReadable})) {
+      const eq = line.indexOf(separator);
+      if (eq < 0 && !line.length) {
+        throw new Error("Line is missing a '" + separator + "': " + line);
       }
-      builder.put(line.substring(0, eq), line.substring(eq + 1));
+      builder.set(line.substring(0, eq), line.substring(eq + 1));
     }
   }
 }
+
+/* tslint:disable:no-namespace */
+namespace OutputRenamingMapFormat {
+  /**
+   * Reads/Writes the mapping as JSON, passed as an argument to
+   * {@code goog.setCssNameMapping()}. Designed for use with the Closure
+   * Library in compiled mode.
+   */
+  export const CLOSURE_COMPILED = () => new OutputRenamingMapFormatImpl("goog.setCssNameMapping(%s);\n");
+
+  /**
+   * Reads/Writes the mapping as JSON, passed as an argument to
+   * {@code goog.setCssNameMapping()} using the 'BY_WHOLE' mapping style.
+   * Designed for use with the Closure Library in compiled mode where the CSS
+   * name substitutions are taken as-is, which allows, e.g., using
+   * {@code SimpleSubstitutionMap} with class names containing hyphens.
+   */
+  export const CLOSURE_COMPILED_BY_WHOLE = () => new OutputRenamingMapFormatImpl("goog.setCssNameMapping(%s, 'BY_WHOLE');\n");
+
+  /**
+   * Before writing the mapping as CLOSURE_COMPILED, split the css name maps by hyphens and write
+   * out each piece individually. see {@code CLOSURE_COMPILED}
+   */
+  class ClosureCompiledSplitHyphensImpl extends OutputRenamingMapFormatImpl {
+    constructor() { super("goog.setCssNameMapping(%s);\n"); }
+    writeRenamingMap(renamingMap: Map<string, string>, renamingMapWriter: stream.Writable) {
+      super.writeRenamingMap(OutputRenamingMapFormatImpl.splitEntriesOnHyphens(renamingMap), renamingMapWriter);
+    }
+  };
+  export const CLOSURE_COMPILED_SPLIT_HYPHENS = () => new ClosureCompiledSplitHyphensImpl();
+
+  /**
+   * Reads/Writes the mapping as JSON, assigned to the global JavaScript variable
+   * {@code CLOSURE_CSS_NAME_MAPPING}. Designed for use with the Closure
+   * Library in uncompiled mode.
+   */
+  export const CLOSURE_UNCOMPILED = () => new OutputRenamingMapFormatImpl("CLOSURE_CSS_NAME_MAPPING = %s;\n");
+
+  /**
+   * Reads/Writes the mapping as JSON.
+   */
+  export const JSON = () => new OutputRenamingMapFormatImpl();
+
+  /**
+   * Reads/Writes the mapping from/in a .properties file format, such that it can be read
+   * by {@link Properties}.
+   */
+  class PropertiesImpl extends OutputRenamingMapFormatImpl {
+    writeRenamingMap(renamingMap: Map<string, string>, renamingMapWriter: stream.Writable) {
+      OutputRenamingMapFormatImpl.writeOnePerLine('=', renamingMap, renamingMapWriter);
+      // We write the properties directly rather than using
+      // Properties#store() because it is impossible to suppress the timestamp
+      // comment: http://goo.gl/6hsrN. As noted on the Stack Overflow thread,
+      // the timestamp results in unnecessary diffs between runs. Further, those
+      // who are using a language other than Java to parse this file should not
+      // have to worry about adding support for comments.
+    }
+
+    async readMapInto(inReadable: stream.Readable, builder: Map<string, string>) {
+      await OutputRenamingMapFormatImpl.readOnePerLine('=', inReadable, builder);
+    }
+  };
+  export const PROPERTIES = () => new PropertiesImpl();
+
+  /**
+   * This is the current default behavior for output maps. Still used for
+   * legacy reasons.
+   */
+  class JscompVariableMapImpl extends OutputRenamingMapFormatImpl {
+    writeRenamingMap(renamingMap: Map<string, string>, renamingMapWriter: stream.Writable) {
+      OutputRenamingMapFormatImpl.writeOnePerLine(':', renamingMap, renamingMapWriter);
+    }
+
+    async readMapInto(inReadable: stream.Readable, builder: Map<string, string>) {
+      await OutputRenamingMapFormatImpl.readOnePerLine(':', inReadable, builder);
+    }
+  };
+  export const JSCOMP_VARIABLE_MAP = () => new JscompVariableMapImpl();
+}
+
+export { OutputRenamingMapFormat };

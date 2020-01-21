@@ -14,4 +14,8 @@
 
 exports_files(["LICENSE"])
 
-exports_files(["tsconfig.json"], visibility = ["//visibility:public"])
+alias(
+    name = "tsconfig.json",
+    actual = "//:tsconfig.bazel.json",
+    visibility = ["//visibility:public"],
+)

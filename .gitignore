@@ -1,4 +1,5 @@
 bazel-*
+build/
 target/
 .DS_STORE
 node_modules/
