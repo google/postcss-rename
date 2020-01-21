@@ -14,12 +14,9 @@
  * limitations under the License.
  */
 
-package com.google.common.css;
-
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableMap;
-
-import java.util.Map;
+import {SubstitutionMap} from './substitution-map';
+import {Map as ImmutableMap} from 'immutable';
+import * as Preconditions from 'conditional';
 
 /**
  * {@link MultipleMappingSubstitutionMap} is a special type of
@@ -40,33 +37,34 @@ import java.util.Map;
  *
  * @author bolinfest@google.com (Michael Bolin)
  */
-public interface MultipleMappingSubstitutionMap extends SubstitutionMap {
-
+/* tslint:disable:no-namespace */
+namespace MultipleMappingSubstitutionMap {
   /**
    * Contains both the value and mappings returned by
    * {@link MultipleMappingSubstitutionMap#getValueWithMappings(String)}.
    */
-  public static class ValueWithMappings {
-    public final String value;
-    public final Map<String, String> mappings;
+  export class ValueWithMappings {
+    readonly value: string;
+    readonly mappings: ImmutableMap<string, string>;
 
-    private ValueWithMappings(String value, Map<String, String> mappings) {
+    private constructor(value: string, mappings: ImmutableMap<string, string>) {
       Preconditions.checkNotNull(value);
       Preconditions.checkNotNull(mappings);
       this.value = value;
-      this.mappings = ImmutableMap.copyOf(mappings);
+      this.mappings = ImmutableMap(mappings);
     }
 
-    public static ValueWithMappings createWithValueAndMappings(String value,
-        Map<String, String> mappings) {
+    static createWithValueAndMappings(value: string, mappings: ImmutableMap<string, string>) {
       return new ValueWithMappings(value, mappings);
     }
 
-    public static ValueWithMappings createForSingleMapping(String key, String value) {
-      return new ValueWithMappings(value, ImmutableMap.of(key, value));
+    static createForSingleMapping(key: string, value: string) {
+      return new ValueWithMappings(value, ImmutableMap([[key, value]]));
     }
-  }
+  };
+}
 
+interface MultipleMappingSubstitutionMap extends SubstitutionMap {
   /**
    * Like an ordinary {@link SubstitutionMap}, this returns a value to
    * substitute for the specified {@code key}. This value is available as
@@ -76,5 +74,7 @@ public interface MultipleMappingSubstitutionMap extends SubstitutionMap {
    * associated with this substitution. These mappings are available as
    * {@link ValueWithMappings#mappings}.
    */
-  public ValueWithMappings getValueWithMappings(String key);
+  getValueWithMappings(key: string): MultipleMappingSubstitutionMap.ValueWithMappings;
 }
+
+export { MultipleMappingSubstitutionMap };

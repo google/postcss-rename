@@ -40,6 +40,7 @@ java_library(
     deps = [
         ":commandline",
         "//src/com/google/common/css",
+        "//src/com/google/common/css:interfaces",
         "//src/com/google/common/css/compiler/ast",
         "@maven//:args4j_args4j",
         "@maven//:com_google_code_findbugs_jsr305",

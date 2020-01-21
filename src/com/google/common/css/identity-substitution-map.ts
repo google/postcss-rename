@@ -14,21 +14,17 @@
  * limitations under the License.
  */
 
-package com.google.common.css;
-
-import com.google.common.base.Preconditions;
+import {SubstitutionMap} from './substitution-map';
+import * as Preconditions from 'conditional';
 
 /**
  * {@link IdentitySubstitutionMap} is a trivial implementation of
  * {@link SubstitutionMap} that returns the key as the value for the requested
  * key.
- *
- * @author bolinfest@google.com (Michael Bolin)
  */
-public class IdentitySubstitutionMap implements SubstitutionMap {
+export class IdentitySubstitutionMap implements SubstitutionMap {
 
-  @Override
-  public String get(String key) {
+  get(key: string): string {
     Preconditions.checkNotNull(key);
     return key;
   }

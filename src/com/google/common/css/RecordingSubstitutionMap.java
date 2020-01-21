@@ -17,6 +17,7 @@
 // TODO(bolinfest): Move this to com.google.common.css.compiler.passes.
 package com.google.common.css;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
@@ -30,79 +31,56 @@ import java.util.Map;
  *
  * @author bolinfest@google.com (Michael Bolin)
  */
-public class RecordingSubstitutionMap implements SubstitutionMap.Initializable {
+public class RecordingSubstitutionMap implements SubstitutionMap.Initializable, JavaScriptDelegator.Delegating {
 
-  private final SubstitutionMap delegate;
+  JavaScriptDelegator delegator;
 
-  private final Predicate<? super String> shouldRecordMappingForCodeGeneration;
-
-  // Use a LinkedHashMap so getMappings() is deterministic.
-  private final Map<String, String> mappings = Maps.newLinkedHashMap();
-
-  private RecordingSubstitutionMap(
-      SubstitutionMap map, Predicate<? super String> shouldRecordMappingForCodeGeneration) {
-    this.delegate = map;
-    this.shouldRecordMappingForCodeGeneration = shouldRecordMappingForCodeGeneration;
+  private RecordingSubstitutionMap(JavaScriptDelegator delegator) {
+    this.delegator = delegator;
   }
 
-  /**
-   * {@inheritDoc}
-   * @throws NullPointerException if key is null.
-   */
   @Override
   public String get(String key) {
-    Preconditions.checkNotNull(key);
-    if (!shouldRecordMappingForCodeGeneration.apply(key)) {
-      return key;
-    }
-
-    if (delegate instanceof MultipleMappingSubstitutionMap) {
-      // The final value only bears a loose relationship to the mappings.
-      // For example, PrefixingSubstitutionMap applied to a MinimalSubstitutionMap
-      // minimizes all components but only prefixes the first.
-      // We can't memoize the value here, so don't look up in mappings first.
-      ValueWithMappings valueWithMappings =
-          ((MultipleMappingSubstitutionMap) delegate).getValueWithMappings(key);
-      mappings.putAll(valueWithMappings.mappings);
-      return valueWithMappings.value;
-    } else {
-      String value = mappings.get(key);
-      if (value == null) {
-        value = delegate.get(key);
-        mappings.put(key, value);
-      }
-      return value;
-    }
+    return delegator.substitutionMapGet(key);
   }
 
-  /**
-   * @return The recorded mappings in the order they were created. This output may be used with
-   *     {@link OutputRenamingMapFormat#writeRenamingMap}
-   */
   public Map<String, String> getMappings() {
-    return ImmutableMap.copyOf(mappings);
+    return delegator.executeMap("getMappings");
   }
 
   @Override
   public void initializeWithMappings(Map<? extends String, ? extends String> newMappings) {
-    Preconditions.checkState(mappings.isEmpty());
-    if (!newMappings.isEmpty()) {
-      mappings.putAll(newMappings);
-      ((SubstitutionMap.Initializable) delegate).initializeWithMappings(newMappings);
-    }
+    delegator.substitutionMapInitializableInitializeWithMappings(newMappings);
+  }
+
+  @Override
+  public Object getDelegatedJSObject() {
+    return delegator.delegatedMap;
   }
 
   /** A-la-carte builder. */
   public static final class Builder {
-    private SubstitutionMap delegate = new IdentitySubstitutionMap();
-    private Predicate<? super String> shouldRecordMappingForCodeGeneration =
-        Predicates.alwaysTrue();
-    private Map<String, String> mappings = Maps.newLinkedHashMap();
+    JavaScriptDelegator delegator;
+    Object builder;
+
+    public Builder() {
+      delegator = new JavaScriptDelegator("RecordingSubstitutionMap", "recording-substitution-map");
+      builder = delegator.initializeBuilder();
+    }
+
+    @VisibleForTesting
+    public JavaScriptDelegator getDelegator() {
+      return delegator;
+    }
 
     /** Specifies the underlying map. Multiple calls clobber. */
     public Builder withSubstitutionMap(SubstitutionMap d) {
-      this.delegate = Preconditions.checkNotNull(d);
-      return this;
+      if (d instanceof JavaScriptDelegator.Delegating) {
+        builder = delegator.executeOnObject(builder, "withSubstitutionMap", ((JavaScriptDelegator.Delegating) d).getDelegatedJSObject());
+        return this;
+      } else {
+        throw new RuntimeException("Delegate must be implemented in JavaScript");
+      }
     }
 
     /**
@@ -110,8 +88,7 @@ public class RecordingSubstitutionMap implements SubstitutionMap.Initializable {
      * calls AND.
      */
     public Builder shouldRecordMappingForCodeGeneration(Predicate<? super String> p) {
-      shouldRecordMappingForCodeGeneration =
-          Predicates.and(shouldRecordMappingForCodeGeneration, p);
+      builder = delegator.executeOnObject(builder, "shouldRecordMappingForCodeGeneration", delegator.wrapPredicate(p));
       return this;
     }
 
@@ -122,19 +99,14 @@ public class RecordingSubstitutionMap implements SubstitutionMap.Initializable {
      * OutputRenamingMapFormat#readRenamingMap}.
      */
     public Builder withMappings(Map<? extends String, ? extends String> m) {
-      this.mappings.putAll(m);
+      builder = delegator.recordingSubstitutionMapBuilderWithMappings(builder, m);
       return this;
     }
 
     /** Builds the substitution map based on previous operations on this builder. */
     public RecordingSubstitutionMap build() {
-      // TODO(msamuel): if delegate instanceof MultipleMappingSubstitutionMap
-      // should this return a RecordingSubstitutionMap that is itself
-      // a MultipleMappingSubstitutionMap.
-      RecordingSubstitutionMap built =
-          new RecordingSubstitutionMap(delegate, shouldRecordMappingForCodeGeneration);
-      built.initializeWithMappings(mappings);
-      return built;
+      delegator.initializeBuilt(delegator.executeOnObject(builder, "build", null));
+      return new RecordingSubstitutionMap(delegator);
     }
   }
 }

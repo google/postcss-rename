@@ -29,55 +29,36 @@ import java.util.Map;
  * @author dgajda@google.com (Damian Gajda)
  */
 public class SplittingSubstitutionMap implements
-    MultipleMappingSubstitutionMap, SubstitutionMap.Initializable {
-  private static final Splitter DASH = Splitter.on('-');
-  private final SubstitutionMap delegate;
+    MultipleMappingSubstitutionMap, SubstitutionMap.Initializable, JavaScriptDelegator.Delegating {
+  JavaScriptDelegator delegator;
 
   public SplittingSubstitutionMap(SubstitutionMap substitutionMap) {
-    this.delegate = substitutionMap;
+    delegator = new JavaScriptDelegator("SplittingSubstitutionMap", "splitting-substitution-map");
+
+    if (substitutionMap instanceof JavaScriptDelegator.Delegating) {
+      delegator.initialize(((JavaScriptDelegator.Delegating) substitutionMap).getDelegatedJSObject());
+    } else {
+      throw new RuntimeException("Delegate must be implemented in JavaScript");
+    }
   }
 
   @Override
   public void initializeWithMappings(Map<? extends String, ? extends String> newMappings) {
-    if (!newMappings.isEmpty()) {
-      ((SubstitutionMap.Initializable) delegate).initializeWithMappings(newMappings);
-    }
+    delegator.substitutionMapInitializableInitializeWithMappings(newMappings);
   }
 
   @Override
   public String get(String key) {
-    return getValueWithMappings(key).value;
+    return delegator.substitutionMapGet(key);
   }
 
   @Override
   public ValueWithMappings getValueWithMappings(String key) {
-    Preconditions.checkNotNull(key, "CSS key cannot be null");
-    Preconditions.checkArgument(!key.isEmpty(), "CSS key cannot be empty");
+    return delegator.multipleMappingSubstitutionMapGetValueWithMappings(key);
+  }
 
-    // Efficiently handle the common case with no dashes.
-    if (key.indexOf('-') == -1) {
-      String value = delegate.get(key);
-      return ValueWithMappings.createForSingleMapping(key, value);
-    }
-
-    StringBuilder buffer = new StringBuilder();
-    // Cannot use an ImmutableMap.Builder because the same key/value pair may be
-    // inserted more than once in this loop.
-    Map<String, String> mappings = Maps.newLinkedHashMap();
-    for (String part : DASH.split(key)) {
-      if (buffer.length() != 0) {
-        buffer.append('-');
-      }
-
-      String value = delegate.get(part);
-      mappings.put(part, value);
-      buffer.append(value);
-    }
-
-    String renamedClassComposedFromParts = buffer.toString();
-
-    return ValueWithMappings.createWithValueAndMappings(
-        renamedClassComposedFromParts,
-        ImmutableMap.copyOf(mappings));
+  @Override
+  public Object getDelegatedJSObject() {
+    return delegator.delegatedMap;
   }
 }

@@ -15,32 +15,42 @@
  */
 
 // TODO(bolinfest): Move this to com.google.common.css.compiler.passes.
-package com.google.common.css;
+import {IdentitySubstitutionMap} from './identity-substitution-map';
+import {SubstitutionMap} from './substitution-map';
+import {MultipleMappingSubstitutionMap} from './multiple-mapping-substitution-map';
+import {Map as ImmutableMap} from 'immutable';
+import * as Preconditions from 'conditional';
 
-import com.google.common.base.Preconditions;
-import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
-import com.google.common.css.MultipleMappingSubstitutionMap.ValueWithMappings;
-import java.util.Map;
+type Predicate<T> = (input: T) => boolean;
+
+function isMultipleMappingSubstitutionMap(arg: SubstitutionMap): arg is MultipleMappingSubstitutionMap {
+  return arg && 'getValueWithMappings' in arg;
+}
 
 /**
  * A decorator for a {@link SubstitutionMap} that records which values it maps.
  *
  * @author bolinfest@google.com (Michael Bolin)
  */
-public class RecordingSubstitutionMap implements SubstitutionMap.Initializable {
+// Hack to hide the constructor, because the Builder class, unlike in Java,
+// can't simultaneously be an inner class and have private properties.
+interface RecordingSubstitutionMap extends SubstitutionMap.Initializable {
+  get(key: string): string;
+  getMappings(): ImmutableMap<string, string>;
+  initializeWithMappings(newMappings: ImmutableMap<string, string>): void;
+}
 
-  private final SubstitutionMap delegate;
+class RecordingSubstitutionMapImpl implements RecordingSubstitutionMap {
 
-  private final Predicate<? super String> shouldRecordMappingForCodeGeneration;
+  private readonly delegate: SubstitutionMap;
+
+  private readonly shouldRecordMappingForCodeGeneration: Predicate<string>;
 
   // Use a LinkedHashMap so getMappings() is deterministic.
-  private final Map<String, String> mappings = Maps.newLinkedHashMap();
+  private readonly mappings: Map<string, string> = new Map();
 
-  private RecordingSubstitutionMap(
-      SubstitutionMap map, Predicate<? super String> shouldRecordMappingForCodeGeneration) {
+  constructor(
+      map: SubstitutionMap, shouldRecordMappingForCodeGeneration: Predicate<string>) {
     this.delegate = map;
     this.shouldRecordMappingForCodeGeneration = shouldRecordMappingForCodeGeneration;
   }
@@ -49,27 +59,25 @@ public class RecordingSubstitutionMap implements SubstitutionMap.Initializable {
    * {@inheritDoc}
    * @throws NullPointerException if key is null.
    */
-  @Override
-  public String get(String key) {
+  get(key: string): string {
     Preconditions.checkNotNull(key);
-    if (!shouldRecordMappingForCodeGeneration.apply(key)) {
+    if (!this.shouldRecordMappingForCodeGeneration.apply(this, [key])) {
       return key;
     }
 
-    if (delegate instanceof MultipleMappingSubstitutionMap) {
+    if (isMultipleMappingSubstitutionMap(this.delegate)) {
       // The final value only bears a loose relationship to the mappings.
       // For example, PrefixingSubstitutionMap applied to a MinimalSubstitutionMap
       // minimizes all components but only prefixes the first.
       // We can't memoize the value here, so don't look up in mappings first.
-      ValueWithMappings valueWithMappings =
-          ((MultipleMappingSubstitutionMap) delegate).getValueWithMappings(key);
-      mappings.putAll(valueWithMappings.mappings);
+      const valueWithMappings = this.delegate.getValueWithMappings(key);
+      valueWithMappings.mappings.forEach((key, value) => this.mappings.set(key, value));
       return valueWithMappings.value;
     } else {
-      String value = mappings.get(key);
+      let value = this.mappings.get(key);
       if (value == null) {
-        value = delegate.get(key);
-        mappings.put(key, value);
+        value = this.delegate.get(key);
+        this.mappings.set(key, value);
       }
       return value;
     }
@@ -79,29 +87,31 @@ public class RecordingSubstitutionMap implements SubstitutionMap.Initializable {
    * @return The recorded mappings in the order they were created. This output may be used with
    *     {@link OutputRenamingMapFormat#writeRenamingMap}
    */
-  public Map<String, String> getMappings() {
-    return ImmutableMap.copyOf(mappings);
+  getMappings() {
+    return ImmutableMap(this.mappings);
   }
 
-  @Override
-  public void initializeWithMappings(Map<? extends String, ? extends String> newMappings) {
-    Preconditions.checkState(mappings.isEmpty());
-    if (!newMappings.isEmpty()) {
-      mappings.putAll(newMappings);
-      ((SubstitutionMap.Initializable) delegate).initializeWithMappings(newMappings);
+  initializeWithMappings(newMappings: ImmutableMap<string, string>) {
+    Preconditions.checkState(!this.mappings.size);
+    if (newMappings.size > 0) {
+      newMappings.forEach((key, value) => this.mappings.set(key, value));
+      (this.delegate as SubstitutionMap.Initializable).initializeWithMappings(newMappings);
     }
   }
+}
 
+/* tslint:disable:no-namespace */
+namespace RecordingSubstitutionMap {
   /** A-la-carte builder. */
-  public static final class Builder {
-    private SubstitutionMap delegate = new IdentitySubstitutionMap();
-    private Predicate<? super String> shouldRecordMappingForCodeGeneration =
-        Predicates.alwaysTrue();
-    private Map<String, String> mappings = Maps.newLinkedHashMap();
+  export class Builder {
+    private delegate: SubstitutionMap = new IdentitySubstitutionMap();
+    private shouldRecordMappingForCodeGenerationPredicate: Predicate<string> = () => true;
+    private mappings: Map<string, string> = new Map();
 
     /** Specifies the underlying map. Multiple calls clobber. */
-    public Builder withSubstitutionMap(SubstitutionMap d) {
-      this.delegate = Preconditions.checkNotNull(d);
+    withSubstitutionMap(d: SubstitutionMap) {
+      Preconditions.checkNotNull(d);
+      this.delegate = d;
       return this;
     }
 
@@ -109,9 +119,9 @@ public class RecordingSubstitutionMap implements SubstitutionMap.Initializable {
      * True keys that should be treated mapped to themselves instead of passing through Multiple
      * calls AND.
      */
-    public Builder shouldRecordMappingForCodeGeneration(Predicate<? super String> p) {
-      shouldRecordMappingForCodeGeneration =
-          Predicates.and(shouldRecordMappingForCodeGeneration, p);
+    shouldRecordMappingForCodeGeneration(p: Predicate<string>) {
+      const oldPredicate = this.shouldRecordMappingForCodeGenerationPredicate;
+      this.shouldRecordMappingForCodeGenerationPredicate = (input) => oldPredicate(input) && p(input);
       return this;
     }
 
@@ -121,20 +131,22 @@ public class RecordingSubstitutionMap implements SubstitutionMap.Initializable {
      * OutputRenamingMapFormat#writeRenamingMap} from the output of {@link
      * OutputRenamingMapFormat#readRenamingMap}.
      */
-    public Builder withMappings(Map<? extends String, ? extends String> m) {
-      this.mappings.putAll(m);
+    withMappings(m: Map<string, string>) {
+      m.forEach((key, value) => this.mappings.set(key, value));
       return this;
     }
 
     /** Builds the substitution map based on previous operations on this builder. */
-    public RecordingSubstitutionMap build() {
+    build(): RecordingSubstitutionMap {
       // TODO(msamuel): if delegate instanceof MultipleMappingSubstitutionMap
       // should this return a RecordingSubstitutionMap that is itself
       // a MultipleMappingSubstitutionMap.
-      RecordingSubstitutionMap built =
-          new RecordingSubstitutionMap(delegate, shouldRecordMappingForCodeGeneration);
-      built.initializeWithMappings(mappings);
+      const built =
+          new RecordingSubstitutionMapImpl(this.delegate, this.shouldRecordMappingForCodeGenerationPredicate);
+      built.initializeWithMappings(ImmutableMap(this.mappings));
       return built;
     }
   }
 }
+
+export { RecordingSubstitutionMap };

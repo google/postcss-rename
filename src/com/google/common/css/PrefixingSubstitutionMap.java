@@ -24,38 +24,36 @@ import java.util.Map;
  *
  */
 public class PrefixingSubstitutionMap
-    implements MultipleMappingSubstitutionMap, SubstitutionMap.Initializable {
-  private final SubstitutionMap delegate;
-  private final String prefix;
+    implements MultipleMappingSubstitutionMap, SubstitutionMap.Initializable, JavaScriptDelegator.Delegating {
+  JavaScriptDelegator delegator;
 
   public PrefixingSubstitutionMap(SubstitutionMap delegate, String prefix) {
-    this.delegate = delegate;
-    this.prefix = prefix;
+    delegator = new JavaScriptDelegator("PrefixingSubstitutionMap", "prefixing-substitution-map");
+
+    if (delegate instanceof JavaScriptDelegator.Delegating) {
+      delegator.initialize(((JavaScriptDelegator.Delegating) delegate).getDelegatedJSObject(), prefix);
+    } else {
+      throw new RuntimeException("Delegate must be implemented in JavaScript");
+    }
   }
 
   @Override
   public void initializeWithMappings(Map<? extends String, ? extends String> newMappings) {
-    if (!newMappings.isEmpty()) {
-      // We don't need to remove prefixes from mapping values because the mappings
-      // returned by getValueWithMappings are not prefixed.
-      ((SubstitutionMap.Initializable) delegate).initializeWithMappings(newMappings);
-    }
+    delegator.substitutionMapInitializableInitializeWithMappings(newMappings);
   }
 
   @Override
   public String get(String key) {
-    return prefix + delegate.get(key);
+    return delegator.substitutionMapGet(key);
   }
 
   @Override
   public ValueWithMappings getValueWithMappings(String key) {
-    if (delegate instanceof MultipleMappingSubstitutionMap) {
-      ValueWithMappings withoutPrefix =
-          ((MultipleMappingSubstitutionMap) delegate).getValueWithMappings(key);
-      return ValueWithMappings.createWithValueAndMappings(
-          prefix + withoutPrefix.value, withoutPrefix.mappings);
-    } else {
-      return ValueWithMappings.createForSingleMapping(key, get(key));
-    }
+    return delegator.multipleMappingSubstitutionMapGetValueWithMappings(key);
+  }
+
+  @Override
+  public Object getDelegatedJSObject() {
+    return delegator.delegatedMap;
   }
 }

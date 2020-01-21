@@ -64,6 +64,7 @@ java_test(
     test_class = "com.google.common.css.PrefixingSubstitutionMapTest",
     deps = [
         "//src/com/google/common/css",
+        "//src/com/google/common/css:interfaces",
         "@maven//:com_google_truth_truth",
     ],
 )
@@ -77,6 +78,7 @@ java_test(
     test_class = "com.google.common.css.RecordingSubstitutionMapTest",
     deps = [
         "//src/com/google/common/css",
+        "//src/com/google/common/css:interfaces",
         "@maven//:com_google_guava_guava",
         "@maven//:com_google_truth_truth",
     ],
@@ -106,6 +108,7 @@ java_test(
     test_class = "com.google.common.css.SplittingSubstitutionMapTest",
     deps = [
         "//src/com/google/common/css",
+        "//src/com/google/common/css:interfaces",
         "@maven//:com_google_truth_truth",
     ],
 )

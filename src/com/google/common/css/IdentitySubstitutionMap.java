@@ -16,20 +16,25 @@
 
 package com.google.common.css;
 
-import com.google.common.base.Preconditions;
-
 /**
- * {@link IdentitySubstitutionMap} is a trivial implementation of
- * {@link SubstitutionMap} that returns the key as the value for the requested
- * key.
- *
- * @author bolinfest@google.com (Michael Bolin)
+ * Wrapper around JavaScript version of IdentitySubstitutionMap.
  */
-public class IdentitySubstitutionMap implements SubstitutionMap {
+public class IdentitySubstitutionMap implements SubstitutionMap, JavaScriptDelegator.Delegating {
+
+  JavaScriptDelegator delegator;
+
+  public IdentitySubstitutionMap() {
+    delegator = new JavaScriptDelegator("IdentitySubstitutionMap", "identity-substitution-map");
+    delegator.initialize();
+  }
 
   @Override
   public String get(String key) {
-    Preconditions.checkNotNull(key);
-    return key;
+    return delegator.substitutionMapGet(key);
+  }
+
+  @Override
+  public Object getDelegatedJSObject() {
+    return delegator.delegatedMap;
   }
 }

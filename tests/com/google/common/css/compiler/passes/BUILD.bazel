@@ -342,6 +342,7 @@ java_test(
     test_class = "com.google.common.css.compiler.passes.CssClassRenamingFunctionalTest",
     deps = [
         "//src/com/google/common/css",
+        "//src/com/google/common/css:interfaces",
         "//src/com/google/common/css/compiler/passes",
         "//tests/com/google/common/css/compiler/passes/testing",
         "@maven//:com_google_truth_truth",
@@ -357,6 +358,7 @@ java_test(
     test_class = "com.google.common.css.compiler.passes.CssClassRenamingTest",
     deps = [
         "//src/com/google/common/css",
+        "//src/com/google/common/css:interfaces",
         "//src/com/google/common/css/compiler/ast",
         "//src/com/google/common/css/compiler/passes",
         "//tests/com/google/common/css/compiler/ast:base",
@@ -777,6 +779,8 @@ java_test(
     test_class = "com.google.common.css.compiler.passes.RecordingSubstitutionMapTest",
     deps = [
         "//src/com/google/common/css",
+        "//src/com/google/common/css:interfaces",
+        "//src/com/google/common/css:js_support",
         "//src/com/google/common/css/compiler/ast",
         "//src/com/google/common/css/compiler/passes",
         "//tests/com/google/common/css/testing",

@@ -14,48 +14,50 @@
  * limitations under the License.
  */
 
-package com.google.common.css;
+import {MultipleMappingSubstitutionMap} from './multiple-mapping-substitution-map';
+import {Map as ImmutableMap, Set as ImmutableSet} from 'immutable';
+import {SubstitutionMap} from './substitution-map';
+import ValueWithMappings = MultipleMappingSubstitutionMap.ValueWithMappings;
 
-import java.util.Map;
+function isMultipleMappingSubstitutionMap(arg: SubstitutionMap): arg is MultipleMappingSubstitutionMap {
+  return arg && 'getValueWithMappings' in arg;
+}
 
 /**
  * A {@link SubstitutionMap} implementation that prefixes the renamed CSS class names (provided by a
  * delegate substitution map).
  *
  */
-public class PrefixingSubstitutionMap
+export class PrefixingSubstitutionMap
     implements MultipleMappingSubstitutionMap, SubstitutionMap.Initializable {
-  private final SubstitutionMap delegate;
-  private final String prefix;
+  private readonly delegate: SubstitutionMap;
+  private readonly prefix: string;
 
-  public PrefixingSubstitutionMap(SubstitutionMap delegate, String prefix) {
+  constructor(delegate: SubstitutionMap, prefix: string) {
     this.delegate = delegate;
     this.prefix = prefix;
   }
 
-  @Override
-  public void initializeWithMappings(Map<? extends String, ? extends String> newMappings) {
+  initializeWithMappings(newMappings: ImmutableMap<string, string>) {
     if (!newMappings.isEmpty()) {
       // We don't need to remove prefixes from mapping values because the mappings
       // returned by getValueWithMappings are not prefixed.
-      ((SubstitutionMap.Initializable) delegate).initializeWithMappings(newMappings);
+      (this.delegate as SubstitutionMap.Initializable).initializeWithMappings(newMappings);
     }
   }
 
-  @Override
-  public String get(String key) {
-    return prefix + delegate.get(key);
+  get(key: string): string {
+    return this.prefix + this.delegate.get(key);
   }
 
-  @Override
-  public ValueWithMappings getValueWithMappings(String key) {
-    if (delegate instanceof MultipleMappingSubstitutionMap) {
-      ValueWithMappings withoutPrefix =
-          ((MultipleMappingSubstitutionMap) delegate).getValueWithMappings(key);
+  getValueWithMappings(key: string): ValueWithMappings {
+    if (isMultipleMappingSubstitutionMap(this.delegate)) {
+      const withoutPrefix =
+          this.delegate.getValueWithMappings(key);
       return ValueWithMappings.createWithValueAndMappings(
-          prefix + withoutPrefix.value, withoutPrefix.mappings);
+          this.prefix + withoutPrefix.value, withoutPrefix.mappings);
     } else {
-      return ValueWithMappings.createForSingleMapping(key, get(key));
+      return ValueWithMappings.createForSingleMapping(key, this.get(key));
     }
   }
 }

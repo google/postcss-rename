@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-package com.google.common.css;
-
-import java.util.Map;
+import {Map as ImmutableMap} from 'immutable';
 
 /**
  * An interface for a one-to-one string mapping function.
  */
-public interface SubstitutionMap {
+interface SubstitutionMap {
 
   /**
    * Gets the string that should be substituted for {@code key}. The same
@@ -31,9 +29,11 @@ public interface SubstitutionMap {
    * @param key  the text to be replaced (never null)
    * @return the value to substitute for {@code key}
    */
-  String get(String key);
+  get(key: string): string;
+}
 
-
+/* tslint:disable:no-namespace */
+namespace SubstitutionMap {
   /**
    * A substitution map that can be reconsitituted from saved mappings.
    *
@@ -59,7 +59,9 @@ public interface SubstitutionMap {
    *
    * <p>Subsequent com
    */
-  interface Initializable extends SubstitutionMap {
-    void initializeWithMappings(Map<? extends String, ? extends String> initialMappings);
+  export interface Initializable extends SubstitutionMap {
+    initializeWithMappings(initialMappings: ImmutableMap<string, string>): void;
   }
 }
+
+export { SubstitutionMap };

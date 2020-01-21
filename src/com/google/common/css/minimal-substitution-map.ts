@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,108 +14,75 @@
  * limitations under the License.
  */
 
-package com.google.common.css;
-
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Set;
+import {SubstitutionMap} from './substitution-map';
+import {Map as ImmutableMap, Set as ImmutableSet} from 'immutable';
+import * as Preconditions from 'conditional';
 
 /**
  * MinimalSubstitutionMap is a SubstitutionMap that renames CSS classes to the
  * shortest string possible.
- *
- * @author bolinfest@google.com (Michael Bolin)
  */
-public class MinimalSubstitutionMap implements SubstitutionMap.Initializable {
+export class MinimalSubstitutionMap implements SubstitutionMap.Initializable {
 
   /** Possible first chars in a CSS class name */
-  private static final char[] START_CHARS = {
+  private static readonly START_CHARS = [
       'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
       'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
       'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N',
       'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
-  };
+  ];
 
   /** Possible non-first chars in a CSS class name */
-  private static final char[] CHARS = {
+  private static readonly CHARS = [
       'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
       'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
       'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N',
       'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
       '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-  };
+  ];
 
   /**
    * Last value used with toShortString().
    */
-  private int lastIndex;
+  private lastIndex: number;
 
   /**
    * Characters that can be used at the start of a CSS class name.
    */
-  private final char[] startChars;
+  private readonly startChars: string[];
 
   /**
    * Characters that can be used in a CSS class name (though not necessarily as
    * the first character).
    */
-  private final char[] chars;
+  private readonly chars: string[];
 
   /**
    * Number of startChars.
    */
-  private final int startCharsRadix;
+  private readonly startCharsRadix: number;
 
   /**
    * Number of chars.
    */
-  private final int charsRadix;
+  private readonly charsRadix: number;
 
   /**
    * Value equal to Math.log(charsRadix). Stored as a field so it does not need
    * to be recomputed each time toShortString() is invoked.
    */
-  private final double logCharsRadix;
+  private readonly logCharsRadix: number;
 
   /**
    * Map of CSS classes that were renamed. Keys are original class names and
    * values are their renamed equivalents.
    */
-  private final Map<String, String> renamedCssClasses;
+  private readonly renamedCssClasses: Map<string, string>;
 
   /**
    * A set of CSS class names that may not be output from this substitution map.
    */
-  private ImmutableSet<String> outputValueBlacklist;
-
-  public MinimalSubstitutionMap() {
-    this(ImmutableSet.<String>of());
-  }
-
-  /**
-   * @param outputValueBlacklist A set of CSS class names that may not be
-   *     returned as the output from a substitution lookup.
-   */
-  public MinimalSubstitutionMap(Set<String> outputValueBlacklist) {
-    this(START_CHARS, CHARS, outputValueBlacklist);
-  }
-
-  /**
-   * Creates a new MinimalSubstitutionMap that generates CSS class names from
-   * the specified set of characters.
-   * @param startChars Possible values for the first character of a CSS class
-   *     name.
-   * @param chars Possible values for the characters other than the first
-   *     character in a CSS class name.
-   */
-  @VisibleForTesting
-  MinimalSubstitutionMap(char[] startChars, char[] chars) {
-    this(startChars, chars, ImmutableSet.<String>of());
-  }
+  private outputValueBlacklist: ImmutableSet<string>;
 
   /**
    * Creates a new MinimalSubstitutionMap that generates CSS class names from
@@ -127,40 +94,36 @@ public class MinimalSubstitutionMap implements SubstitutionMap.Initializable {
    * @param outputValueBlacklist A set of CSS class names that may not be
    *     returned as the output from a substitution lookup.
    */
-  @VisibleForTesting
-  MinimalSubstitutionMap(
-      char[] startChars, char[] chars, Set<String> outputValueBlacklist) {
+  constructor(
+      startChars?: string[], chars?: string[], outputValueBlacklist?: Set<string>) {
     this.lastIndex = 0;
-    this.startChars = Arrays.copyOf(startChars, startChars.length);
+    this.startChars = startChars ? startChars.slice() : MinimalSubstitutionMap.START_CHARS;
     this.startCharsRadix = this.startChars.length;
-    this.chars = Arrays.copyOf(chars, chars.length);
+    this.chars = chars ? chars.slice() : MinimalSubstitutionMap.CHARS;
     this.charsRadix = this.chars.length;
-    this.logCharsRadix = Math.log(charsRadix);
-    this.renamedCssClasses = Maps.newHashMap();
-    this.outputValueBlacklist =
-        ImmutableSet.copyOf(Preconditions.checkNotNull(outputValueBlacklist));
+    this.logCharsRadix = Math.log(this.charsRadix);
+    this.renamedCssClasses = new Map();
+    this.outputValueBlacklist = outputValueBlacklist ? ImmutableSet(outputValueBlacklist) : ImmutableSet();
   }
 
   /** {@inheritDoc} */
-  @Override
-  public String get(String key) {
-    String value = renamedCssClasses.get(key);
+  get(key: string): string {
+    let value = this.renamedCssClasses.get(key);
     if (value == null) {
       do {
-        value = toShortString(lastIndex++);
-      } while (this.outputValueBlacklist.contains(value));
+        value = this.toShortString(this.lastIndex++);
+      } while (this.outputValueBlacklist.has(value));
 
-      renamedCssClasses.put(key, value);
+      this.renamedCssClasses.set(key, value);
     }
     return value;
   }
 
-  @Override
-  public void initializeWithMappings(Map<? extends String, ? extends String> m) {
-    Preconditions.checkState(renamedCssClasses.isEmpty());
+  initializeWithMappings(m: ImmutableMap<string, string>): void {
+    Preconditions.checkState(this.renamedCssClasses.size === 0);
     this.outputValueBlacklist =
-        ImmutableSet.<String>builder().addAll(outputValueBlacklist).addAll(m.values()).build();
-    this.renamedCssClasses.putAll(m);
+        ImmutableSet(this.outputValueBlacklist).union(m.values());
+    m.forEach((value, key) => this.renamedCssClasses.set(key, value));
   }
 
   /**
@@ -172,8 +135,7 @@ public class MinimalSubstitutionMap implements SubstitutionMap.Initializable {
    * @return The CSS class name that corresponds to the index of the
    *     enumeration.
    */
-  @VisibleForTesting
-  String toShortString(int index) {
+  toShortString(index: number): string {
     // Given the number of non-start characters, C, then for each start
     // character, S, there will be:
     //   1 one-letter CSS class name that starts with S
@@ -205,19 +167,19 @@ public class MinimalSubstitutionMap implements SubstitutionMap.Initializable {
     //
     // Once n is known, the standard modulo-then-divide approach can be used to
     // determine each character that should be appended to s.
-    int i = index / startCharsRadix;
-    final int n = (int) (Math.log(i * (charsRadix - 1) + 1) / logCharsRadix);
+    let i = Math.floor(index / this.startCharsRadix);
+    const n = Math.floor(Math.log(i * (this.charsRadix - 1) + 1) / this.logCharsRadix);
 
     // The array is 1 more than the number of secondary chars to account for the
     // first char.
-    char[] cssNameChars = new char[n + 1];
-    cssNameChars[0] = startChars[index % startCharsRadix];
+    const cssNameChars = new Array<string>(n + 1);
+    cssNameChars[0] = this.startChars[index % this.startCharsRadix];
 
-    for (int k = 1; k <= n; ++k) {
-      cssNameChars[k] = chars[i % charsRadix];
-      i /= charsRadix;
+    for (let k = 1; k <= n; ++k) {
+      cssNameChars[k] = this.chars[i % this.charsRadix];
+      i = Math.floor(i / this.charsRadix);
     }
 
-    return new String(cssNameChars);
+    return cssNameChars.join('');
   }
 }

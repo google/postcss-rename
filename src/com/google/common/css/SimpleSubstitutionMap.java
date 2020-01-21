@@ -17,34 +17,24 @@
 package com.google.common.css;
 
 /**
- * A SubstitutionMap that trivially renames its CSS classes by adding an
- * underscore. This may be helpful in debugging because it makes it easy to
- * match the renamed value with the original while helping catch bugs where the
- * CSS class name is hardcoded in the code. Example in Soy:
- * <pre>
- * // Case I: Hardcoded name (incorrect)
- * &lt;div class="CSS_MENU_BAR">&lt;/div>
- *
- * // Case II: Name used as variable (correct)
- * &lt;div class="{css CSS_MENU_BAR}">&lt;/div>
- * </pre>
- * <p>In Case I, the div would not get the effects of the CSS class when it is
- * renamed, so hopefully the missing styles would help discover the source of
- * the error.
- *
- * @author bolinfest@google.com (Michael Bolin)
+ * Wrapper around JavaScript version of SimpleSubstitutionMap.
  */
-public class SimpleSubstitutionMap implements SubstitutionMap {
+public class SimpleSubstitutionMap implements SubstitutionMap, JavaScriptDelegator.Delegating {
 
-  /**
-   * {@inheritDoc}
-   * @throws IllegalArgumentException if key is null
-   */
+  JavaScriptDelegator delegator;
+
+  public SimpleSubstitutionMap() {
+    delegator = new JavaScriptDelegator("SimpleSubstitutionMap", "simple-substitution-map");
+    delegator.initialize();
+  }
+
   @Override
   public String get(String key) {
-    if (key == null) {
-      throw new IllegalArgumentException("key cannot be null");
-    }
-    return key + "_";
+    return delegator.substitutionMapGet(key);
+  }
+
+  @Override
+  public Object getDelegatedJSObject() {
+    return delegator.delegatedMap;
   }
 }

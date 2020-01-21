@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-package com.google.common.css;
-
-import com.google.common.base.Preconditions;
-import com.google.common.base.Splitter;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
-import java.util.Map;
+import {SubstitutionMap} from './substitution-map';
+import {MultipleMappingSubstitutionMap} from './multiple-mapping-substitution-map';
+import {Map as ImmutableMap} from 'immutable';
+import * as Preconditions from 'conditional';
+import * as GuavaJS from './guavajs-wrapper';
+import Splitter = GuavaJS.Strings.Splitter;
 
 /**
  * The CSS class substitution map which splits CSS class names on the "-" (dash)
@@ -28,56 +27,53 @@ import java.util.Map;
  *
  * @author dgajda@google.com (Damian Gajda)
  */
-public class SplittingSubstitutionMap implements
+export class SplittingSubstitutionMap implements
     MultipleMappingSubstitutionMap, SubstitutionMap.Initializable {
-  private static final Splitter DASH = Splitter.on('-');
-  private final SubstitutionMap delegate;
+  private static readonly DASH = Splitter.on('-');
+  private readonly delegate: SubstitutionMap;
 
-  public SplittingSubstitutionMap(SubstitutionMap substitutionMap) {
+  constructor(substitutionMap: SubstitutionMap) {
     this.delegate = substitutionMap;
   }
 
-  @Override
-  public void initializeWithMappings(Map<? extends String, ? extends String> newMappings) {
-    if (!newMappings.isEmpty()) {
-      ((SubstitutionMap.Initializable) delegate).initializeWithMappings(newMappings);
+  initializeWithMappings(newMappings: ImmutableMap<string, string>) {
+    if (newMappings.size) {
+      (this.delegate as SubstitutionMap.Initializable).initializeWithMappings(newMappings);
     }
   }
 
-  @Override
-  public String get(String key) {
-    return getValueWithMappings(key).value;
+  get(key: string): string {
+    return this.getValueWithMappings(key).value;
   }
 
-  @Override
-  public ValueWithMappings getValueWithMappings(String key) {
+  getValueWithMappings(key: string): MultipleMappingSubstitutionMap.ValueWithMappings {
     Preconditions.checkNotNull(key, "CSS key cannot be null");
-    Preconditions.checkArgument(!key.isEmpty(), "CSS key cannot be empty");
+    Preconditions.checkArgument(key.length, "CSS key cannot be empty");
 
     // Efficiently handle the common case with no dashes.
     if (key.indexOf('-') == -1) {
-      String value = delegate.get(key);
-      return ValueWithMappings.createForSingleMapping(key, value);
+      const value = this.delegate.get(key);
+      return MultipleMappingSubstitutionMap.ValueWithMappings.createForSingleMapping(key, value);
     }
 
-    StringBuilder buffer = new StringBuilder();
+    const buffer = [];
     // Cannot use an ImmutableMap.Builder because the same key/value pair may be
     // inserted more than once in this loop.
-    Map<String, String> mappings = Maps.newLinkedHashMap();
-    for (String part : DASH.split(key)) {
-      if (buffer.length() != 0) {
-        buffer.append('-');
+    const mappings = new Map();
+    for (const part of SplittingSubstitutionMap.DASH.split(key)) {
+      if (buffer.length != 0) {
+        buffer.push('-');
       }
 
-      String value = delegate.get(part);
-      mappings.put(part, value);
-      buffer.append(value);
+      const value = this.delegate.get(part);
+      mappings.set(part, value);
+      buffer.push(value);
     }
 
-    String renamedClassComposedFromParts = buffer.toString();
+    const renamedClassComposedFromParts = buffer.join('');
 
-    return ValueWithMappings.createWithValueAndMappings(
+    return MultipleMappingSubstitutionMap.ValueWithMappings.createWithValueAndMappings(
         renamedClassComposedFromParts,
-        ImmutableMap.copyOf(mappings));
+        ImmutableMap(mappings));
   }
 }

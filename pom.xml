@@ -79,7 +79,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <java.version>1.7</java.version>
+    <java.version>1.8</java.version>
     <guava.version>20.0</guava.version>
   </properties>
 
@@ -151,6 +151,12 @@
       <groupId>args4j</groupId>
       <artifactId>args4j</artifactId>
       <version>2.0.26</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.coveo</groupId>
+      <artifactId>nashorn-commonjs-modules</artifactId>
+      <version>1.0.9</version>
     </dependency>
 
     <dependency>

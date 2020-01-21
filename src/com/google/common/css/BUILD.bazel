@@ -14,6 +14,9 @@
 
 licenses(["notice"])  # Apache 2.0
 
+load("@npm_bazel_typescript//:index.bzl", "ts_library")
+load("@build_bazel_rules_nodejs//:index.bzl", "npm_package_bin")
+
 java_library(
     name = "css",
     srcs = [
@@ -26,7 +29,6 @@ java_library(
         "JobDescriptionBuilder.java",
         "Locatable.java",
         "MinimalSubstitutionMap.java",
-        "MultipleMappingSubstitutionMap.java",
         "OutputRenamingMapFormat.java",
         "PrefixingSubstitutionMap.java",
         "RecordingSubstitutionMap.java",
@@ -38,15 +40,100 @@ java_library(
         "SourceCodeLocation.java",
         "SourceCodeLocationBuilder.java",
         "SplittingSubstitutionMap.java",
-        "SubstitutionMap.java",
         "SubstitutionMapProvider.java",
         "Vendor.java",
     ],
     visibility = ["//visibility:public"],
     deps = [
+        ":interfaces",
+        ":js_support",
         "@maven//:com_google_auto_value_auto_value",
         "@maven//:com_google_code_findbugs_jsr305",
         "@maven//:com_google_code_gson_gson",
         "@maven//:com_google_guava_guava",
+    ],
+)
+
+java_library(
+    name = "interfaces",
+    srcs = [
+        "MultipleMappingSubstitutionMap.java",
+        "SubstitutionMap.java",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        "@maven//:com_google_guava_guava",
+    ],
+)
+
+java_library(
+    name = "js_support",
+    srcs = [
+        "JavaScriptDelegator.java",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":interfaces",
+        "@maven//:com_coveo_nashorn_commonjs_modules",
+        "@maven//:com_google_guava_guava",
+    ],
+    resources = [
+        ":css_js",
+        "@npm//conditional",
+        "@npm//guava-js",
+        "@npm//immutable",
+    ]
+)
+
+ts_library(
+    name = "css_ts",
+    srcs = [
+        "guavajs-wrapper.d.ts",
+        "identity-substitution-map.ts",
+        "minimal-substitution-map.ts",
+        "multiple-mapping-substitution-map.ts",
+        "prefixing-substitution-map.ts",
+        "recording-substitution-map.ts",
+        "simple-substitution-map.ts",
+        "splitting-substitution-map.ts",
+        "substitution-map.ts",
+    ],
+    deps = [
+      "@npm//@types",
+      "@npm//conditional",
+      "@npm//guava-js",
+      "@npm//immutable",
+    ],
+)
+
+filegroup(
+    name = "css_ts_js",
+    srcs = [":css_ts"],
+    output_group = "es6_sources",
+)
+
+npm_package_bin(
+    name = "css_js",
+    tool = "@npm//@babel/cli/bin:babel",
+    outs = [
+        "lol/identity-substitution-map.js",
+        "lol/minimal-substitution-map.js",
+        "lol/multiple-mapping-substitution-map.js",
+        "lol/prefixing-substitution-map.js",
+        "lol/recording-substitution-map.js",
+        "lol/simple-substitution-map.js",
+        "lol/splitting-substitution-map.js",
+        "lol/substitution-map.js"
+    ],
+    data = [
+        ":css_ts_js",
+        "@npm//@babel/preset-env",
+    ],
+    args = [
+        "$(execpaths :css_ts_js)",
+        "--no-babelrc",
+        "--presets=@babel/preset-env",
+        "--out-dir",
+        "$(execpath :lol/identity-substitution-map.js)/.."
     ],
 )
