@@ -780,7 +780,6 @@ java_test(
     deps = [
         "//src/com/google/common/css",
         "//src/com/google/common/css:interfaces",
-        "//src/com/google/common/css:js_support",
         "//src/com/google/common/css/compiler/ast",
         "//src/com/google/common/css/compiler/passes",
         "//tests/com/google/common/css/testing",

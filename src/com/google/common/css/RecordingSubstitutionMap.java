@@ -79,7 +79,8 @@ public class RecordingSubstitutionMap implements SubstitutionMap.Initializable, 
         builder = delegator.executeOnObject(builder, "withSubstitutionMap", ((JavaScriptDelegator.Delegating) d).getDelegatedJSObject());
         return this;
       } else {
-        throw new RuntimeException("Delegate must be implemented in JavaScript");
+        builder = delegator.executeOnObject(builder, "withSubstitutionMap", new JavaScriptDelegator(d).delegatedMap);
+        return this;
       }
     }
 

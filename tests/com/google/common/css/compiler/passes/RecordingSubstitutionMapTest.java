@@ -21,7 +21,6 @@ import static com.google.common.truth.Truth.assertWithMessage;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.css.JavaScriptDelegator;
 import com.google.common.css.JobDescription;
 import com.google.common.css.JobDescriptionBuilder;
 import com.google.common.css.MinimalSubstitutionMap;
@@ -83,26 +82,20 @@ public class RecordingSubstitutionMapTest extends UtilityTestCase {
 
   @Test
   public void testGet() {
-    JavaScriptDelegator delegator = new JavaScriptDelegator("" +
-            "        if (\"CSS_FOO\".equals(key)) {\n" +
-            "          return \"a\";\n" +
-            "        } else if (\"CSS_BAR\".equals(key)) {\n" +
-            "          return \"b\";\n" +
-            "        } else {\n" +
-            "          return key;\n" +
-            "        }");
-    SubstitutionMap substitutionMap = new JavaScriptDelegator.Delegating() {
+    SubstitutionMap substitutionMap = new SubstitutionMap() {
       @Override
       public String get(String key) {
-        return delegator.substitutionMapGet(key);
-      }
-
-      @Override
-      public Object getDelegatedJSObject() {
-        return delegator.delegatedMap;
+        if ("CSS_FOO".equals(key)) {
+          return "a";
+        } else if ("CSS_BAR".equals(key)) {
+          return "b";
+        } else {
+          return key;
+        }
       }
     };
-    RecordingSubstitutionMap recordingMap = new RecordingSubstitutionMap.Builder()
+    RecordingSubstitutionMap recordingMap =
+        new RecordingSubstitutionMap.Builder()
             .withSubstitutionMap(substitutionMap)
             .shouldRecordMappingForCodeGeneration(predicate)
             .build();

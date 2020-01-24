@@ -55,6 +55,33 @@ public class JavaScriptDelegator {
                 "    isFinite(value) && \n" +
                 "    Math.floor(value) === value;\n" +
                 "}", "Couldn't polyfill Number.isInteger");
+
+      // JavaScript map to Java map. Use LinkedHashMap to preserve order.
+      exec("toJavaMap = (jsMap) => {" +
+              "const LinkedHashMap = Java.type('java.util.LinkedHashMap');" +
+              "const javaMap = new LinkedHashMap();" +
+              "jsMap.forEach((value, key) => javaMap.put(key, value));" +
+              "return javaMap }");
+
+      // Java map to JavaScript map. Use ES6 Map to preserve order.
+      exec("toJsMap = (javaMap) => {" +
+              "const jsMap = new Map();" +
+              "for each (let i in javaMap.keySet()) { jsMap.set(i, javaMap.get(i)) }" +
+              "return jsMap }");
+
+      // Java map to JavaScript ImmutableMap.
+      exec("toJsImmutableMap = (javaMap) => {" +
+              "const ImmutableMap = require('immutable').Map;" +
+              "return ImmutableMap(toJsMap(javaMap)) }");
+
+      // Simple Java SubstitutionMap wrapper.
+      exec("function JavaMapWrapper(javaObject) {\n" +
+              "  this.javaObject = javaObject;\n" +
+              "}\n" +
+              "JavaMapWrapper.prototype.get = function(key) {\n" +
+              "  return this.javaObject.get(key);\n" +
+              "};\n");
+
       try {
         Require.enable(engine, createRootFolder("com/google/common/css/babel-out", "UTF-8"));
       } catch (ScriptException e) {
@@ -63,35 +90,10 @@ public class JavaScriptDelegator {
     }
   }
 
-  public JavaScriptDelegator(String getImpl) {
+  public JavaScriptDelegator(SubstitutionMap javaMap) {
     this("", "");
-    delegatedMap = exec("(() => {" +
-            "function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { \"default\": obj }; }\n" +
-            "\n" +
-            "function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError(\"Cannot call a class as a function\"); } }\n" +
-            "\n" +
-            "function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if (\"value\" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }\n" +
-            "\n" +
-            "function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }\n" +
-            "\n" +
-            "var NewMap =\n" +
-            "/*#__PURE__*/\n" +
-            "function () {\n" +
-            "  function NewMap() {\n" +
-            "    _classCallCheck(this, NewMap);\n" +
-            "  }\n" +
-            "\n" +
-            "  _createClass(NewMap, [{\n" +
-            "    key: \"get\",\n" +
-            "    value: function get(key) {\n" +
-            "      " + getImpl + "\n" +
-            "    }\n" +
-            "  }]);\n" +
-            "\n" +
-            "  return NewMap;\n" +
-            "}();\n" +
-            "return new NewMap();\n" +
-            "})()");
+    engine.put("javaMap", javaMap);
+    delegatedMap = exec("new JavaMapWrapper(javaMap)");
   }
 
   public void initialize(Object ...args) {
@@ -113,6 +115,7 @@ public class JavaScriptDelegator {
     engine.put("delegatedMap", builder);
     engine.put("initialMappings", m);
     return exec("(() => {" +
+            //"return delegatedMap.withMappings(toJsMap(initialMappings)) })()");
             "const map = new Map(); for each (let i in initialMappings.keySet()) { map.set(i, initialMappings.get(i)) };" +
             "return delegatedMap.withMappings(map) })()");
   }
@@ -127,24 +130,17 @@ public class JavaScriptDelegator {
 
   public void substitutionMapInitializableInitializeWithMappings(Map<? extends String, ? extends String> initialMappings) {
     engine.put("delegatedMap", delegatedMap);
-    // immutable.Map expects a JavaScript Object, so we need to pre-convert.
     engine.put("initialMappings", initialMappings);
-    exec("(() => {" +
-        "const immutable = require('immutable');" +
-        "const map = {}; for each (let i in initialMappings.keySet()) { map[i] = initialMappings.get(i) };" +
-        "delegatedMap.initializeWithMappings(immutable.Map(map)) })()");
+    exec("delegatedMap.initializeWithMappings(toJsImmutableMap(initialMappings))");
   }
 
   public ValueWithMappings multipleMappingSubstitutionMapGetValueWithMappings(String key) {
     engine.put("delegatedMap", delegatedMap);
     engine.put("key", key);
     return (ValueWithMappings) exec("(() => {" +
-      "const LinkedHashMap = Java.type('java.util.LinkedHashMap');\n" +
       "const JavaValueWithMappings = Java.type('com.google.common.css.MultipleMappingSubstitutionMap.ValueWithMappings');\n" +
       "const jsValueWithMappings = delegatedMap.getValueWithMappings(key);\n" +
-      "const map = new LinkedHashMap();\n" +
-      "jsValueWithMappings.mappings.forEach((value, key) => map.put(key, value));\n" +
-      "return JavaValueWithMappings.createWithValueAndMappings(jsValueWithMappings.value, map) })()");
+      "return JavaValueWithMappings.createWithValueAndMappings(jsValueWithMappings.value, toJavaMap(jsValueWithMappings.mappings)) })()");
   }
 
   public Object executeObject(String method, Object ...args) {
@@ -159,13 +155,7 @@ public class JavaScriptDelegator {
 
   public Map<String, String> executeMap(String method) {
     engine.put("delegatedMap", delegatedMap);
-    Object result = exec("(() => {" +
-              "const LinkedHashMap = Java.type('java.util.LinkedHashMap');\n" +
-              "const JavaValueWithMappings = Java.type('com.google.common.css.MultipleMappingSubstitutionMap.ValueWithMappings');\n" +
-              "const jsMap = delegatedMap." + method + "();\n" +
-              "const javaMap = new LinkedHashMap();\n" +
-              "jsMap.forEach((value, key) => javaMap.put(key, value));\n" +
-              "return javaMap })()");
+    Object result = exec("toJavaMap(delegatedMap." + method + "())");
     return (Map<String, String>) result;
   }
 

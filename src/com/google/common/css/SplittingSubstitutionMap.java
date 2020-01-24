@@ -38,7 +38,7 @@ public class SplittingSubstitutionMap implements
     if (substitutionMap instanceof JavaScriptDelegator.Delegating) {
       delegator.initialize(((JavaScriptDelegator.Delegating) substitutionMap).getDelegatedJSObject());
     } else {
-      throw new RuntimeException("Delegate must be implemented in JavaScript");
+      delegator.initialize(new JavaScriptDelegator(substitutionMap).delegatedMap);
     }
   }
 
