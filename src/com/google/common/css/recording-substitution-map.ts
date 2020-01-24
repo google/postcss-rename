@@ -18,7 +18,7 @@
 import {IdentitySubstitutionMap} from './identity-substitution-map';
 import {SubstitutionMap} from './substitution-map';
 import {MultipleMappingSubstitutionMap} from './multiple-mapping-substitution-map';
-import {Map as ImmutableMap} from 'immutable';
+import {Map as ImmutableMap, OrderedMap as OrderedImmutableMap} from 'immutable';
 import * as Preconditions from 'conditional';
 
 type Predicate<T> = (input: T) => boolean;
@@ -71,7 +71,7 @@ class RecordingSubstitutionMapImpl implements RecordingSubstitutionMap {
       // minimizes all components but only prefixes the first.
       // We can't memoize the value here, so don't look up in mappings first.
       const valueWithMappings = this.delegate.getValueWithMappings(key);
-      valueWithMappings.mappings.forEach((key, value) => this.mappings.set(key, value));
+      valueWithMappings.mappings.forEach((value, key) => this.mappings.set(key, value));
       return valueWithMappings.value;
     } else {
       let value = this.mappings.get(key);
@@ -88,13 +88,13 @@ class RecordingSubstitutionMapImpl implements RecordingSubstitutionMap {
    *     {@link OutputRenamingMapFormat#writeRenamingMap}
    */
   getMappings() {
-    return ImmutableMap(this.mappings);
+    return OrderedImmutableMap(this.mappings);
   }
 
   initializeWithMappings(newMappings: ImmutableMap<string, string>) {
     Preconditions.checkState(!this.mappings.size);
     if (newMappings.size > 0) {
-      newMappings.forEach((key, value) => this.mappings.set(key, value));
+      newMappings.forEach((value, key) => this.mappings.set(key, value));
       (this.delegate as SubstitutionMap.Initializable).initializeWithMappings(newMappings);
     }
   }
@@ -132,7 +132,7 @@ namespace RecordingSubstitutionMap {
      * OutputRenamingMapFormat#readRenamingMap}.
      */
     withMappings(m: Map<string, string>) {
-      m.forEach((key, value) => this.mappings.set(key, value));
+      m.forEach((value, key) => this.mappings.set(key, value));
       return this;
     }
 
