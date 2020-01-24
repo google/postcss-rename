@@ -116,14 +116,14 @@ npm_package_bin(
     name = "css_js",
     tool = "@npm//@babel/cli/bin:babel",
     outs = [
-        "lol/identity-substitution-map.js",
-        "lol/minimal-substitution-map.js",
-        "lol/multiple-mapping-substitution-map.js",
-        "lol/prefixing-substitution-map.js",
-        "lol/recording-substitution-map.js",
-        "lol/simple-substitution-map.js",
-        "lol/splitting-substitution-map.js",
-        "lol/substitution-map.js"
+        "babel-out/identity-substitution-map.js",
+        "babel-out/minimal-substitution-map.js",
+        "babel-out/multiple-mapping-substitution-map.js",
+        "babel-out/prefixing-substitution-map.js",
+        "babel-out/recording-substitution-map.js",
+        "babel-out/simple-substitution-map.js",
+        "babel-out/splitting-substitution-map.js",
+        "babel-out/substitution-map.js"
     ],
     data = [
         ":css_ts_js",
@@ -134,6 +134,6 @@ npm_package_bin(
         "--no-babelrc",
         "--presets=@babel/preset-env",
         "--out-dir",
-        "$(execpath :lol/identity-substitution-map.js)/.."
+        "$(execpath :babel-out/identity-substitution-map.js)/.."
     ],
 )
