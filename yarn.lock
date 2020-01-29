@@ -1000,10 +1000,10 @@
   resolved "https://registry.yarnpkg.com/@types/color-name/-/color-name-1.1.1.tgz#1c1261bbeaa10a8055bbc5d8ab84b7b2afc846a0"
   integrity sha512-rr+OQyAjxze7GgWrSaJwydHStIhHq2lvY3BOC2Mj7KnzI7XK0Uw1TOOdI9lDoajEbSWLiYgoo4f1R51erQfhPQ==
 
-"@types/conditional@file:typings/conditional":
-  version "0.0.0-PLACEHOLDER"
-  dependencies:
-    typescript "^3.7.2"
+"@types/conditional@^5.3.0":
+  version "5.3.0"
+  resolved "https://registry.yarnpkg.com/@types/conditional/-/conditional-5.3.0.tgz#6ad974d8ef449d7fb7ecacbb58a01cc9558513ee"
+  integrity sha512-xwe5h7jZ5hWvjnZnOO6Cjdk2Ag3vMSM1b3k7a2SHnhWOOTM85NLULynlpQKLnpUysYhlyLM/HVU9aJCefr9HhQ==
 
 "@types/istanbul-lib-coverage@*", "@types/istanbul-lib-coverage@^2.0.0":
   version "2.0.1"
