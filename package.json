@@ -35,7 +35,7 @@
     "@babel/preset-env": "^7.7.7",
     "@bazel/typescript": "^1.0.1",
     "@logux/eslint-config": "^33.0.0",
-    "@types/conditional": "file:typings/conditional",
+    "@types/conditional": "^5.3.0",
     "@types/jest": "^24.0.25",
     "@types/mock-fs": "^4.10.0",
     "babel-jest": "^24.9.0",
