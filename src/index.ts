@@ -65,7 +65,7 @@ export = postcss.plugin(
       if (opts.outputRenamingMap) {
         const renamingMap = new Map([...substitutionMap.getMappings()]);
         const writer = fs.createWriteStream(opts.outputRenamingMap);
-        OutputRenamingMapFormat.CLOSURE_COMPILED_SPLIT_HYPHENS().writeRenamingMap(
+        OutputRenamingMapFormat.CLOSURE_COMPILED_SPLIT_HYPHENS.writeRenamingMap(
           renamingMap,
           writer
         );
