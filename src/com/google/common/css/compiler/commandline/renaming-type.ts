@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-package com.google.common.css.compiler.commandline;
-
-import com.google.common.css.IdentitySubstitutionMap;
-import com.google.common.css.MinimalSubstitutionMap;
-import com.google.common.css.SimpleSubstitutionMap;
-import com.google.common.css.SplittingSubstitutionMap;
-import com.google.common.css.SubstitutionMap;
-import com.google.common.css.SubstitutionMapProvider;
+import { IdentitySubstitutionMap } from '../../identity-substitution-map';
+import { MinimalSubstitutionMap } from '../../minimal-substitution-map';
+import { OutputRenamingMapFormat } from '../../output-renaming-map-format';
+import { PrefixingSubstitutionMap } from '../../prefixing-substitution-map';
+import { RecordingSubstitutionMap } from '../../recording-substitution-map';
+import { SimpleSubstitutionMap } from '../../simple-substitution-map';
+import { SplittingSubstitutionMap } from '../../splitting-substitution-map';
+import { SubstitutionMap } from '../../substitution-map';
+import { SubstitutionMapProvider } from '../../substitution-map-provider';
 
 /**
  * {@link RenamingType} is an enumeration of the possible values for the
@@ -31,45 +32,63 @@ import com.google.common.css.SubstitutionMapProvider;
  *
  * @author bolinfest@google.com (Michael Bolin)
  */
-enum RenamingType {
-  /** No renaming is done. */
-  NONE(new SubstitutionMapProvider() {
-    @Override
-    public SubstitutionMap get() {
-      return new IdentitySubstitutionMap();
+class RenamingType {
+  private readonly provider: SubstitutionMapProvider;
+
+  constructor(provider: SubstitutionMapProvider) {
+    this.provider = provider;
+  }
+
+  getCssSubstitutionMapProvider(): SubstitutionMapProvider {
+    return this.provider;
+  }
+}
+
+namespace RenamingType {
+  const NULL_RENAMING_TYPE = new RenamingType(new class implements SubstitutionMapProvider {
+    public get(): SubstitutionMap {
+      throw Error('Undefined renaming type');
     }
-  }),
+  });
+
+  /** No renaming is done. */
+  export const NONE = NULL_RENAMING_TYPE;
+  Object.defineProperty(RenamingType, 'NONE', {
+    enumerable: true,
+    get: () => new RenamingType(new class implements SubstitutionMapProvider {
+      public get(): SubstitutionMap {
+        return new IdentitySubstitutionMap();
+      }
+    })
+  });
 
   /** A trailing underscore is added to each part of a CSS class. */
-  DEBUG(new SubstitutionMapProvider() {
-    @Override
-    public SubstitutionMap get() {
-      // This wraps the SimpleSubstitutionMap in a SplittingSubstitutionMap so
-      // that can be used with goog.getCssName().
-      return new SplittingSubstitutionMap(new SimpleSubstitutionMap());
-    }
-  }),
+  export const DEBUG = NULL_RENAMING_TYPE;
+  Object.defineProperty(RenamingType, 'DEBUG', {
+    enumerable: true,
+    get: () => new RenamingType(new class implements SubstitutionMapProvider {
+      public get(): SubstitutionMap {
+        // This wraps the SimpleSubstitutionMap in a SplittingSubstitutionMap so
+        // that can be used with goog.getCssName().
+        return new SplittingSubstitutionMap(new SimpleSubstitutionMap());
+      }
+    })
+  });
 
 
   /**
    * Each chunk of a CSS class as delimited by '-' is renamed using the
    * shortest available name.
    */
-  CLOSURE(new SubstitutionMapProvider() {
-    @Override
-    public SubstitutionMap get() {
-      return new SplittingSubstitutionMap(new MinimalSubstitutionMap());
-    }
-  }),
-  ;
-
-  private final SubstitutionMapProvider provider;
-
-  private RenamingType(SubstitutionMapProvider provider) {
-    this.provider = provider;
-  }
-
-  public SubstitutionMapProvider getCssSubstitutionMapProvider() {
-    return provider;
-  }
+  export const CLOSURE = NULL_RENAMING_TYPE;
+  Object.defineProperty(RenamingType, 'CLOSURE', {
+    enumerable: true,
+    get: () => new RenamingType(new class implements SubstitutionMapProvider {
+      public get(): SubstitutionMap {
+        return new SplittingSubstitutionMap(new MinimalSubstitutionMap());
+      }
+    })
+  });
 }
+
+export { RenamingType };
