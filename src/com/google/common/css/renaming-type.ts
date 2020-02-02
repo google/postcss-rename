@@ -14,15 +14,12 @@
  * limitations under the License.
  */
 
-import { IdentitySubstitutionMap } from '../../identity-substitution-map';
-import { MinimalSubstitutionMap } from '../../minimal-substitution-map';
-import { OutputRenamingMapFormat } from '../../output-renaming-map-format';
-import { PrefixingSubstitutionMap } from '../../prefixing-substitution-map';
-import { RecordingSubstitutionMap } from '../../recording-substitution-map';
-import { SimpleSubstitutionMap } from '../../simple-substitution-map';
-import { SplittingSubstitutionMap } from '../../splitting-substitution-map';
-import { SubstitutionMap } from '../../substitution-map';
-import { SubstitutionMapProvider } from '../../substitution-map-provider';
+import { IdentitySubstitutionMap } from './identity-substitution-map';
+import { MinimalSubstitutionMap } from './minimal-substitution-map';
+import { SimpleSubstitutionMap } from './simple-substitution-map';
+import { SplittingSubstitutionMap } from './splitting-substitution-map';
+import { SubstitutionMap } from './substitution-map';
+import { SubstitutionMapProvider } from './substitution-map-provider';
 
 /**
  * {@link RenamingType} is an enumeration of the possible values for the
