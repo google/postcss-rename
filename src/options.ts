@@ -14,19 +14,10 @@
  * limitations under the License.
  */
 
-import { IdentitySubstitutionMap } from './com/google/common/css/identity-substitution-map';
-import { MinimalSubstitutionMap } from './com/google/common/css/minimal-substitution-map';
-import { SimpleSubstitutionMap } from './com/google/common/css/simple-substitution-map';
-import { SplittingSubstitutionMap } from './com/google/common/css/splitting-substitution-map';
-
-export const RENAMING_TYPE = {
-  none: () => new IdentitySubstitutionMap(),
-  debug: () => new SplittingSubstitutionMap(new SimpleSubstitutionMap()),
-  closure: () => new SplittingSubstitutionMap(new MinimalSubstitutionMap()),
-};
+import { RenamingType } from './com/google/common/css/renaming-type';
 
 export interface Options {
-  renamingType?: keyof typeof RENAMING_TYPE;
+  renamingType?: keyof typeof RenamingType;
   outputRenamingMap?: string | null;
   cssRenamingPrefix?: string | null;
 }

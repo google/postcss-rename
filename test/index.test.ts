@@ -46,21 +46,21 @@ it('does nothing with none renaming type', async () => {
   const input = await read('default.css');
   const expectedOutput = input;
 
-  assertPostcss(await run(input, { renamingType: 'none' }), expectedOutput);
+  assertPostcss(await run(input, { renamingType: 'NONE' }), expectedOutput);
 });
 
 it('renames with debug renaming type', async () => {
   const input = await read('default.css');
   const expectedOutput = await read('default.debug.css');
 
-  assertPostcss(await run(input, { renamingType: 'debug' }), expectedOutput);
+  assertPostcss(await run(input, { renamingType: 'DEBUG' }), expectedOutput);
 });
 
 it('renames with closure renaming type', async () => {
   const input = await read('default.css');
   const expectedOutput = await read('default.closure.css');
 
-  assertPostcss(await run(input, { renamingType: 'closure' }), expectedOutput);
+  assertPostcss(await run(input, { renamingType: 'CLOSURE' }), expectedOutput);
 });
 
 it('renames with prefix', async () => {
@@ -75,7 +75,7 @@ it('outputs renaming map as expected', async () => {
   const expectedOutput = await read('renaming_map.js');
 
   mockFs({ 'temp/': {} });
-  await run(input, { renamingType: 'closure', outputRenamingMap: 'temp/renaming_map.js' });
+  await run(input, { renamingType: 'CLOSURE', outputRenamingMap: 'temp/renaming_map.js' });
   const output = (await fs.readFile('temp/renaming_map.js')).toString();
   mockFs.restore();
 

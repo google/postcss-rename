@@ -20,7 +20,8 @@ import * as selectorParser from 'postcss-selector-parser';
 import { OutputRenamingMapFormat } from './com/google/common/css/output-renaming-map-format';
 import { PrefixingSubstitutionMap } from './com/google/common/css/prefixing-substitution-map';
 import { RecordingSubstitutionMap } from './com/google/common/css/recording-substitution-map';
-import { RENAMING_TYPE, Options } from './options';
+import { Options } from './options';
+import { RenamingType } from './com/google/common/css/renaming-type';
 
 export = postcss.plugin(
   'postcss-rename',
@@ -28,14 +29,18 @@ export = postcss.plugin(
     return (root: postcss.Root) => {
       const opts = Object.assign(
         {
-          renamingType: 'none',
+          renamingType: 'NONE',
           outputRenamingMap: '',
           cssRenamingPrefix: '',
-        },
+        } as Options,
         options
       );
 
-      let map = RENAMING_TYPE[opts.renamingType]();
+      const renamingType = (RenamingType as {})[opts.renamingType];
+      let map = (renamingType as RenamingType)
+          .getCssSubstitutionMapProvider()
+          .get();
+
       if (opts.cssRenamingPrefix) {
         map = new PrefixingSubstitutionMap(map, opts.cssRenamingPrefix);
       }
