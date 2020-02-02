@@ -23,53 +23,50 @@ import { RecordingSubstitutionMap } from './com/google/common/css/recording-subs
 import { Options } from './options';
 import { RenamingType } from './com/google/common/css/renaming-type';
 
-export = postcss.plugin(
-  'postcss-rename',
-  (options: Partial<Options> = {}) => {
-    return (root: postcss.Root) => {
-      const opts = Object.assign(
-        {
-          renamingType: 'NONE',
-          outputRenamingMap: '',
-          cssRenamingPrefix: '',
-        } as Options,
-        options
+export = postcss.plugin('postcss-rename', (options: Partial<Options> = {}) => {
+  return (root: postcss.Root) => {
+    const opts = Object.assign(
+      {
+        renamingType: 'NONE',
+        outputRenamingMap: '',
+        cssRenamingPrefix: '',
+      } as Options,
+      options
+    );
+
+    const renamingType = (RenamingType as {})[opts.renamingType];
+    let map = (renamingType as RenamingType)
+      .getCssSubstitutionMapProvider()
+      .get();
+
+    if (opts.cssRenamingPrefix) {
+      map = new PrefixingSubstitutionMap(map, opts.cssRenamingPrefix);
+    }
+    const substitutionMap = new RecordingSubstitutionMap.Builder()
+      .withSubstitutionMap(map)
+      .build();
+
+    const selectorProcessor = selectorParser(selectors => {
+      selectors.walkClasses(classNode => {
+        if (classNode.value) {
+          classNode.value = substitutionMap.get(classNode.value);
+        }
+      });
+    });
+
+    root.walkRules(ruleNode => {
+      return selectorProcessor.process(ruleNode);
+    });
+
+    // Write the class substitution map to file, using same format as
+    // VariableMap in jscomp.
+    if (opts.outputRenamingMap) {
+      const renamingMap = new Map([...substitutionMap.getMappings()]);
+      const writer = fs.createWriteStream(opts.outputRenamingMap);
+      OutputRenamingMapFormat.CLOSURE_COMPILED_SPLIT_HYPHENS.writeRenamingMap(
+        renamingMap,
+        writer
       );
-
-      const renamingType = (RenamingType as {})[opts.renamingType];
-      let map = (renamingType as RenamingType)
-          .getCssSubstitutionMapProvider()
-          .get();
-
-      if (opts.cssRenamingPrefix) {
-        map = new PrefixingSubstitutionMap(map, opts.cssRenamingPrefix);
-      }
-      const substitutionMap = new RecordingSubstitutionMap.Builder()
-        .withSubstitutionMap(map)
-        .build();
-
-      const selectorProcessor = selectorParser(selectors => {
-        selectors.walkClasses(classNode => {
-          if (classNode.value) {
-            classNode.value = substitutionMap.get(classNode.value);
-          }
-        });
-      });
-
-      root.walkRules(ruleNode => {
-        return selectorProcessor.process(ruleNode);
-      });
-
-      // Write the class substitution map to file, using same format as
-      // VariableMap in jscomp.
-      if (opts.outputRenamingMap) {
-        const renamingMap = new Map([...substitutionMap.getMappings()]);
-        const writer = fs.createWriteStream(opts.outputRenamingMap);
-        OutputRenamingMapFormat.CLOSURE_COMPILED_SPLIT_HYPHENS.writeRenamingMap(
-          renamingMap,
-          writer
-        );
-      }
-    };
-  }
-);
+    }
+  };
+});
