@@ -1,5 +1,5 @@
-/*
- * Copyright 2011 Google Inc.
+/**
+ * Copyright 2020 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,10 @@
  * limitations under the License.
  */
 
-import {SubstitutionMap} from './substitution-map';
+import { RenamingType } from './com/google/common/css/renaming-type';
 
-/**
- * Provides substitution maps for use with command-line compilers.
- *
- * Any implementation should provide a parameterless constructor, as the
- * provider is instantiated via {@link Function.prototype.bind#call()}.
- *
- */
-export interface SubstitutionMapProvider {
-  /**
-   * Gets the substitution map.
-   *
-   * @return The substitution map provided by this class.
-   */
-  get(): SubstitutionMap;
+export interface Options {
+  renamingType?: keyof typeof RenamingType;
+  outputRenamingMap?: string | null;
+  cssRenamingPrefix?: string | null;
 }

@@ -194,12 +194,18 @@ class OutputRenamingMapFormatImpl implements OutputRenamingMapFormat {
 
 /* tslint:disable:no-namespace */
 namespace OutputRenamingMapFormat {
+  const NULL_FORMAT = new OutputRenamingMapFormatImpl('');
+
   /**
    * Reads/Writes the mapping as JSON, passed as an argument to
    * {@code goog.setCssNameMapping()}. Designed for use with the Closure
    * Library in compiled mode.
    */
-  export const CLOSURE_COMPILED = () => new OutputRenamingMapFormatImpl("goog.setCssNameMapping(%s);\n");
+  export const CLOSURE_COMPILED = NULL_FORMAT;
+  Object.defineProperty(OutputRenamingMapFormat, 'CLOSURE_COMPILED', {
+    enumerable: true,
+    get: () => new OutputRenamingMapFormatImpl("goog.setCssNameMapping(%s);\n")
+  });
 
   /**
    * Reads/Writes the mapping as JSON, passed as an argument to
@@ -208,36 +214,53 @@ namespace OutputRenamingMapFormat {
    * name substitutions are taken as-is, which allows, e.g., using
    * {@code SimpleSubstitutionMap} with class names containing hyphens.
    */
-  export const CLOSURE_COMPILED_BY_WHOLE = () => new OutputRenamingMapFormatImpl("goog.setCssNameMapping(%s, 'BY_WHOLE');\n");
+  export const CLOSURE_COMPILED_BY_WHOLE = NULL_FORMAT;
+  Object.defineProperty(OutputRenamingMapFormat, 'CLOSURE_COMPILED_BY_WHOLE', {
+    enumerable: true,
+    get: () => new OutputRenamingMapFormatImpl("goog.setCssNameMapping(%s, 'BY_WHOLE');\n")
+  });
 
   /**
    * Before writing the mapping as CLOSURE_COMPILED, split the css name maps by hyphens and write
    * out each piece individually. see {@code CLOSURE_COMPILED}
    */
+  export const CLOSURE_COMPILED_SPLIT_HYPHENS = NULL_FORMAT;
   class ClosureCompiledSplitHyphensImpl extends OutputRenamingMapFormatImpl {
     constructor() { super("goog.setCssNameMapping(%s);\n"); }
     writeRenamingMap(renamingMap: Map<string, string>, renamingMapWriter: stream.Writable) {
       super.writeRenamingMap(OutputRenamingMapFormatImpl.splitEntriesOnHyphens(renamingMap), renamingMapWriter);
     }
   };
-  export const CLOSURE_COMPILED_SPLIT_HYPHENS = () => new ClosureCompiledSplitHyphensImpl();
+  Object.defineProperty(OutputRenamingMapFormat, 'CLOSURE_COMPILED_SPLIT_HYPHENS', {
+    enumerable: true,
+    get: () => new ClosureCompiledSplitHyphensImpl()
+  });
 
   /**
    * Reads/Writes the mapping as JSON, assigned to the global JavaScript variable
    * {@code CLOSURE_CSS_NAME_MAPPING}. Designed for use with the Closure
    * Library in uncompiled mode.
    */
-  export const CLOSURE_UNCOMPILED = () => new OutputRenamingMapFormatImpl("CLOSURE_CSS_NAME_MAPPING = %s;\n");
+  export const CLOSURE_UNCOMPILED = NULL_FORMAT;
+  Object.defineProperty(OutputRenamingMapFormat, 'CLOSURE_UNCOMPILED', {
+    enumerable: true,
+    get: () => new OutputRenamingMapFormatImpl("CLOSURE_CSS_NAME_MAPPING = %s;\n")
+  });
 
   /**
    * Reads/Writes the mapping as JSON.
    */
-  export const JSON = () => new OutputRenamingMapFormatImpl();
+  export const JSON = NULL_FORMAT;
+  Object.defineProperty(OutputRenamingMapFormat, 'JSON', {
+    enumerable: true,
+    get: () => new OutputRenamingMapFormatImpl()
+  });
 
   /**
    * Reads/Writes the mapping from/in a .properties file format, such that it can be read
    * by {@link Properties}.
    */
+  export const PROPERTIES = NULL_FORMAT;
   class PropertiesImpl extends OutputRenamingMapFormatImpl {
     writeRenamingMap(renamingMap: Map<string, string>, renamingMapWriter: stream.Writable) {
       OutputRenamingMapFormatImpl.writeOnePerLine('=', renamingMap, renamingMapWriter);
@@ -253,12 +276,16 @@ namespace OutputRenamingMapFormat {
       await OutputRenamingMapFormatImpl.readOnePerLine('=', inReadable, builder);
     }
   };
-  export const PROPERTIES = () => new PropertiesImpl();
+  Object.defineProperty(OutputRenamingMapFormat, 'PROPERTIES', {
+    enumerable: true,
+    get: () => new PropertiesImpl()
+  });
 
   /**
    * This is the current default behavior for output maps. Still used for
    * legacy reasons.
    */
+  export const JSCOMP_VARIABLE_MAP = NULL_FORMAT;
   class JscompVariableMapImpl extends OutputRenamingMapFormatImpl {
     writeRenamingMap(renamingMap: Map<string, string>, renamingMapWriter: stream.Writable) {
       OutputRenamingMapFormatImpl.writeOnePerLine(':', renamingMap, renamingMapWriter);
@@ -268,7 +295,10 @@ namespace OutputRenamingMapFormat {
       await OutputRenamingMapFormatImpl.readOnePerLine(':', inReadable, builder);
     }
   };
-  export const JSCOMP_VARIABLE_MAP = () => new JscompVariableMapImpl();
+  Object.defineProperty(OutputRenamingMapFormat, 'JSCOMP_VARIABLE_MAP', {
+    enumerable: true,
+    get: () => new JscompVariableMapImpl()
+  });
 }
 
 export { OutputRenamingMapFormat };
