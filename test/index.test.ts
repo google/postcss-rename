@@ -19,7 +19,7 @@ import * as mockFs from 'mock-fs';
 import * as path from 'path';
 import * as postcss from 'postcss';
 
-const plugin = require('../');
+const plugin = require('../src');
 
 async function run(input: string, opts?: Object) {
   return await postcss([plugin(opts)]).process(input, { from: undefined });
