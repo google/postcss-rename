@@ -17,27 +17,12 @@
 import * as fs from 'fs';
 import * as postcss from 'postcss';
 import * as selectorParser from 'postcss-selector-parser';
-import { IdentitySubstitutionMap } from './com/google/common/css/identity-substitution-map';
-import { MinimalSubstitutionMap } from './com/google/common/css/minimal-substitution-map';
 import { OutputRenamingMapFormat } from './com/google/common/css/output-renaming-map-format';
 import { PrefixingSubstitutionMap } from './com/google/common/css/prefixing-substitution-map';
 import { RecordingSubstitutionMap } from './com/google/common/css/recording-substitution-map';
-import { SimpleSubstitutionMap } from './com/google/common/css/simple-substitution-map';
-import { SplittingSubstitutionMap } from './com/google/common/css/splitting-substitution-map';
+import { RENAMING_TYPE, Options } from './options';
 
-const RENAMING_TYPE = {
-  none: () => new IdentitySubstitutionMap(),
-  debug: () => new SplittingSubstitutionMap(new SimpleSubstitutionMap()),
-  closure: () => new SplittingSubstitutionMap(new MinimalSubstitutionMap()),
-};
-
-interface Options {
-  renamingType?: keyof typeof RENAMING_TYPE;
-  outputRenamingMap?: string | null;
-  cssRenamingPrefix?: string | null;
-}
-
-module.exports = postcss.plugin(
+export = postcss.plugin(
   'postcss-rename',
   (options: Partial<Options> = {}) => {
     return (root: postcss.Root) => {
