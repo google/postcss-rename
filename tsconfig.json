@@ -20,8 +20,4 @@
     "strict": false,
     "allowJs": true
   },
-  "include": [
-    "src/com/google/common/css/*.js",
-    "src/index.ts"
-  ],
 }
