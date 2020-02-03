@@ -12,10 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-exports_files(["LICENSE"])
+load("@npm_bazel_typescript//:index.bzl", "ts_library")
 
-exports_files([
-    "tsconfig.json",
-    "jest.config.js",
-    "package.json",
-])
+ts_library(
+    name = "index",
+    srcs = [
+        "index.ts",
+        "options.ts",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//src/com/google/common/css:css_ts",
+        "@npm//@types",
+        "@npm//postcss",
+        "@npm//postcss-selector-parser",
+    ],
+)

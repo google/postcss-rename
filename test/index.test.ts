@@ -15,11 +15,11 @@
  */
 
 import {promises as fs} from 'fs';
-import * as mockFs from 'mock-fs';
-import * as path from 'path';
-import * as postcss from 'postcss';
-import { Options } from '../src/options';
-import plugin = require('../src');
+import mockFs from 'mock-fs';
+import path from 'path';
+import postcss from 'postcss';
+import plugin from 'com_google_closure_stylesheets/src';
+import { Options } from 'com_google_closure_stylesheets/src/options';
 
 async function run(input: string, opts?: Options) {
   return await postcss([plugin(opts)]).process(input, { from: undefined });
