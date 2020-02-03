@@ -2,8 +2,12 @@
   "extends": "./node_modules/gts/tsconfig-google.json",
   "compilerOptions": {
     "outDir": "build",
-    "resolveJsonModule": true,
     "module": "commonjs",
+    "baseUrl": ".",
+    "paths": {
+      "com_google_closure_stylesheets/*": ["*"],
+    },
+    "esModuleInterop": true,
     "lib": [
       "es5",
       "es6",
