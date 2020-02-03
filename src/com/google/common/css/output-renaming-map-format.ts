@@ -98,7 +98,7 @@ class OutputRenamingMapFormatImpl implements OutputRenamingMapFormat {
 
     const b = new Map<string, string>();
     const json = JSON.parse(content);
-    this.readMapInto(json, b);
+    await this.readMapInto(json, b);
 
     return ImmutableMap(b);
   }
