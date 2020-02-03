@@ -1,0 +1,4 @@
+build/
+bazel-*/
+src/com/google/common/css/guavajs-wrapper.js
+test/cases/
