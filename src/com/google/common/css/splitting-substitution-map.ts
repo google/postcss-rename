@@ -51,7 +51,7 @@ export class SplittingSubstitutionMap implements
     Preconditions.checkArgument(key.length, "CSS key cannot be empty");
 
     // Efficiently handle the common case with no dashes.
-    if (key.indexOf('-') == -1) {
+    if (key.indexOf('-') === -1) {
       const value = this.delegate.get(key);
       return MultipleMappingSubstitutionMap.ValueWithMappings.createForSingleMapping(key, value);
     }
@@ -61,7 +61,7 @@ export class SplittingSubstitutionMap implements
     // inserted more than once in this loop.
     const mappings = new Map();
     for (const part of SplittingSubstitutionMap.DASH.split(key)) {
-      if (buffer.length != 0) {
+      if (buffer.length !== 0) {
         buffer.push('-');
       }
 

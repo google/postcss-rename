@@ -41,9 +41,10 @@ class RenamingType {
   }
 }
 
+/* tslint:disable:no-namespace */
 namespace RenamingType {
   const NULL_RENAMING_TYPE = new RenamingType(new class implements SubstitutionMapProvider {
-    public get(): SubstitutionMap {
+    get(): SubstitutionMap {
       throw Error('Undefined renaming type');
     }
   });
@@ -53,7 +54,7 @@ namespace RenamingType {
   Object.defineProperty(RenamingType, 'NONE', {
     enumerable: true,
     get: () => new RenamingType(new class implements SubstitutionMapProvider {
-      public get(): SubstitutionMap {
+      get(): SubstitutionMap {
         return new IdentitySubstitutionMap();
       }
     })
@@ -64,7 +65,7 @@ namespace RenamingType {
   Object.defineProperty(RenamingType, 'DEBUG', {
     enumerable: true,
     get: () => new RenamingType(new class implements SubstitutionMapProvider {
-      public get(): SubstitutionMap {
+      get(): SubstitutionMap {
         // This wraps the SimpleSubstitutionMap in a SplittingSubstitutionMap so
         // that can be used with goog.getCssName().
         return new SplittingSubstitutionMap(new SimpleSubstitutionMap());
@@ -81,7 +82,7 @@ namespace RenamingType {
   Object.defineProperty(RenamingType, 'CLOSURE', {
     enumerable: true,
     get: () => new RenamingType(new class implements SubstitutionMapProvider {
-      public get(): SubstitutionMap {
+      get(): SubstitutionMap {
         return new SplittingSubstitutionMap(new MinimalSubstitutionMap());
       }
     })

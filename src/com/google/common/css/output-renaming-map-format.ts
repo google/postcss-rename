@@ -25,7 +25,7 @@ import { AssertionError } from 'assert';
 
 const streamToString = async (stream: stream.Readable) => {
   return new Promise<string>((resolve, reject) => {
-    let chunks = [];
+    const chunks = [];
     const onData = chunk => chunks.push(chunk);
     stream.on('data', onData);
     stream.once('error', reject);
@@ -100,7 +100,7 @@ class OutputRenamingMapFormatImpl implements OutputRenamingMapFormat {
     const json = JSON.parse(content);
     this.readMapInto(json, b);
 
-    return ImmutableMap.of(b);
+    return ImmutableMap(b);
   }
 
   /**
