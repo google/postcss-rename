@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-package com.google.common.css;
+import {SimpleSplittingSubstitutionMap} from './simple-splitting-substitution-map';
+import {SubstitutionMap} from './substitution-map';
+import {SubstitutionMapProvider} from './substitution-map-provider';
 
 /**
  * Provides a {@link SimpleSplittingSubstitutionMap} for use via the
@@ -23,10 +25,9 @@ package com.google.common.css;
  * @see SimpleSplittingSubstitutionMap
  * @author jart@google.com (Justine Tunney)
  */
-public class SimpleSplittingSubstitutionMapProvider implements SubstitutionMapProvider {
+export class SimpleSplittingSubstitutionMapProvider implements SubstitutionMapProvider {
 
-  @Override
-  public SubstitutionMap get() {
+  get(): SubstitutionMap {
     return new SimpleSplittingSubstitutionMap();
   }
 }

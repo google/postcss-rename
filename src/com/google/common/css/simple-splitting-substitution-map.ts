@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-package com.google.common.css;
+import {SimpleSubstitutionMap} from './simple-substitution-map';
+import {SplittingSubstitutionMap} from './splitting-substitution-map';
+import {SubstitutionMap} from './substitution-map';
 
 /**
  * This class uses {@link SplittingSubstitutionMap} to split css class names
@@ -35,17 +37,16 @@ package com.google.common.css;
  * @see SimpleSplittingSubstitutionMapProvider
  * @author jart@google.com (Justine Tunney)
  */
-public class SimpleSplittingSubstitutionMap implements SubstitutionMap {
+export class SimpleSplittingSubstitutionMap implements SubstitutionMap {
 
-  private final SplittingSubstitutionMap splittingSubstitutionMap;
+  private readonly splittingSubstitutionMap: SplittingSubstitutionMap;
 
-  public SimpleSplittingSubstitutionMap() {
-    splittingSubstitutionMap = new SplittingSubstitutionMap(
+  constructor() {
+    this.splittingSubstitutionMap = new SplittingSubstitutionMap(
         new SimpleSubstitutionMap());
   }
 
-  @Override
-  public String get(String value) {
-    return splittingSubstitutionMap.get(value);
+  get(value: string): string {
+    return this.splittingSubstitutionMap.get(value);
   }
 }

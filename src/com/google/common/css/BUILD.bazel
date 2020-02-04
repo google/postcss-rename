@@ -98,6 +98,8 @@ ts_library(
         "prefixing-substitution-map.ts",
         "recording-substitution-map.ts",
         "renaming-type.ts",
+        "simple-splitting-substitution-map.ts",
+        "simple-splitting-substitution-map-provider.ts",
         "simple-substitution-map.ts",
         "splitting-substitution-map.ts",
         "substitution-map.ts",
