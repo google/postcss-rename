@@ -17,6 +17,8 @@ licenses(["notice"])  # Apache 2.0
 load("@npm_bazel_typescript//:index.bzl", "ts_library")
 load("@build_bazel_rules_nodejs//:index.bzl", "npm_package_bin")
 
+exports_files(["guavajs-wrapper.js"])
+
 java_library(
     name = "css",
     srcs = [
@@ -92,6 +94,7 @@ ts_library(
         "identity-substitution-map.ts",
         "minimal-substitution-map.ts",
         "multiple-mapping-substitution-map.ts",
+        "output-renaming-map-format.ts",
         "prefixing-substitution-map.ts",
         "recording-substitution-map.ts",
         "renaming-type.ts",
@@ -100,6 +103,7 @@ ts_library(
         "substitution-map.ts",
         "substitution-map-provider.ts",
     ],
+    visibility = ["//visibility:public"],
     deps = [
       "@npm//@types",
       "@npm//conditional",
