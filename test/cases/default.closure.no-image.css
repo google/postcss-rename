@@ -1,0 +1,24 @@
+body {
+  font-size: 12px;
+}
+
+.a, .image.b-c {
+  margin: 0 auto;
+  width: 800px;
+}
+
+.a {
+  background: #fff;
+}
+
+.image {
+  box-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
+}
+
+.image.b-c {
+  box-shadow: none;
+}
+
+.b-d {
+  width: 100%;
+}

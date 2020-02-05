@@ -22,4 +22,5 @@ export interface Options {
   outputRenamingMap?: string | null;
   outputRenamingMapFormat?: keyof typeof OutputRenamingMapFormat;
   cssRenamingPrefix?: string | null;
+  excludedClassesFromRenaming?: string[];
 }

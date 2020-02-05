@@ -31,6 +31,7 @@ export = postcss.plugin('postcss-rename', (options: Partial<Options> = {}) => {
         outputRenamingMap: '',
         outputRenamingMapFormat: 'JSON',
         cssRenamingPrefix: '',
+        excludedClassesFromRenaming: [],
       } as Options,
       options
     );
@@ -49,6 +50,8 @@ export = postcss.plugin('postcss-rename', (options: Partial<Options> = {}) => {
     }
     const substitutionMap = new RecordingSubstitutionMap.Builder()
       .withSubstitutionMap(map)
+      .shouldRecordMappingForCodeGeneration(
+        (input) => !opts.excludedClassesFromRenaming.includes(input))
       .build();
 
     const selectorProcessor = selectorParser(selectors => {

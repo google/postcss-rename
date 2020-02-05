@@ -71,6 +71,13 @@ it('renames with prefix', async () => {
   assertPostcss(await run(input, { cssRenamingPrefix: 'x-' }), expectedOutput);
 });
 
+it('renames excluding provided classes', async () => {
+  const input = await read('default.css');
+  const expectedOutput = await read('default.closure.no-image.css');
+
+  assertPostcss(await run(input, { renamingType: 'CLOSURE', excludedClassesFromRenaming: ['image'] }), expectedOutput);
+});
+
 it.each([
   ['CLOSURE_COMPILED_BY_WHOLE', 'js'],
   ['CLOSURE_COMPILED_SPLIT_HYPHENS', 'js'],
