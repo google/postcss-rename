@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
+import { OutputRenamingMapFormat } from './com/google/common/css/output-renaming-map-format';
 import { RenamingType } from './com/google/common/css/renaming-type';
 
 export interface Options {
   renamingType?: keyof typeof RenamingType;
   outputRenamingMap?: string | null;
+  outputRenamingMapFormat?: keyof typeof OutputRenamingMapFormat;
   cssRenamingPrefix?: string | null;
 }

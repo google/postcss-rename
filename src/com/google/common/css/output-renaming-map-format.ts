@@ -52,7 +52,6 @@ class OutputRenamingMapFormatImpl implements OutputRenamingMapFormat {
   private readonly formatString: string;
 
   constructor(formatString?: string) {
-    Preconditions.checkNotNull(formatString);
     this.formatString = formatString ?? '%s';
   }
 

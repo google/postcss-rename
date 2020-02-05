@@ -29,15 +29,20 @@ export = postcss.plugin('postcss-rename', (options: Partial<Options> = {}) => {
       {
         renamingType: 'NONE',
         outputRenamingMap: '',
+        outputRenamingMapFormat: 'JSON',
         cssRenamingPrefix: '',
       } as Options,
       options
     );
 
-    const renamingType = (RenamingType as {})[opts.renamingType];
-    let map = (renamingType as RenamingType)
-      .getCssSubstitutionMapProvider()
-      .get();
+    const renamingType = (RenamingType as {})[
+      opts.renamingType
+    ] as RenamingType;
+    const outputRenamingMapFormat = (OutputRenamingMapFormat as {})[
+      opts.outputRenamingMapFormat
+    ] as OutputRenamingMapFormat;
+
+    let map = renamingType.getCssSubstitutionMapProvider().get();
 
     if (opts.cssRenamingPrefix) {
       map = new PrefixingSubstitutionMap(map, opts.cssRenamingPrefix);
@@ -63,10 +68,7 @@ export = postcss.plugin('postcss-rename', (options: Partial<Options> = {}) => {
     if (opts.outputRenamingMap) {
       const renamingMap = new Map([...substitutionMap.getMappings()]);
       const writer = fs.createWriteStream(opts.outputRenamingMap);
-      OutputRenamingMapFormat.CLOSURE_COMPILED_SPLIT_HYPHENS.writeRenamingMap(
-        renamingMap,
-        writer
-      );
+      outputRenamingMapFormat.writeRenamingMap(renamingMap, writer);
     }
   };
 });

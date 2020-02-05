@@ -20,6 +20,7 @@ import path from 'path';
 import postcss from 'postcss';
 import plugin from 'com_google_closure_stylesheets/src';
 import { Options } from 'com_google_closure_stylesheets/src/options';
+import { OutputRenamingMapFormat } from 'com_google_closure_stylesheets/src/com/google/common/css/output-renaming-map-format';
 
 async function run(input: string, opts?: Options) {
   return await postcss([plugin(opts)]).process(input, { from: undefined });
@@ -70,13 +71,26 @@ it('renames with prefix', async () => {
   assertPostcss(await run(input, { cssRenamingPrefix: 'x-' }), expectedOutput);
 });
 
-it('outputs renaming map as expected', async () => {
+it.each([
+  ['CLOSURE_COMPILED_BY_WHOLE', 'js'],
+  ['CLOSURE_COMPILED_SPLIT_HYPHENS', 'js'],
+  ['CLOSURE_COMPILED', 'js'],
+  ['CLOSURE_UNCOMPILED', 'js'],
+  ['JSCOMP_VARIABLE_MAP', 'map'],
+  ['JSON', 'json'],
+  ['PROPERTIES', 'properties'],
+])('outputs %s renaming map', async (format, extension) => {
+  const outputName = `renaming_map.${format}.${extension}`;
   const input = await read('default.css');
-  const expectedOutput = await read('renaming_map.js');
+  const expectedOutput = await read(outputName);
 
   mockFs({ 'temp/': {} });
-  await run(input, { renamingType: 'CLOSURE', outputRenamingMap: 'temp/renaming_map.js' });
-  const output = (await fs.readFile('temp/renaming_map.js')).toString();
+  await run(input, {
+    renamingType: 'CLOSURE',
+    outputRenamingMap: `temp/${outputName}`,
+    outputRenamingMapFormat: format as keyof typeof OutputRenamingMapFormat,
+  });
+  const output = (await fs.readFile(`temp/${outputName}`)).toString();
   mockFs.restore();
 
   expect(output).toEqual(expectedOutput);

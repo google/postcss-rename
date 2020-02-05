@@ -1,0 +1,22 @@
+CLOSURE_CSS_NAME_MAPPING = [
+  [
+    "container",
+    "a"
+  ],
+  [
+    "image",
+    "b"
+  ],
+  [
+    "full",
+    "c"
+  ],
+  [
+    "width",
+    "d"
+  ],
+  [
+    "size",
+    "e"
+  ]
+];
