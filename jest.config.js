@@ -3,5 +3,5 @@ module.exports = {
   testEnvironment: 'node',
   moduleNameMapper: {
     '^com_google_closure_stylesheets/(.*)$': '<rootDir>/$1',
-  }
+  },
 };

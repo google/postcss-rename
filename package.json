@@ -12,8 +12,8 @@
     "build"
   ],
   "scripts": {
-    "test": "jest && eslint .",
-    "check": "gts check",
+    "test": "jest",
+    "check": "eslint .",
     "clean": "gts clean",
     "compile": "tsc -p .",
     "fix": "gts fix",

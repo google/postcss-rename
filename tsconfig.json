@@ -24,4 +24,11 @@
     "strict": false,
     "allowJs": true
   },
+  "exclude": [
+    "bazel-*/",
+    "build/",
+    "test/",
+    "jest.config.js",
+    "prettier.config.js"
+  ]
 }
