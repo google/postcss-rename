@@ -15,10 +15,11 @@
     "test": "jest",
     "check": "eslint .",
     "clean": "gts clean",
-    "compile": "tsc -p .",
+    "compile": "tsc -p . && npm run reindent",
     "fix": "gts fix",
     "pretest": "npm run compile",
-    "posttest": "npm run check"
+    "posttest": "npm run check",
+    "reindent": "ls ./build/com/google/common/css/* | while read -r line ; do node ./node_modules/@alexreg/reindent/bin/reindent.js --from=4 --to=2 $line ; done"
   },
   "license": "Apache-2.0",
   "repository": "https://github.com/google/postcss-rename",
@@ -28,6 +29,7 @@
     "immutable": "^4.0.0-rc.12"
   },
   "devDependencies": {
+    "@alexreg/reindent": "^0.1.2",
     "@babel/cli": "^7.6.0",
     "@babel/core": "^7.7.7",
     "@babel/preset-env": "^7.7.7",
