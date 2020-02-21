@@ -18,7 +18,7 @@ import {SubstitutionMap} from './substitution-map';
 import {MultipleMappingSubstitutionMap} from './multiple-mapping-substitution-map';
 import {Map as ImmutableMap} from 'immutable';
 import * as Preconditions from 'conditional';
-import * as GuavaJS from './guavajs-wrapper';
+import * as GuavaJS from 'guava-js-umd';
 import Splitter = GuavaJS.Strings.Splitter;
 
 /**

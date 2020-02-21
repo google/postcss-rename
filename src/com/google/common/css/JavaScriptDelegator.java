@@ -222,6 +222,7 @@ public class JavaScriptDelegator {
       // Node.js requires shouldn't be using the Babel-generated format.
       result = result.replace("_interopRequireDefault(require(\"./guavajs-wrapper\"))", "require('./guavajs-wrapper')");
       result = result.replace("_interopRequireDefault(require(\"conditional\"))", "require('conditional')");
+      result = result.replace("_interopRequireDefault(require(\"guava-js-umd\"))", "require('guava-js-umd')");
       result = result.replace("_interopRequireDefault(require(\"immutable\"))", "require('immutable')");
       result = result.replace("_identitySubstitutionMap.IdentitySubstitutionMap", "_identitySubstitutionMap");
 
@@ -242,6 +243,10 @@ public class JavaScriptDelegator {
       if (path.startsWith("com/google/common/css/babel-out/node_modules/conditional")) {
         return new DataFolder(
                 "external/npm/node_modules/conditional/node_modules/debug/node_modules/ms/node_modules/conditional", this, getPath() + name + "/", encoding);
+      }
+      if (path.startsWith("com/google/common/css/babel-out/node_modules/guava-js-umd")) {
+        return new DataFolder(
+                "external/npm/node_modules/guava-js-umd", this, getPath() + name + "/", encoding);
       }
       if (path.startsWith("com/google/common/css/babel-out/node_modules/immutable")) {
         return new DataFolder(
