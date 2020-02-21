@@ -33,7 +33,6 @@ jest_test(
         "//:tsconfig.json",
         "//src:index",
         "//src/com/google/common/css:css_ts",
-        "//src/com/google/common/css:guavajs-wrapper.js",
         "@npm//gts",
         "@npm//mock-fs",
         "@npm//postcss",

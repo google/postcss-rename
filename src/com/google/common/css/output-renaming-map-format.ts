@@ -19,7 +19,7 @@ import {Map as ImmutableMap} from 'immutable';
 import * as readline from 'readline';
 import * as stream from 'stream';
 import * as util from 'util';
-import * as GuavaJS from './guavajs-wrapper';
+import * as GuavaJS from 'guava-js-umd';
 import Splitter = GuavaJS.Strings.Splitter;
 import { AssertionError } from 'assert';
 

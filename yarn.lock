@@ -2750,9 +2750,10 @@ gts@^1.1.2:
     update-notifier "^3.0.0"
     write-file-atomic "^3.0.0"
 
-"guava-js@github:nerdynick/guava-js#2811ba397343f945e811239dfa7e040eeb44db99":
-  version "1.1.0"
-  resolved "https://codeload.github.com/nerdynick/guava-js/tar.gz/2811ba397343f945e811239dfa7e040eeb44db99"
+guava-js-umd@^1.1.1:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/guava-js-umd/-/guava-js-umd-1.1.1.tgz#ae933054dc683198d6d0c592f6cc93ef4ebd98b8"
+  integrity sha512-33De4DB1c5MCr1Wou4kUiv9aRNt7/lR6nNajJgVYvyJWNz85ptB7FE4s/kMzTLPzbBjb+3EArZn02VB2YsDS2g==
 
 har-schema@^2.0.0:
   version "2.0.0"
