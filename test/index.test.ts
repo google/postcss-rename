@@ -15,91 +15,169 @@
  * limitations under the License.
  */
 
-import {promises as fs} from 'fs';
+import { promises as fs } from 'fs';
 import mockFs from 'mock-fs';
 import path from 'path';
 import postcss from 'postcss';
-import plugin from 'com_google_closure_stylesheets/src';
-import { Options } from 'com_google_closure_stylesheets/src/options';
-import { OutputRenamingMapFormat } from 'com_google_closure_stylesheets/src/com/google/common/css/output-renaming-map-format';
+import plugin, { Options } from '../src';
+import {toShortName} from '../src/minimal-renamer';
 
-async function run(input: string, opts?: Options) {
-  return await postcss([plugin(opts)]).process(input, { from: undefined });
+async function run(input: string, options?: Options): Promise<postcss.Result> {
+  return await postcss([plugin(options)]).process(input, { from: undefined });
 }
 
-function assertPostcss(result: postcss.Result, output: string) {
+function assertPostcss(result: postcss.Result, output: string): void {
   expect(result.css).toEqual(output);
   expect(result.warnings()).toHaveLength(0);
 }
 
-async function read(filename: string) {
-  const file = path.join(__dirname, '/cases/', filename);
-  return (await fs.readFile(file)).toString();
+/**
+ * Compiles `input` with postcss and asserts that the output map equals
+ * `expected`.
+ */
+async function assertMapEquals(
+  input: string,
+  expected: { [key: string]: string },
+  options: Options = {}
+): Promise<void> {
+  await run(input, {
+    ...options,
+    outputMapCallback: map => expect(map).toEqual(expected),
+  });
 }
 
-it('does nothing with no options', async () => {
-  const input = await read('default.css');
-  const expectedOutput = input;
-  
-  assertPostcss(await run(input), expectedOutput);
-});
+const INPUT = '.container, .full-height .image.full-width {}';
 
-it('does nothing with none renaming type', async () => {
-  const input = await read('default.css');
-  const expectedOutput = input;
-
-  assertPostcss(await run(input, { renamingType: 'NONE' }), expectedOutput);
-});
-
-it('renames with debug renaming type', async () => {
-  const input = await read('default.css');
-  const expectedOutput = await read('default.debug.css');
-
-  assertPostcss(await run(input, { renamingType: 'DEBUG' }), expectedOutput);
-});
-
-it('renames with closure renaming type', async () => {
-  const input = await read('default.css');
-  const expectedOutput = await read('default.closure.css');
-
-  assertPostcss(await run(input, { renamingType: 'CLOSURE' }), expectedOutput);
-});
-
-it('renames with prefix', async () => {
-  const input = await read('default.css');
-  const expectedOutput = await read('default.prefix.css');
-
-  assertPostcss(await run(input, { cssRenamingPrefix: 'x-' }), expectedOutput);
-});
-
-it('renames excluding provided classes', async () => {
-  const input = await read('default.css');
-  const expectedOutput = await read('default.closure.no-image.css');
-
-  assertPostcss(await run(input, { renamingType: 'CLOSURE', excludedClassesFromRenaming: ['image'] }), expectedOutput);
-});
-
-it.each([
-  ['CLOSURE_COMPILED_BY_WHOLE', 'js'],
-  ['CLOSURE_COMPILED_SPLIT_HYPHENS', 'js'],
-  ['CLOSURE_COMPILED', 'js'],
-  ['CLOSURE_UNCOMPILED', 'js'],
-  ['JSCOMP_VARIABLE_MAP', 'map'],
-  ['JSON', 'json'],
-  ['PROPERTIES', 'properties'],
-])('outputs %s renaming map', async (format, extension) => {
-  const outputName = `renaming_map.${format}.${extension}`;
-  const input = await read('default.css');
-  const expectedOutput = await read(outputName);
-
-  mockFs({ 'temp/': {} });
-  await run(input, {
-    renamingType: 'CLOSURE',
-    outputRenamingMap: `temp/${outputName}`,
-    outputRenamingMapFormat: format as keyof typeof OutputRenamingMapFormat,
+describe('with strategy "none"', () => {
+  it('does nothing with no options', async () => {
+    assertPostcss(await run(INPUT), INPUT);
   });
-  const output = (await fs.readFile(`temp/${outputName}`)).toString();
-  mockFs.restore();
 
-  expect(output).toEqual(expectedOutput);
+  it('does nothing with an explicit strategy', async () => {
+    assertPostcss(await run(INPUT, { strategy: 'none' }), INPUT);
+  });
+
+  it('adds a prefix', async () => {
+    assertPostcss(
+      await run(INPUT, { prefix: 'pf-' }),
+      '.pf-container, .pf-full-height .pf-image.pf-full-width {}'
+    );
+  });
+
+  it('emits an output map', async () => {
+    await assertMapEquals(INPUT, {
+      container: 'container',
+      full: 'full',
+      height: 'height',
+      image: 'image',
+      width: 'width',
+    });
+  });
+
+  it('omits parts that only appear in excluded names from the output map', async () => {
+    await assertMapEquals(
+      INPUT,
+      {
+        container: 'container',
+        full: 'full',
+        image: 'image',
+        width: 'width',
+      },
+      { except: ['full-height'] }
+    );
+  });
+
+  it("doesn't include the prefix in the output map", async () => {
+    await assertMapEquals(
+      INPUT,
+      {
+        container: 'container',
+        full: 'full',
+        height: 'height',
+        image: 'image',
+        width: 'width',
+      },
+      { prefix: 'pf-' }
+    );
+  });
+});
+
+describe('with strategy "debug"', () => {
+  it('adds underscores after every part', async () => {
+    assertPostcss(await run(INPUT, { strategy: 'debug' }),
+                  '.container_, .full_-height_ .image_.full_-width_ {}');
+  });
+
+  it('adds a prefix after underscoring', async () => {
+    assertPostcss(
+      await run(INPUT, { strategy: 'debug', prefix: 'pf-' }),
+      '.pf-container_, .pf-full_-height_ .pf-image_.pf-full_-width_ {}'
+    );
+  });
+
+  it('maps original names to underscored names', async () => {
+    await assertMapEquals(INPUT, {
+      container: 'container_',
+      full: 'full_',
+      height: 'height_',
+      image: 'image_',
+      width: 'width_',
+    }, {strategy: 'debug'});
+  });
+
+  it('doesn\'t map excluded names', async () => {
+    assertPostcss(await run(INPUT, { strategy: 'debug', except: ['full-height'] }),
+                  '.container_, .full-height .image_.full_-width_ {}');
+  });
+});
+
+describe('with strategy "minimal"', () => {
+  it('maps parts to the shortest possible strings', async () => {
+    assertPostcss(await run(INPUT, { strategy: 'minimal' }),
+                  '.a, .b-c .d.b-e {}');
+  });
+
+  it('adds a prefix after minimizing', async () => {
+    assertPostcss(
+      await run(INPUT, { strategy: 'minimal', prefix: 'pf-' }),
+      '.pf-a, .pf-b-c .pf-d.pf-b-e {}'
+    );
+  });
+
+  it('maps original names to minimized names', async () => {
+    await assertMapEquals(INPUT, {
+      container: 'a',
+      full: 'b',
+      height: 'c',
+      image: 'd',
+      width: 'e',
+    }, {strategy: 'minimal'});
+  });
+
+  it('doesn\'t map excluded names', async () => {
+    assertPostcss(await run(INPUT, { strategy: 'minimal', except: ['full-height'] }),
+                  '.a, .full-height .b.c-d {}');
+  });
+
+  it('doesn\'t produce a name that would be excluded', async () => {
+    assertPostcss(await run(INPUT, { strategy: 'minimal', except: ['b'] }),
+                  '.a, .c-d .e.c-f {}');
+  });
+
+  describe('toShortName()', () => {
+    it('produces the right results around the two-character boundary', () => {
+      expect(toShortName(52)).toEqual('_');
+      expect(toShortName(53)).toEqual('aa');
+      expect(toShortName(54)).toEqual('ba');
+      expect(toShortName(55)).toEqual('ca');
+    });
+
+    it('produces the right results around the three-character boundary', () => {
+      expect(toShortName(3390)).toEqual('Z_');
+      expect(toShortName(3391)).toEqual('__');
+      expect(toShortName(3392)).toEqual('aaa');
+      expect(toShortName(3393)).toEqual('baa');
+      expect(toShortName(3394)).toEqual('caa');
+    });
+  });
 });

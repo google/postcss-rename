@@ -4,9 +4,6 @@
     "outDir": "build",
     "module": "commonjs",
     "baseUrl": ".",
-    "paths": {
-      "com_google_closure_stylesheets/*": ["*"],
-    },
     "esModuleInterop": true,
     "lib": [
       "es5",

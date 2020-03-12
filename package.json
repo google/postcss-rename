@@ -1,6 +1,6 @@
 {
   "name": "postcss-rename",
-  "version": "0.1.4",
+  "version": "0.2.0",
   "description": "A PostCSS plugin to replace class names based on a customizable renaming scheme.",
   "keywords": [
     "postcss",
@@ -8,6 +8,7 @@
     "postcss-plugin"
   ],
   "main": "build/index.js",
+  "types": "build/index.d.ts",
   "files": [
     "build"
   ],
@@ -15,18 +16,17 @@
     "test": "jest",
     "check": "eslint .",
     "clean": "gts clean",
-    "compile": "tsc -p . && npm run reindent",
+    "compile": "tsc -p .",
     "fix": "gts fix",
+    "format": "npx prettier --write {src,test}/**/*.ts",
     "pretest": "npm run compile",
-    "posttest": "npm run check",
-    "reindent": "ls ./build/com/google/common/css/* | while read -r line ; do node ./node_modules/@alexreg/reindent/bin/reindent.js --from=4 --to=2 $line ; done"
+    "posttest": "npm run check"
   },
   "license": "Apache-2.0",
   "repository": "https://github.com/google/postcss-rename",
   "dependencies": {
-    "conditional": "^5.3.0",
-    "guava-js-umd": "^1.1.1",
-    "immutable": "^4.0.0-rc.12"
+    "postcss": "^7.0.18",
+    "postcss-selector-parser": "^6.0.2"
   },
   "devDependencies": {
     "@alexreg/reindent": "^0.1.2",
@@ -60,8 +60,6 @@
     "jest": "^24.9.0",
     "jest-cli": "^24.9.0",
     "mock-fs": "^4.10.4",
-    "postcss": "^7.0.18",
-    "postcss-selector-parser": "^6.0.2",
     "prettier": "^1.19.1",
     "ts-jest": "^24.2.0",
     "typescript": "^3.7.2"

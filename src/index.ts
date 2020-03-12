@@ -15,64 +15,66 @@
  * limitations under the License.
  */
 
-import fs from 'fs';
 import postcss from 'postcss';
 import selectorParser from 'postcss-selector-parser';
-import { OutputRenamingMapFormat } from 'com_google_closure_stylesheets/src/com/google/common/css/output-renaming-map-format';
-import { PrefixingSubstitutionMap } from 'com_google_closure_stylesheets/src/com/google/common/css/prefixing-substitution-map';
-import { RecordingSubstitutionMap } from 'com_google_closure_stylesheets/src/com/google/common/css/recording-substitution-map';
-import { Options } from 'com_google_closure_stylesheets/src/options';
-import { RenamingType } from 'com_google_closure_stylesheets/src/com/google/common/css/renaming-type';
 
-export = postcss.plugin('postcss-rename', (options: Partial<Options> = {}) => {
-  return (root: postcss.Root) => {
-    const opts = Object.assign(
-      {
-        renamingType: 'NONE',
-        outputRenamingMap: '',
-        outputRenamingMapFormat: 'JSON',
-        cssRenamingPrefix: '',
-        excludedClassesFromRenaming: [],
-      } as Options,
-      options
-    );
+import { MinimalRenamer } from './minimal-renamer';
 
-    const renamingType = (RenamingType as {})[
-      opts.renamingType
-    ] as RenamingType;
-    const outputRenamingMapFormat = (OutputRenamingMapFormat as {})[
-      opts.outputRenamingMapFormat
-    ] as OutputRenamingMapFormat;
+export interface Options {
+  strategy?: 'none' | 'debug' | 'minimal';
+  prefix?: string;
+  except?: Iterable<string>;
+  outputMapCallback?(map: { [key: string]: string }): void;
+}
 
-    let map = renamingType.getCssSubstitutionMapProvider().get();
+export default postcss.plugin(
+  'postcss-rename',
+  ({
+    strategy = 'none',
+    prefix = '',
+    except = [],
+    outputMapCallback,
+  }: Options = {}) => {
+    const exceptSet = new Set(except);
+    return (root: postcss.Root): void => {
+      if (strategy === 'none' && !outputMapCallback && !prefix) return;
 
-    if (opts.cssRenamingPrefix) {
-      map = new PrefixingSubstitutionMap(map, opts.cssRenamingPrefix);
-    }
-    const substitutionMap = new RecordingSubstitutionMap.Builder()
-      .withSubstitutionMap(map)
-      .shouldRecordMappingForCodeGeneration(
-        (input) => !opts.excludedClassesFromRenaming.includes(input))
-      .build();
+      const outputMap: { [key: string]: string } | null = outputMapCallback
+        ? {}
+        : null;
 
-    const selectorProcessor = selectorParser(selectors => {
-      selectors.walkClasses(classNode => {
-        if (classNode.value) {
-          classNode.value = substitutionMap.get(classNode.value);
-        }
+      let rename: (string) => string;
+      if (strategy === 'none') {
+        rename = name => name;
+      } else if (strategy === 'debug') {
+        rename = name => name + '_';
+      } else if (strategy === 'minimal') {
+        const renamer = new MinimalRenamer(exceptSet);
+        rename = name => renamer.rename(name);
+      }
+
+      const selectorProcessor = selectorParser(selectors => {
+        selectors.walkClasses(classNode => {
+          if (exceptSet.has(classNode.value)) return;
+
+          classNode.value =
+            prefix +
+            classNode.value
+              .split('-')
+              .map(part => {
+                const newPart = rename(part);
+                if (outputMap) outputMap[part] = newPart;
+                return newPart;
+              })
+              .join('-');
+        });
       });
-    });
 
-    root.walkRules(ruleNode => {
-      return selectorProcessor.process(ruleNode);
-    });
+      root.walkRules(ruleNode => selectorProcessor.process(ruleNode));
 
-    // Write the class substitution map to file, using same format as
-    // VariableMap in jscomp.
-    if (opts.outputRenamingMap) {
-      const renamingMap = new Map([...substitutionMap.getMappings()]);
-      const writer = fs.createWriteStream(opts.outputRenamingMap);
-      outputRenamingMapFormat.writeRenamingMap(renamingMap, writer);
-    }
-  };
-});
+      if (outputMapCallback) {
+        outputMapCallback(outputMap);
+      }
+    };
+  }
+);
