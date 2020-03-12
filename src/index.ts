@@ -72,9 +72,7 @@ export default postcss.plugin(
 
       root.walkRules(ruleNode => selectorProcessor.process(ruleNode));
 
-      if (outputMapCallback) {
-        outputMapCallback(outputMap);
-      }
+      if (outputMapCallback) outputMapCallback(outputMap);
     };
   }
 );
