@@ -51,6 +51,8 @@ export default postcss.plugin(
       } else if (strategy === 'minimal') {
         const renamer = new MinimalRenamer(exceptSet);
         rename = name => renamer.rename(name);
+      } else {
+        throw new Error(`Unknown strategy "${strategy}".`);
       }
 
       const selectorProcessor = selectorParser(selectors => {
