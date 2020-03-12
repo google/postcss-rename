@@ -15,8 +15,8 @@
  * limitations under the License.
  */
 
-import fs from 'fs';
-import postcss from 'postcss';
+import * as fs from 'fs';
+import * as postcss from 'postcss';
 import selectorParser from 'postcss-selector-parser';
 import { OutputRenamingMapFormat } from './com/google/common/css/output-renaming-map-format';
 import { PrefixingSubstitutionMap } from './com/google/common/css/prefixing-substitution-map';
