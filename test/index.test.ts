@@ -20,7 +20,7 @@ import mockFs from 'mock-fs';
 import path from 'path';
 import postcss from 'postcss';
 import plugin, { Options } from '../src';
-import {toShortName} from '../src/minimal-renamer';
+import { toShortName } from '../src/minimal-renamer';
 
 async function run(input: string, options?: Options): Promise<postcss.Result> {
   return await postcss([plugin(options)]).process(input, { from: undefined });
@@ -104,8 +104,10 @@ describe('with strategy "none"', () => {
 
 describe('with strategy "debug"', () => {
   it('adds underscores after every part', async () => {
-    assertPostcss(await run(INPUT, { strategy: 'debug' }),
-                  '.container_, .full_-height_ .image_.full_-width_ {}');
+    assertPostcss(
+      await run(INPUT, { strategy: 'debug' }),
+      '.container_, .full_-height_ .image_.full_-width_ {}'
+    );
   });
 
   it('adds a prefix after underscoring', async () => {
@@ -116,25 +118,33 @@ describe('with strategy "debug"', () => {
   });
 
   it('maps original names to underscored names', async () => {
-    await assertMapEquals(INPUT, {
-      container: 'container_',
-      full: 'full_',
-      height: 'height_',
-      image: 'image_',
-      width: 'width_',
-    }, {strategy: 'debug'});
+    await assertMapEquals(
+      INPUT,
+      {
+        container: 'container_',
+        full: 'full_',
+        height: 'height_',
+        image: 'image_',
+        width: 'width_',
+      },
+      { strategy: 'debug' }
+    );
   });
 
-  it('doesn\'t map excluded names', async () => {
-    assertPostcss(await run(INPUT, { strategy: 'debug', except: ['full-height'] }),
-                  '.container_, .full-height .image_.full_-width_ {}');
+  it("doesn't map excluded names", async () => {
+    assertPostcss(
+      await run(INPUT, { strategy: 'debug', except: ['full-height'] }),
+      '.container_, .full-height .image_.full_-width_ {}'
+    );
   });
 });
 
 describe('with strategy "minimal"', () => {
   it('maps parts to the shortest possible strings', async () => {
-    assertPostcss(await run(INPUT, { strategy: 'minimal' }),
-                  '.a, .b-c .d.b-e {}');
+    assertPostcss(
+      await run(INPUT, { strategy: 'minimal' }),
+      '.a, .b-c .d.b-e {}'
+    );
   });
 
   it('adds a prefix after minimizing', async () => {
@@ -145,23 +155,31 @@ describe('with strategy "minimal"', () => {
   });
 
   it('maps original names to minimized names', async () => {
-    await assertMapEquals(INPUT, {
-      container: 'a',
-      full: 'b',
-      height: 'c',
-      image: 'd',
-      width: 'e',
-    }, {strategy: 'minimal'});
+    await assertMapEquals(
+      INPUT,
+      {
+        container: 'a',
+        full: 'b',
+        height: 'c',
+        image: 'd',
+        width: 'e',
+      },
+      { strategy: 'minimal' }
+    );
   });
 
-  it('doesn\'t map excluded names', async () => {
-    assertPostcss(await run(INPUT, { strategy: 'minimal', except: ['full-height'] }),
-                  '.a, .full-height .b.c-d {}');
+  it("doesn't map excluded names", async () => {
+    assertPostcss(
+      await run(INPUT, { strategy: 'minimal', except: ['full-height'] }),
+      '.a, .full-height .b.c-d {}'
+    );
   });
 
-  it('doesn\'t produce a name that would be excluded', async () => {
-    assertPostcss(await run(INPUT, { strategy: 'minimal', except: ['b'] }),
-                  '.a, .c-d .e.c-f {}');
+  it("doesn't produce a name that would be excluded", async () => {
+    assertPostcss(
+      await run(INPUT, { strategy: 'minimal', except: ['b'] }),
+      '.a, .c-d .e.c-f {}'
+    );
   });
 
   describe('toShortName()', () => {

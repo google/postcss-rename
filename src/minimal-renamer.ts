@@ -23,15 +23,18 @@ const decoder = new TextDecoder();
  * avoid the risk of encoding mismatches, and it doesn't include `-` in case the
  * user is doing by-part renaming.
  */
-const START_CHARS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_'.split('');
+const START_CHARS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_'.split(
+  ''
+);
 
 /**
  * Possible non-initial chars in a CSS name. This only includes ASCII characters
  * to avoid the risk of encoding mismatches, and it doesn't include `-` in case
  * the user is doing by-part renaming.
  */
-const CHARS = 
-  'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_'.split('');
+const CHARS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_'.split(
+  ''
+);
 
 /**
  * Returns the next unique short string whose first character is in
