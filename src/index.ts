@@ -18,11 +18,11 @@
 import fs from 'fs';
 import postcss from 'postcss';
 import selectorParser from 'postcss-selector-parser';
-import { OutputRenamingMapFormat } from 'com_google_closure_stylesheets/src/com/google/common/css/output-renaming-map-format';
-import { PrefixingSubstitutionMap } from 'com_google_closure_stylesheets/src/com/google/common/css/prefixing-substitution-map';
-import { RecordingSubstitutionMap } from 'com_google_closure_stylesheets/src/com/google/common/css/recording-substitution-map';
-import { Options } from 'com_google_closure_stylesheets/src/options';
-import { RenamingType } from 'com_google_closure_stylesheets/src/com/google/common/css/renaming-type';
+import { OutputRenamingMapFormat } from './com/google/common/css/output-renaming-map-format';
+import { PrefixingSubstitutionMap } from './com/google/common/css/prefixing-substitution-map';
+import { RecordingSubstitutionMap } from './com/google/common/css/recording-substitution-map';
+import { Options } from './options';
+import { RenamingType } from './com/google/common/css/renaming-type';
 
 export = postcss.plugin('postcss-rename', (options: Partial<Options> = {}) => {
   return (root: postcss.Root) => {

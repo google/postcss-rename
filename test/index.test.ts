@@ -19,9 +19,9 @@ import {promises as fs} from 'fs';
 import mockFs from 'mock-fs';
 import path from 'path';
 import postcss from 'postcss';
-import plugin from 'com_google_closure_stylesheets/src';
-import { Options } from 'com_google_closure_stylesheets/src/options';
-import { OutputRenamingMapFormat } from 'com_google_closure_stylesheets/src/com/google/common/css/output-renaming-map-format';
+import plugin from '../src';
+import { Options } from '../src/options';
+import { OutputRenamingMapFormat } from '../src/com/google/common/css/output-renaming-map-format';
 
 async function run(input: string, opts?: Options) {
   return await postcss([plugin(opts)]).process(input, { from: undefined });
