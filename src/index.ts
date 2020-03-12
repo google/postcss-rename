@@ -22,6 +22,7 @@ import { MinimalRenamer } from './minimal-renamer';
 
 export interface Options {
   strategy?: 'none' | 'debug' | 'minimal';
+  by?: 'whole' | 'part';
   prefix?: string;
   except?: Iterable<string>;
   outputMapCallback?(map: { [key: string]: string }): void;
@@ -31,6 +32,7 @@ export default postcss.plugin(
   'postcss-rename',
   ({
     strategy = 'none',
+    by = 'whole',
     prefix = '',
     except = [],
     outputMapCallback,
@@ -55,20 +57,30 @@ export default postcss.plugin(
         throw new Error(`Unknown strategy "${strategy}".`);
       }
 
+      if (by !== 'whole' && by !== 'part') {
+        throw new Error(`Unknown mode "${by}".`);
+      }
+
       const selectorProcessor = selectorParser(selectors => {
         selectors.walkClasses(classNode => {
           if (exceptSet.has(classNode.value)) return;
 
-          classNode.value =
-            prefix +
-            classNode.value
-              .split('-')
-              .map(part => {
-                const newPart = rename(part);
-                if (outputMap) outputMap[part] = newPart;
-                return newPart;
-              })
-              .join('-');
+          if (by === 'part') {
+            classNode.value =
+              prefix +
+              classNode.value
+                .split('-')
+                .map(part => {
+                  const newPart = rename(part);
+                  if (outputMap) outputMap[part] = newPart;
+                  return newPart;
+                })
+                .join('-');
+          } else {
+            const newName = prefix + rename(classNode.value);
+            if (outputMap) outputMap[classNode.value] = newName;
+            classNode.value = newName;
+          }
         });
       });
 

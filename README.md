@@ -6,6 +6,7 @@ based on a customizable renaming scheme.
 * [Usage](#usage)
 * [Options](#options]
   * [`strategy`](#strategy)
+  * [`by`](#by)
   * [`prefix`](#prefix)
   * [`except`](#except)
   * [`outputMapCallback`](#outputMapCallback)
@@ -24,7 +25,7 @@ we'll link it here!
 
 The renaming strategy to use:
 
-* `"none"`: Don't change names at all.
+* `"none"`: Don't change names at all. This is the default strategy.
 
 * `"debug"`: Add an underscore at the end of each name. This is useful for
   keeping classes readable during debugging while still verifying that your
@@ -32,6 +33,16 @@ The renaming strategy to use:
 
 * `"minimal"`: Use the shortest possible names, in order of appearance: the
   first class is renamed to `.a`, the second to `.b`, and so on.
+
+### `by`
+
+Whether to rename in "by-whole mode" or "by-part mode".
+
+* `"whole"`: Rename the entire name at once, so for example `.tall-image` might
+  become `.a`. This is the default mode.
+
+* `"part"`: Rename each hyphenated section of a name separately, so for example
+  `.tall-image` might become `.a-b`.
 
 ### `prefix`
 

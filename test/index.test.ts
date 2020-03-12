@@ -57,129 +57,255 @@ describe('with strategy "none"', () => {
     assertPostcss(await run(INPUT, { strategy: 'none' }), INPUT);
   });
 
-  it('adds a prefix', async () => {
-    assertPostcss(
-      await run(INPUT, { prefix: 'pf-' }),
-      '.pf-container, .pf-full-height .pf-image.pf-full-width {}'
-    );
-  });
+  describe('in by-whole mode', () => {
+    it('adds a prefix', async () => {
+      assertPostcss(
+        await run(INPUT, { prefix: 'pf-' }),
+        '.pf-container, .pf-full-height .pf-image.pf-full-width {}'
+      );
+    });
 
-  it('emits an output map', async () => {
-    await assertMapEquals(INPUT, {
-      container: 'container',
-      full: 'full',
-      height: 'height',
-      image: 'image',
-      width: 'width',
+    it('emits an output map', async () => {
+      await assertMapEquals(INPUT, {
+        container: 'container',
+        'full-height': 'full-height',
+        image: 'image',
+        'full-width': 'full-width',
+      });
+    });
+
+    it('omits excluded names from the output map', async () => {
+      await assertMapEquals(
+        INPUT,
+        {
+          container: 'container',
+          image: 'image',
+          'full-width': 'full-width',
+        },
+        { except: ['full-height'] }
+      );
+    });
+
+    it('includes the prefix in the output map', async () => {
+      await assertMapEquals(
+        INPUT,
+        {
+          container: 'pf-container',
+          'full-height': 'pf-full-height',
+          image: 'pf-image',
+          'full-width': 'pf-full-width',
+        },
+        { prefix: 'pf-' }
+      );
     });
   });
 
-  it('omits parts that only appear in excluded names from the output map', async () => {
-    await assertMapEquals(
-      INPUT,
-      {
-        container: 'container',
-        full: 'full',
-        image: 'image',
-        width: 'width',
-      },
-      { except: ['full-height'] }
-    );
-  });
+  describe('in by-part mode', () => {
+    it('emits each part in an output map in by-part mode', async () => {
+      await assertMapEquals(
+        INPUT,
+        {
+          container: 'container',
+          full: 'full',
+          height: 'height',
+          image: 'image',
+          width: 'width',
+        },
+        { by: 'part' }
+      );
+    });
 
-  it("doesn't include the prefix in the output map", async () => {
-    await assertMapEquals(
-      INPUT,
-      {
-        container: 'container',
-        full: 'full',
-        height: 'height',
-        image: 'image',
-        width: 'width',
-      },
-      { prefix: 'pf-' }
-    );
+    it('omits part that only appear in excluded names from the output map', async () => {
+      await assertMapEquals(
+        INPUT,
+        {
+          container: 'container',
+          full: 'full',
+          image: 'image',
+          width: 'width',
+        },
+        { except: ['full-height'], by: 'part' }
+      );
+    });
+
+    it("doesn't include the prefix in the output map", async () => {
+      await assertMapEquals(
+        INPUT,
+        {
+          container: 'container',
+          full: 'full',
+          height: 'height',
+          image: 'image',
+          width: 'width',
+        },
+        { prefix: 'pf-', by: 'part' }
+      );
+    });
   });
 });
 
 describe('with strategy "debug"', () => {
-  it('adds underscores after every part', async () => {
-    assertPostcss(
-      await run(INPUT, { strategy: 'debug' }),
-      '.container_, .full_-height_ .image_.full_-width_ {}'
-    );
+  describe('in by-whole mode', () => {
+    it('adds underscores after every name', async () => {
+      assertPostcss(
+        await run(INPUT, { strategy: 'debug' }),
+        '.container_, .full-height_ .image_.full-width_ {}'
+      );
+    });
+
+    it('maps original names to underscored names', async () => {
+      await assertMapEquals(
+        INPUT,
+        {
+          container: 'container_',
+          'full-height': 'full-height_',
+          image: 'image_',
+          'full-width': 'full-width_',
+        },
+        { strategy: 'debug' }
+      );
+    });
+
+    it("doesn't map excluded names", async () => {
+      assertPostcss(
+        await run(INPUT, { strategy: 'debug', except: ['full-height'] }),
+        '.container_, .full-height .image_.full-width_ {}'
+      );
+    });
   });
 
-  it('adds a prefix after underscoring', async () => {
-    assertPostcss(
-      await run(INPUT, { strategy: 'debug', prefix: 'pf-' }),
-      '.pf-container_, .pf-full_-height_ .pf-image_.pf-full_-width_ {}'
-    );
-  });
+  describe('in by-part mode', () => {
+    it('adds underscores after every part', async () => {
+      assertPostcss(
+        await run(INPUT, { strategy: 'debug', by: 'part' }),
+        '.container_, .full_-height_ .image_.full_-width_ {}'
+      );
+    });
 
-  it('maps original names to underscored names', async () => {
-    await assertMapEquals(
-      INPUT,
-      {
-        container: 'container_',
-        full: 'full_',
-        height: 'height_',
-        image: 'image_',
-        width: 'width_',
-      },
-      { strategy: 'debug' }
-    );
-  });
+    it('adds a prefix after underscoring', async () => {
+      assertPostcss(
+        await run(INPUT, { strategy: 'debug', prefix: 'pf-', by: 'part' }),
+        '.pf-container_, .pf-full_-height_ .pf-image_.pf-full_-width_ {}'
+      );
+    });
 
-  it("doesn't map excluded names", async () => {
-    assertPostcss(
-      await run(INPUT, { strategy: 'debug', except: ['full-height'] }),
-      '.container_, .full-height .image_.full_-width_ {}'
-    );
+    it('maps original names to underscored names', async () => {
+      await assertMapEquals(
+        INPUT,
+        {
+          container: 'container_',
+          full: 'full_',
+          height: 'height_',
+          image: 'image_',
+          width: 'width_',
+        },
+        { strategy: 'debug', by: 'part' }
+      );
+    });
+
+    it("doesn't map excluded names", async () => {
+      assertPostcss(
+        await run(INPUT, {
+          strategy: 'debug',
+          except: ['full-height'],
+          by: 'part',
+        }),
+        '.container_, .full-height .image_.full_-width_ {}'
+      );
+    });
   });
 });
 
 describe('with strategy "minimal"', () => {
-  it('maps parts to the shortest possible strings', async () => {
-    assertPostcss(
-      await run(INPUT, { strategy: 'minimal' }),
-      '.a, .b-c .d.b-e {}'
-    );
+  describe('in by-whole mode', () => {
+    it('maps names to the shortest possible strings', async () => {
+      assertPostcss(
+        await run(INPUT, { strategy: 'minimal' }),
+        '.a, .b .c.d {}'
+      );
+    });
+
+    it('adds a prefix after minimizing', async () => {
+      assertPostcss(
+        await run(INPUT, { strategy: 'minimal', prefix: 'pf-' }),
+        '.pf-a, .pf-b .pf-c.pf-d {}'
+      );
+    });
+
+    it('maps original names to minimized names', async () => {
+      await assertMapEquals(
+        INPUT,
+        {
+          container: 'a',
+          'full-height': 'b',
+          image: 'c',
+          'full-width': 'd',
+        },
+        { strategy: 'minimal' }
+      );
+    });
+
+    it("doesn't map excluded names", async () => {
+      assertPostcss(
+        await run(INPUT, { strategy: 'minimal', except: ['full-height'] }),
+        '.a, .full-height .b.c {}'
+      );
+    });
+
+    it("doesn't produce a name that would be excluded", async () => {
+      assertPostcss(
+        await run(INPUT, { strategy: 'minimal', except: ['b'] }),
+        '.a, .c .d.e {}'
+      );
+    });
   });
 
-  it('adds a prefix after minimizing', async () => {
-    assertPostcss(
-      await run(INPUT, { strategy: 'minimal', prefix: 'pf-' }),
-      '.pf-a, .pf-b-c .pf-d.pf-b-e {}'
-    );
-  });
+  describe('in by-part mode', () => {
+    it('maps parts to the shortest possible strings', async () => {
+      assertPostcss(
+        await run(INPUT, { strategy: 'minimal', by: 'part' }),
+        '.a, .b-c .d.b-e {}'
+      );
+    });
 
-  it('maps original names to minimized names', async () => {
-    await assertMapEquals(
-      INPUT,
-      {
-        container: 'a',
-        full: 'b',
-        height: 'c',
-        image: 'd',
-        width: 'e',
-      },
-      { strategy: 'minimal' }
-    );
-  });
+    it('adds a prefix after minimizing', async () => {
+      assertPostcss(
+        await run(INPUT, { strategy: 'minimal', prefix: 'pf-', by: 'part' }),
+        '.pf-a, .pf-b-c .pf-d.pf-b-e {}'
+      );
+    });
 
-  it("doesn't map excluded names", async () => {
-    assertPostcss(
-      await run(INPUT, { strategy: 'minimal', except: ['full-height'] }),
-      '.a, .full-height .b.c-d {}'
-    );
-  });
+    it('maps original names to minimized names', async () => {
+      await assertMapEquals(
+        INPUT,
+        {
+          container: 'a',
+          full: 'b',
+          height: 'c',
+          image: 'd',
+          width: 'e',
+        },
+        { strategy: 'minimal', by: 'part' }
+      );
+    });
 
-  it("doesn't produce a name that would be excluded", async () => {
-    assertPostcss(
-      await run(INPUT, { strategy: 'minimal', except: ['b'] }),
-      '.a, .c-d .e.c-f {}'
-    );
+    it("doesn't map excluded names", async () => {
+      assertPostcss(
+        await run(INPUT, {
+          strategy: 'minimal',
+          except: ['full-height'],
+          by: 'part',
+        }),
+        '.a, .full-height .b.c-d {}'
+      );
+    });
+
+    it("doesn't produce a name that would be excluded", async () => {
+      assertPostcss(
+        await run(INPUT, { strategy: 'minimal', except: ['b'], by: 'part' }),
+        '.a, .c-d .e.c-f {}'
+      );
+    });
   });
 
   describe('toShortName()', () => {
