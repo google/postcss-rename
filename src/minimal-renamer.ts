@@ -56,7 +56,7 @@ export function toShortName(index: number): string {
   return result.join('');
 }
 
-/** Renames CSS namesto the smallest valid identifiers. */
+/** Renames CSS names to the smallest valid identifiers. */
 export class MinimalRenamer {
   /** The next index to pass to `toShortName()`. */
   private nextIndex = 0;

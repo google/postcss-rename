@@ -16,7 +16,6 @@
  */
 
 import { promises as fs } from 'fs';
-import path from 'path';
 import postcss from 'postcss';
 import plugin, { Options } from '../src';
 import { toShortName } from '../src/minimal-renamer';
