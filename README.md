@@ -15,9 +15,9 @@ based on a customizable renaming scheme.
 
 `postcss-rename` makes it possible to rename CSS class names in the generated
 stylesheet, which helps reduce the size of the CSS that is sent down to your
-users. It's designed to be used along with a plugin that can rewrite HTML
-templates and/or references in JS. If you write such a plugin, let us know and
-we'll link it here!
+users. It's designed to be used along with a plugin for a build system like
+Webpack that can rewrite HTML templates and/or references in JS. If you write
+such a plugin, let us know and we'll link it here!
 
 ## Options
 

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import postcss from 'postcss';
+import * as postcss from 'postcss';
 import selectorParser from 'postcss-selector-parser';
 
 import { MinimalRenamer } from './minimal-renamer';
