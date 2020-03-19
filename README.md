@@ -4,7 +4,7 @@ A [PostCSS](https://github.com/postcss/postcss) plugin to replace class names
 based on a customizable renaming scheme.
 
 * [Usage](#usage)
-* [Options](#options]
+* [Options](#options)
   * [`strategy`](#strategy)
   * [`by`](#by)
   * [`prefix`](#prefix)
