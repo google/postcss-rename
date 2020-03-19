@@ -21,7 +21,7 @@ import selectorParser from 'postcss-selector-parser';
 import { MinimalRenamer } from './minimal-renamer';
 
 export interface Options {
-  strategy?: 'none' | 'debug' | 'minimal';
+  strategy?: 'none' | 'debug' | 'minimal' | ((string) => string);
   by?: 'whole' | 'part';
   prefix?: string;
   except?: Iterable<string>;
@@ -53,8 +53,10 @@ export default postcss.plugin(
       } else if (strategy === 'minimal') {
         const renamer = new MinimalRenamer(exceptSet);
         rename = name => renamer.rename(name);
-      } else {
+      } else if (typeof strategy === 'string') {
         throw new Error(`Unknown strategy "${strategy}".`);
+      } else {
+        rename = strategy;
       }
 
       if (by !== 'whole' && by !== 'part') {

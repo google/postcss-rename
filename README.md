@@ -34,6 +34,9 @@ The renaming strategy to use:
 * `"minimal"`: Use the shortest possible names, in order of appearance: the
   first class is renamed to `.a`, the second to `.b`, and so on.
 
+This can also be a function that takes a CSS name (the full name in by-whole
+mode and the part in by-part mode) and returns its renamed value.
+
 ### `by`
 
 Whether to rename in "by-whole mode" or "by-part mode".

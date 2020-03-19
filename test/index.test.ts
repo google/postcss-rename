@@ -323,3 +323,84 @@ describe('with strategy "minimal"', () => {
     });
   });
 });
+
+describe('with a custom strategy', () => {
+  const strategy = (name) => name.substring(name.length - 2, name.length);
+
+  describe('in by-whole mode', () => {
+    it('maps names to the shortest possible strings', async () => {
+      assertPostcss(
+        await run(INPUT, { strategy }),
+        '.er, .ht .ge.th {}'
+      );
+    });
+
+    it('adds a prefix after renaming', async () => {
+      assertPostcss(
+        await run(INPUT, { strategy, prefix: 'pf-' }),
+        '.pf-er, .pf-ht .pf-ge.pf-th {}'
+      );
+    });
+
+    it('maps original names to renamed names', async () => {
+      await assertMapEquals(
+        INPUT,
+        {
+          container: 'er',
+          'full-height': 'ht',
+          image: 'ge',
+          'full-width': 'th',
+        },
+        { strategy }
+      );
+    });
+
+    it("doesn't map excluded names", async () => {
+      assertPostcss(
+        await run(INPUT, { strategy, except: ['full-height'] }),
+        '.er, .full-height .ge.th {}'
+      );
+    });
+  });
+
+  describe('in by-part mode', () => {
+    it('maps parts to the shortest possible strings', async () => {
+      assertPostcss(
+        await run(INPUT, { strategy, by: 'part' }),
+        '.er, .ll-ht .ge.ll-th {}'
+      );
+    });
+
+    it('adds a prefix after renaming', async () => {
+      assertPostcss(
+        await run(INPUT, { strategy, prefix: 'pf-', by: 'part' }),
+        '.pf-er, .pf-ll-ht .pf-ge.pf-ll-th {}'
+      );
+    });
+
+    it('maps original names to renamed names', async () => {
+      await assertMapEquals(
+        INPUT,
+        {
+          container: 'er',
+          full: 'll',
+          height: 'ht',
+          image: 'ge',
+          width: 'th',
+        },
+        { strategy, by: 'part' }
+      );
+    });
+
+    it("doesn't map excluded names", async () => {
+      assertPostcss(
+        await run(INPUT, {
+          strategy,
+          except: ['full-height'],
+          by: 'part',
+        }),
+        '.er, .full-height .ge.ll-th {}'
+      );
+    });
+  });
+});
