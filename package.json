@@ -1,6 +1,6 @@
 {
   "name": "postcss-rename",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "A PostCSS plugin to replace class names based on a customizable renaming scheme.",
   "keywords": [
     "postcss",
