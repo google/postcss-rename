@@ -15,9 +15,6 @@
  * limitations under the License.
  */
 
-const encoder = new TextEncoder();
-const decoder = new TextDecoder();
-
 /**
  * Possible first chars in a CSS name. This only includes ASCII characters to
  * avoid the risk of encoding mismatches, and it doesn't include `-` in case the
