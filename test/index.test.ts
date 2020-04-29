@@ -170,6 +170,25 @@ describe('with strategy "debug"', () => {
         '.container_, .full-height .image_.full-width_ {}'
       );
     });
+
+    it("doesn't map ID selectors by default", async () => {
+      assertPostcss(
+        await run('#container, #full-height, #image.full-width {}', {
+          strategy: 'debug',
+        }),
+        '#container, #full-height, #image.full-width_ {}'
+      );
+    });
+
+    it('maps ID selectors with ids: true', async () => {
+      assertPostcss(
+        await run('#container, #full-height, #image.full-width {}', {
+          strategy: 'debug',
+          ids: true,
+        }),
+        '#container_, #full-height_, #image_.full-width_ {}'
+      );
+    });
   });
 
   describe('in by-part mode', () => {
@@ -325,14 +344,11 @@ describe('with strategy "minimal"', () => {
 });
 
 describe('with a custom strategy', () => {
-  const strategy = (name) => name.substring(name.length - 2, name.length);
+  const strategy = name => name.substring(name.length - 2, name.length);
 
   describe('in by-whole mode', () => {
     it('maps names to the shortest possible strings', async () => {
-      assertPostcss(
-        await run(INPUT, { strategy }),
-        '.er, .ht .ge.th {}'
-      );
+      assertPostcss(await run(INPUT, { strategy }), '.er, .ht .ge.th {}');
     });
 
     it('adds a prefix after renaming', async () => {

@@ -25,6 +25,7 @@ export interface Options {
   by?: 'whole' | 'part';
   prefix?: string;
   except?: Iterable<string>;
+  ids?: boolean;
   outputMapCallback?(map: { [key: string]: string }): void;
 }
 
@@ -35,6 +36,7 @@ export default postcss.plugin(
     by = 'whole',
     prefix = '',
     except = [],
+    ids = false,
     outputMapCallback,
   }: Options = {}) => {
     const exceptSet = new Set(except);
@@ -63,14 +65,13 @@ export default postcss.plugin(
         throw new Error(`Unknown mode "${by}".`);
       }
 
-      const selectorProcessor = selectorParser(selectors => {
-        selectors.walkClasses(classNode => {
-          if (exceptSet.has(classNode.value)) return;
+      function renameNode(node: selectorParser.ClassName | selectorParser.Identifier) {
+          if (exceptSet.has(node.value)) return;
 
           if (by === 'part') {
-            classNode.value =
+            node.value =
               prefix +
-              classNode.value
+              node.value
                 .split('-')
                 .map(part => {
                   const newPart = rename(part);
@@ -79,11 +80,15 @@ export default postcss.plugin(
                 })
                 .join('-');
           } else {
-            const newName = prefix + rename(classNode.value);
-            if (outputMap) outputMap[classNode.value] = newName;
-            classNode.value = newName;
+            const newName = prefix + rename(node.value);
+            if (outputMap) outputMap[node.value] = newName;
+            node.value = newName;
           }
-        });
+      }
+
+      const selectorProcessor = selectorParser(selectors => {
+        selectors.walkClasses(renameNode);
+        if (ids) selectors.walkIds(renameNode);
       });
 
       root.walkRules(ruleNode => selectorProcessor.process(ruleNode));
