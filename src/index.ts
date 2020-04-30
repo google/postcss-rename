@@ -20,7 +20,7 @@ import selectorParser from 'postcss-selector-parser';
 
 import {MinimalRenamer} from './minimal-renamer';
 
-export interface Options {
+interface Options {
   strategy?: 'none' | 'debug' | 'minimal' | ((string) => string);
   by?: 'whole' | 'part';
   prefix?: string;
@@ -29,7 +29,7 @@ export interface Options {
   outputMapCallback?(map: {[key: string]: string}): void;
 }
 
-export default postcss.plugin(
+export = postcss.plugin(
   'postcss-rename',
   ({
     strategy = 'none',
