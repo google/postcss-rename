@@ -21,6 +21,10 @@
     "strict": false,
     "allowJs": true
   },
+  "include": [
+    "src/**/*.ts",
+    "test/**/*.ts"
+  ],
   "exclude": [
     "bazel-*/",
     "build/",

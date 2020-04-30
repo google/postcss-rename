@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 
-import { promises as fs } from 'fs';
 import postcss from 'postcss';
 import plugin, { Options } from '../src';
 import { toShortName } from '../src/minimal-renamer';
