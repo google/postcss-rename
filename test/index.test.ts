@@ -15,11 +15,11 @@
  * limitations under the License.
  */
 
+import plugin = require('../src');
 import postcss from 'postcss';
-import plugin, {Options} from '../src';
 import {toShortName} from '../src/minimal-renamer';
 
-async function run(input: string, options?: Options): Promise<postcss.Result> {
+async function run(input: string, options = {}): Promise<postcss.Result> {
   return await postcss([plugin(options)]).process(input, {from: undefined});
 }
 
@@ -35,7 +35,7 @@ function assertPostcss(result: postcss.Result, output: string): void {
 async function assertMapEquals(
   input: string,
   expected: {[key: string]: string},
-  options: Options = {}
+  options = {}
 ): Promise<void> {
   await run(input, {
     ...options,
