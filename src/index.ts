@@ -18,7 +18,7 @@
 import * as postcss from 'postcss';
 import selectorParser from 'postcss-selector-parser';
 
-import { MinimalRenamer } from './minimal-renamer';
+import {MinimalRenamer} from './minimal-renamer';
 
 export interface Options {
   strategy?: 'none' | 'debug' | 'minimal' | ((string) => string);
@@ -26,7 +26,7 @@ export interface Options {
   prefix?: string;
   except?: Iterable<string>;
   ids?: boolean;
-  outputMapCallback?(map: { [key: string]: string }): void;
+  outputMapCallback?(map: {[key: string]: string}): void;
 }
 
 export default postcss.plugin(
@@ -43,7 +43,7 @@ export default postcss.plugin(
     return (root: postcss.Root): void => {
       if (strategy === 'none' && !outputMapCallback && !prefix) return;
 
-      const outputMap: { [key: string]: string } | null = outputMapCallback
+      const outputMap: {[key: string]: string} | null = outputMapCallback
         ? {}
         : null;
 
@@ -65,25 +65,27 @@ export default postcss.plugin(
         throw new Error(`Unknown mode "${by}".`);
       }
 
-      function renameNode(node: selectorParser.ClassName | selectorParser.Identifier) {
-          if (exceptSet.has(node.value)) return;
+      function renameNode(
+        node: selectorParser.ClassName | selectorParser.Identifier
+      ) {
+        if (exceptSet.has(node.value)) return;
 
-          if (by === 'part') {
-            node.value =
-              prefix +
-              node.value
-                .split('-')
-                .map(part => {
-                  const newPart = rename(part);
-                  if (outputMap) outputMap[part] = newPart;
-                  return newPart;
-                })
-                .join('-');
-          } else {
-            const newName = prefix + rename(node.value);
-            if (outputMap) outputMap[node.value] = newName;
-            node.value = newName;
-          }
+        if (by === 'part') {
+          node.value =
+            prefix +
+            node.value
+              .split('-')
+              .map(part => {
+                const newPart = rename(part);
+                if (outputMap) outputMap[part] = newPart;
+                return newPart;
+              })
+              .join('-');
+        } else {
+          const newName = prefix + rename(node.value);
+          if (outputMap) outputMap[node.value] = newName;
+          node.value = newName;
+        }
       }
 
       const selectorProcessor = selectorParser(selectors => {

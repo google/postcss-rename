@@ -44,6 +44,7 @@ export function toShortName(index: number): string {
   if (index < START_CHARS.length) return result.join('');
   index = Math.floor(index / START_CHARS.length) - 1;
 
+  // eslint-disable-next-line no-constant-condition
   while (true) {
     result.push(CHARS[index % CHARS.length]);
     if (index < CHARS.length) break;
@@ -68,7 +69,7 @@ export class MinimalRenamer {
    * @param except A set of CSS names that may not be returned as the output
    *     from a substitution lookup.
    */
-  constructor(private readonly except = new Set<String>()) {}
+  constructor(private readonly except = new Set<string>()) {}
 
   rename(key: string): string {
     let value = this.renames.get(key);
