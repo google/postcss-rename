@@ -15,13 +15,12 @@
  * limitations under the License.
  */
 
-import { promises as fs } from 'fs';
 import postcss from 'postcss';
-import plugin, { Options } from '../src';
-import { toShortName } from '../src/minimal-renamer';
+import plugin, {Options} from '../src';
+import {toShortName} from '../src/minimal-renamer';
 
 async function run(input: string, options?: Options): Promise<postcss.Result> {
-  return await postcss([plugin(options)]).process(input, { from: undefined });
+  return await postcss([plugin(options)]).process(input, {from: undefined});
 }
 
 function assertPostcss(result: postcss.Result, output: string): void {
@@ -35,7 +34,7 @@ function assertPostcss(result: postcss.Result, output: string): void {
  */
 async function assertMapEquals(
   input: string,
-  expected: { [key: string]: string },
+  expected: {[key: string]: string},
   options: Options = {}
 ): Promise<void> {
   await run(input, {
@@ -52,13 +51,13 @@ describe('with strategy "none"', () => {
   });
 
   it('does nothing with an explicit strategy', async () => {
-    assertPostcss(await run(INPUT, { strategy: 'none' }), INPUT);
+    assertPostcss(await run(INPUT, {strategy: 'none'}), INPUT);
   });
 
   describe('in by-whole mode', () => {
     it('adds a prefix', async () => {
       assertPostcss(
-        await run(INPUT, { prefix: 'pf-' }),
+        await run(INPUT, {prefix: 'pf-'}),
         '.pf-container, .pf-full-height .pf-image.pf-full-width {}'
       );
     });
@@ -80,7 +79,7 @@ describe('with strategy "none"', () => {
           image: 'image',
           'full-width': 'full-width',
         },
-        { except: ['full-height'] }
+        {except: ['full-height']}
       );
     });
 
@@ -93,7 +92,7 @@ describe('with strategy "none"', () => {
           image: 'pf-image',
           'full-width': 'pf-full-width',
         },
-        { prefix: 'pf-' }
+        {prefix: 'pf-'}
       );
     });
   });
@@ -109,7 +108,7 @@ describe('with strategy "none"', () => {
           image: 'image',
           width: 'width',
         },
-        { by: 'part' }
+        {by: 'part'}
       );
     });
 
@@ -122,7 +121,7 @@ describe('with strategy "none"', () => {
           image: 'image',
           width: 'width',
         },
-        { except: ['full-height'], by: 'part' }
+        {except: ['full-height'], by: 'part'}
       );
     });
 
@@ -136,7 +135,7 @@ describe('with strategy "none"', () => {
           image: 'image',
           width: 'width',
         },
-        { prefix: 'pf-', by: 'part' }
+        {prefix: 'pf-', by: 'part'}
       );
     });
   });
@@ -146,7 +145,7 @@ describe('with strategy "debug"', () => {
   describe('in by-whole mode', () => {
     it('adds underscores after every name', async () => {
       assertPostcss(
-        await run(INPUT, { strategy: 'debug' }),
+        await run(INPUT, {strategy: 'debug'}),
         '.container_, .full-height_ .image_.full-width_ {}'
       );
     });
@@ -160,13 +159,13 @@ describe('with strategy "debug"', () => {
           image: 'image_',
           'full-width': 'full-width_',
         },
-        { strategy: 'debug' }
+        {strategy: 'debug'}
       );
     });
 
     it("doesn't map excluded names", async () => {
       assertPostcss(
-        await run(INPUT, { strategy: 'debug', except: ['full-height'] }),
+        await run(INPUT, {strategy: 'debug', except: ['full-height']}),
         '.container_, .full-height .image_.full-width_ {}'
       );
     });
@@ -194,14 +193,14 @@ describe('with strategy "debug"', () => {
   describe('in by-part mode', () => {
     it('adds underscores after every part', async () => {
       assertPostcss(
-        await run(INPUT, { strategy: 'debug', by: 'part' }),
+        await run(INPUT, {strategy: 'debug', by: 'part'}),
         '.container_, .full_-height_ .image_.full_-width_ {}'
       );
     });
 
     it('adds a prefix after underscoring', async () => {
       assertPostcss(
-        await run(INPUT, { strategy: 'debug', prefix: 'pf-', by: 'part' }),
+        await run(INPUT, {strategy: 'debug', prefix: 'pf-', by: 'part'}),
         '.pf-container_, .pf-full_-height_ .pf-image_.pf-full_-width_ {}'
       );
     });
@@ -216,7 +215,7 @@ describe('with strategy "debug"', () => {
           image: 'image_',
           width: 'width_',
         },
-        { strategy: 'debug', by: 'part' }
+        {strategy: 'debug', by: 'part'}
       );
     });
 
@@ -236,15 +235,12 @@ describe('with strategy "debug"', () => {
 describe('with strategy "minimal"', () => {
   describe('in by-whole mode', () => {
     it('maps names to the shortest possible strings', async () => {
-      assertPostcss(
-        await run(INPUT, { strategy: 'minimal' }),
-        '.a, .b .c.d {}'
-      );
+      assertPostcss(await run(INPUT, {strategy: 'minimal'}), '.a, .b .c.d {}');
     });
 
     it('adds a prefix after minimizing', async () => {
       assertPostcss(
-        await run(INPUT, { strategy: 'minimal', prefix: 'pf-' }),
+        await run(INPUT, {strategy: 'minimal', prefix: 'pf-'}),
         '.pf-a, .pf-b .pf-c.pf-d {}'
       );
     });
@@ -258,20 +254,20 @@ describe('with strategy "minimal"', () => {
           image: 'c',
           'full-width': 'd',
         },
-        { strategy: 'minimal' }
+        {strategy: 'minimal'}
       );
     });
 
     it("doesn't map excluded names", async () => {
       assertPostcss(
-        await run(INPUT, { strategy: 'minimal', except: ['full-height'] }),
+        await run(INPUT, {strategy: 'minimal', except: ['full-height']}),
         '.a, .full-height .b.c {}'
       );
     });
 
     it("doesn't produce a name that would be excluded", async () => {
       assertPostcss(
-        await run(INPUT, { strategy: 'minimal', except: ['b'] }),
+        await run(INPUT, {strategy: 'minimal', except: ['b']}),
         '.a, .c .d.e {}'
       );
     });
@@ -280,14 +276,14 @@ describe('with strategy "minimal"', () => {
   describe('in by-part mode', () => {
     it('maps parts to the shortest possible strings', async () => {
       assertPostcss(
-        await run(INPUT, { strategy: 'minimal', by: 'part' }),
+        await run(INPUT, {strategy: 'minimal', by: 'part'}),
         '.a, .b-c .d.b-e {}'
       );
     });
 
     it('adds a prefix after minimizing', async () => {
       assertPostcss(
-        await run(INPUT, { strategy: 'minimal', prefix: 'pf-', by: 'part' }),
+        await run(INPUT, {strategy: 'minimal', prefix: 'pf-', by: 'part'}),
         '.pf-a, .pf-b-c .pf-d.pf-b-e {}'
       );
     });
@@ -302,7 +298,7 @@ describe('with strategy "minimal"', () => {
           image: 'd',
           width: 'e',
         },
-        { strategy: 'minimal', by: 'part' }
+        {strategy: 'minimal', by: 'part'}
       );
     });
 
@@ -319,7 +315,7 @@ describe('with strategy "minimal"', () => {
 
     it("doesn't produce a name that would be excluded", async () => {
       assertPostcss(
-        await run(INPUT, { strategy: 'minimal', except: ['b'], by: 'part' }),
+        await run(INPUT, {strategy: 'minimal', except: ['b'], by: 'part'}),
         '.a, .c-d .e.c-f {}'
       );
     });
@@ -348,12 +344,12 @@ describe('with a custom strategy', () => {
 
   describe('in by-whole mode', () => {
     it('maps names to the shortest possible strings', async () => {
-      assertPostcss(await run(INPUT, { strategy }), '.er, .ht .ge.th {}');
+      assertPostcss(await run(INPUT, {strategy}), '.er, .ht .ge.th {}');
     });
 
     it('adds a prefix after renaming', async () => {
       assertPostcss(
-        await run(INPUT, { strategy, prefix: 'pf-' }),
+        await run(INPUT, {strategy, prefix: 'pf-'}),
         '.pf-er, .pf-ht .pf-ge.pf-th {}'
       );
     });
@@ -367,13 +363,13 @@ describe('with a custom strategy', () => {
           image: 'ge',
           'full-width': 'th',
         },
-        { strategy }
+        {strategy}
       );
     });
 
     it("doesn't map excluded names", async () => {
       assertPostcss(
-        await run(INPUT, { strategy, except: ['full-height'] }),
+        await run(INPUT, {strategy, except: ['full-height']}),
         '.er, .full-height .ge.th {}'
       );
     });
@@ -382,14 +378,14 @@ describe('with a custom strategy', () => {
   describe('in by-part mode', () => {
     it('maps parts to the shortest possible strings', async () => {
       assertPostcss(
-        await run(INPUT, { strategy, by: 'part' }),
+        await run(INPUT, {strategy, by: 'part'}),
         '.er, .ll-ht .ge.ll-th {}'
       );
     });
 
     it('adds a prefix after renaming', async () => {
       assertPostcss(
-        await run(INPUT, { strategy, prefix: 'pf-', by: 'part' }),
+        await run(INPUT, {strategy, prefix: 'pf-', by: 'part'}),
         '.pf-er, .pf-ll-ht .pf-ge.pf-ll-th {}'
       );
     });
@@ -404,7 +400,7 @@ describe('with a custom strategy', () => {
           image: 'ge',
           width: 'th',
         },
-        { strategy, by: 'part' }
+        {strategy, by: 'part'}
       );
     });
 

@@ -1,4 +1,3 @@
 module.exports = {
-  singleQuote: true,
-  trailingComma: 'es5',
+  ...require('gts/.prettierrc.json'),
 };
