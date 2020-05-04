@@ -20,16 +20,18 @@ import selectorParser from 'postcss-selector-parser';
 
 import {MinimalRenamer} from './minimal-renamer';
 
-interface Options {
-  strategy?: 'none' | 'debug' | 'minimal' | ((string) => string);
-  by?: 'whole' | 'part';
-  prefix?: string;
-  except?: Iterable<string>;
-  ids?: boolean;
-  outputMapCallback?(map: {[key: string]: string}): void;
+namespace plugin {
+  export interface Options {
+    strategy?: 'none' | 'debug' | 'minimal' | ((string) => string);
+    by?: 'whole' | 'part';
+    prefix?: string;
+    except?: Iterable<string>;
+    ids?: boolean;
+    outputMapCallback?(map: {[key: string]: string}): void;
+  }
 }
 
-export = postcss.plugin(
+const plugin = postcss.plugin(
   'postcss-rename',
   ({
     strategy = 'none',
@@ -38,7 +40,7 @@ export = postcss.plugin(
     except = [],
     ids = false,
     outputMapCallback,
-  }: Options = {}) => {
+  }: plugin.Options = {}) => {
     const exceptSet = new Set(except);
     return (root: postcss.Root): void => {
       if (strategy === 'none' && !outputMapCallback && !prefix) return;
@@ -99,3 +101,5 @@ export = postcss.plugin(
     };
   }
 );
+
+export = plugin;
