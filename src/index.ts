@@ -20,6 +20,7 @@ import selectorParser from 'postcss-selector-parser';
 
 import {MinimalRenamer} from './minimal-renamer';
 
+// eslint-disable-next-line @typescript-eslint/no-namespace
 namespace plugin {
   export interface Options {
     strategy?: 'none' | 'debug' | 'minimal' | ((string) => string);
@@ -31,6 +32,7 @@ namespace plugin {
   }
 }
 
+// eslint-disable-next-line no-redeclare
 const plugin = postcss.plugin(
   'postcss-rename',
   ({
