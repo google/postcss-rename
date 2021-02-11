@@ -43,8 +43,8 @@ const plugin = ({
   const exceptSet = new Set(except);
   return {
     postcssPlugin: 'postcss-rename',
-    Once(root): void {
-      if (strategy === 'none' && !outputMapCallback && !prefix) return;
+    prepare() {
+      if (strategy === 'none' && !outputMapCallback && !prefix) return {};
 
       const outputMap: {[key: string]: string} | null = outputMapCallback
         ? {}
@@ -96,9 +96,14 @@ const plugin = ({
         if (ids) selectors.walkIds(renameNode);
       });
 
-      root.walkRules(ruleNode => selectorProcessor.process(ruleNode));
-
-      if (outputMapCallback) outputMapCallback(outputMap);
+      return {
+        Rule(ruleNode) {
+          selectorProcessor.process(ruleNode);
+        },
+        OnceExit() {
+          if (outputMapCallback) outputMapCallback(outputMap);
+        },
+      };
     },
   };
 };
