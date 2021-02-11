@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 
-import * as postcss from 'postcss';
 import selectorParser from 'postcss-selector-parser';
 
 import {MinimalRenamer} from './minimal-renamer';
@@ -33,18 +32,18 @@ namespace plugin {
 }
 
 // eslint-disable-next-line no-redeclare
-const plugin = postcss.plugin(
-  'postcss-rename',
-  ({
-    strategy = 'none',
-    by = 'whole',
-    prefix = '',
-    except = [],
-    ids = false,
-    outputMapCallback,
-  }: plugin.Options = {}) => {
-    const exceptSet = new Set(except);
-    return (root: postcss.Root): void => {
+const plugin = ({
+  strategy = 'none',
+  by = 'whole',
+  prefix = '',
+  except = [],
+  ids = false,
+  outputMapCallback,
+}: plugin.Options = {}) => {
+  const exceptSet = new Set(except);
+  return {
+    postcssPlugin: 'postcss-rename',
+    Once(root): void {
       if (strategy === 'none' && !outputMapCallback && !prefix) return;
 
       const outputMap: {[key: string]: string} | null = outputMapCallback
@@ -100,8 +99,8 @@ const plugin = postcss.plugin(
       root.walkRules(ruleNode => selectorProcessor.process(ruleNode));
 
       if (outputMapCallback) outputMapCallback(outputMap);
-    };
-  }
-);
+    },
+  };
+};
 
 export = plugin;
