@@ -16,17 +16,14 @@
  */
 
 import plugin = require('../src');
-import postcss from 'postcss';
+import postcss, {Result} from 'postcss';
 import {toShortName} from '../src/minimal-renamer';
 
-async function run(
-  input: string,
-  options?: plugin.Options
-): Promise<postcss.Result> {
+async function run(input: string, options?: plugin.Options): Promise<Result> {
   return await postcss([plugin(options)]).process(input, {from: undefined});
 }
 
-function assertPostcss(result: postcss.Result, output: string): void {
+function assertPostcss(result: Result, output: string): void {
   expect(result.css).toEqual(output);
   expect(result.warnings()).toHaveLength(0);
 }
