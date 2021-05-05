@@ -229,6 +229,17 @@ describe('with strategy "debug"', () => {
         '.container_, .full-height .image_.full_-width_ {}'
       );
     });
+
+    it("doesn't map excluded parts", async () => {
+      assertPostcss(
+        await run(INPUT, {
+          strategy: 'debug',
+          except: ['full'],
+          by: 'part',
+        }),
+        '.container_, .full-height_ .image_.full-width_ {}'
+      );
+    });
   });
 });
 
