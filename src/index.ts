@@ -79,7 +79,7 @@ const plugin = ({
             node.value
               .split('-')
               .map(part => {
-                const newPart = rename(part);
+                const newPart = exceptSet.has(part) ? part : rename(part);
                 if (outputMap) outputMap[part] = newPart;
                 return newPart;
               })
