@@ -60,9 +60,6 @@ included in the [output map](#outputMapCallback).
 
 An array (or other `Iterable`) of names that shouldn't be renamed.
 
-Even in by-part mode, this excludes the entire class name as a whole, rather
-than excluding it part-by-part.
-
 ### `ids`
 
 Whether to rename ID selectors as well as class selectors. Defaults to `false`.
