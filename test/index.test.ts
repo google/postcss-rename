@@ -90,7 +90,7 @@ describe('with strategy "none"', () => {
           container: 'container',
           image: 'image',
         },
-        {except: [/^full-.*$/]}
+        {except: [/full/]}
       );
     });
 
@@ -197,7 +197,7 @@ describe('with strategy "debug"', () => {
 
     it("doesn't map excluded regexes", async () => {
       assertPostcss(
-        await run(INPUT, {strategy: 'debug', except: [/^full-.*$/]}),
+        await run(INPUT, {strategy: 'debug', except: [/full/]}),
         '.container_, .full-height .image_.full-width {}'
       );
     });
@@ -266,7 +266,7 @@ describe('with strategy "debug"', () => {
       assertPostcss(
         await run(INPUT, {
           strategy: 'debug',
-          except: [/^full-.*$/],
+          except: [/full/],
           by: 'part',
         }),
         '.container_, .full-height .image_.full-width {}'
@@ -321,7 +321,7 @@ describe('with strategy "minimal"', () => {
 
     it("doesn't map excluded regexes", async () => {
       assertPostcss(
-        await run(INPUT, {strategy: 'minimal', except: [/^full-.*$/]}),
+        await run(INPUT, {strategy: 'minimal', except: [/full/]}),
         '.a, .full-height .b.full-width {}'
       );
     });
@@ -385,7 +385,7 @@ describe('with strategy "minimal"', () => {
       assertPostcss(
         await run(INPUT, {
           strategy: 'minimal',
-          except: [/^full-.*$/],
+          except: [/full/],
           by: 'part',
         }),
         '.a, .full-height .b.full-width {}'
@@ -462,7 +462,7 @@ describe('with a custom strategy', () => {
 
     it("doesn't map excluded regexes", async () => {
       assertPostcss(
-        await run(INPUT, {strategy, except: [/^full-.*$/]}),
+        await run(INPUT, {strategy, except: [/full/]}),
         '.er, .full-height .ge.full-width {}'
       );
     });
@@ -512,7 +512,7 @@ describe('with a custom strategy', () => {
       assertPostcss(
         await run(INPUT, {
           strategy,
-          except: [/^full-.*$/],
+          except: [/full/],
           by: 'part',
         }),
         '.er, .full-height .ge.full-width {}'
