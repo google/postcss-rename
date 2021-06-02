@@ -93,7 +93,7 @@ const plugin = ({
 
       function skip(nodeValue: string): boolean {
         if (exceptSet.has(nodeValue)) return true;
-        for (var val of exceptSet) 
+        for (const val of exceptSet)
           if (val instanceof RegExp && val.test(nodeValue)) return true;
         return false;
       }
