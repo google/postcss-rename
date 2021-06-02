@@ -25,7 +25,7 @@ namespace plugin {
     strategy?: 'none' | 'debug' | 'minimal' | ((string) => string);
     by?: 'whole' | 'part';
     prefix?: string;
-    except?: Iterable<string>;
+    except?: Iterable<string | RegExp>;
     ids?: boolean;
     outputMapCallback?(map: {[key: string]: string}): void;
   }
@@ -56,7 +56,7 @@ const plugin = ({
       } else if (strategy === 'debug') {
         rename = name => name + '_';
       } else if (strategy === 'minimal') {
-        const renamer = new MinimalRenamer(exceptSet);
+        const renamer = new MinimalRenamer(skip);
         rename = name => renamer.rename(name);
       } else if (typeof strategy === 'string') {
         throw new Error(`Unknown strategy "${strategy}".`);
@@ -71,7 +71,7 @@ const plugin = ({
       function renameNode(
         node: selectorParser.ClassName | selectorParser.Identifier
       ) {
-        if (exceptSet.has(node.value)) return;
+        if (skip(node.value)) return;
 
         if (by === 'part') {
           node.value =
@@ -79,7 +79,7 @@ const plugin = ({
             node.value
               .split('-')
               .map(part => {
-                const newPart = exceptSet.has(part) ? part : rename(part);
+                const newPart = skip(part) ? part : rename(part);
                 if (outputMap) outputMap[part] = newPart;
                 return newPart;
               })
@@ -89,6 +89,13 @@ const plugin = ({
           if (outputMap) outputMap[node.value] = newName;
           node.value = newName;
         }
+      }
+
+      function skip(nodeValue: string): boolean {
+        if (exceptSet.has(nodeValue)) return true;
+        for (var val of exceptSet) 
+          if (val instanceof RegExp && val.test(nodeValue)) return true;
+        return false;
       }
 
       const selectorProcessor = selectorParser(selectors => {

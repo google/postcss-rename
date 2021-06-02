@@ -66,10 +66,10 @@ export class MinimalRenamer {
    * Creates a new MinimalSubstitutionMap that generates CSS names from the
    * specified set of characters.
    *
-   * @param except A set of CSS names that may not be returned as the output
-   *     from a substitution lookup.
+   * @param skip A function which decides if given CSS names may not be
+   *     returned as the output from a substitution lookup.
    */
-  constructor(private readonly except = new Set<string>()) {}
+  constructor(private readonly skip: (nodeValue: string) => boolean) {}
 
   rename(key: string): string {
     let value = this.renames.get(key);
@@ -77,7 +77,7 @@ export class MinimalRenamer {
 
     do {
       value = toShortName(this.nextIndex++);
-    } while (this.except.has(value));
+    } while (this.skip(value));
 
     this.renames.set(key, value);
     return value;
