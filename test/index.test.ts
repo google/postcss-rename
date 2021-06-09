@@ -83,6 +83,17 @@ describe('with strategy "none"', () => {
       );
     });
 
+    it('omits excluded regexes from the output map', async () => {
+      await assertMapEquals(
+        INPUT,
+        {
+          container: 'container',
+          image: 'image',
+        },
+        {except: [/full/]}
+      );
+    });
+
     it('includes the prefix in the output map', async () => {
       await assertMapEquals(
         INPUT,
@@ -122,6 +133,20 @@ describe('with strategy "none"', () => {
           width: 'width',
         },
         {except: ['full-height'], by: 'part'}
+      );
+    });
+
+    it('omits part that only appear in excluded regexes from the output map', async () => {
+      await assertMapEquals(
+        INPUT,
+        {
+          container: 'container',
+          full: 'full',
+          image: 'image',
+          width: 'width',
+          height: 'height',
+        },
+        {except: ['full-.*'], by: 'part'}
       );
     });
 
@@ -167,6 +192,13 @@ describe('with strategy "debug"', () => {
       assertPostcss(
         await run(INPUT, {strategy: 'debug', except: ['full-height']}),
         '.container_, .full-height .image_.full-width_ {}'
+      );
+    });
+
+    it("doesn't map excluded regexes", async () => {
+      assertPostcss(
+        await run(INPUT, {strategy: 'debug', except: [/full/]}),
+        '.container_, .full-height .image_.full-width {}'
       );
     });
 
@@ -230,6 +262,17 @@ describe('with strategy "debug"', () => {
       );
     });
 
+    it("doesn't map excluded regexes", async () => {
+      assertPostcss(
+        await run(INPUT, {
+          strategy: 'debug',
+          except: [/full/],
+          by: 'part',
+        }),
+        '.container_, .full-height .image_.full-width {}'
+      );
+    });
+
     it("doesn't map excluded parts", async () => {
       assertPostcss(
         await run(INPUT, {
@@ -276,10 +319,24 @@ describe('with strategy "minimal"', () => {
       );
     });
 
+    it("doesn't map excluded regexes", async () => {
+      assertPostcss(
+        await run(INPUT, {strategy: 'minimal', except: [/full/]}),
+        '.a, .full-height .b.full-width {}'
+      );
+    });
+
     it("doesn't produce a name that would be excluded", async () => {
       assertPostcss(
         await run(INPUT, {strategy: 'minimal', except: ['b']}),
         '.a, .c .d.e {}'
+      );
+    });
+
+    it("doesn't produce a name that would be excluded with regexes", async () => {
+      assertPostcss(
+        await run(INPUT, {strategy: 'minimal', except: [/^a|b$/]}),
+        '.c, .d .e.f {}'
       );
     });
   });
@@ -324,10 +381,28 @@ describe('with strategy "minimal"', () => {
       );
     });
 
+    it("doesn't map excluded regexes", async () => {
+      assertPostcss(
+        await run(INPUT, {
+          strategy: 'minimal',
+          except: [/full/],
+          by: 'part',
+        }),
+        '.a, .full-height .b.full-width {}'
+      );
+    });
+
     it("doesn't produce a name that would be excluded", async () => {
       assertPostcss(
         await run(INPUT, {strategy: 'minimal', except: ['b'], by: 'part'}),
         '.a, .c-d .e.c-f {}'
+      );
+    });
+
+    it("doesn't produce a name that would be with regexes", async () => {
+      assertPostcss(
+        await run(INPUT, {strategy: 'minimal', except: [/^a|b$/], by: 'part'}),
+        '.c, .d-e .f.d-g {}'
       );
     });
   });
@@ -384,6 +459,13 @@ describe('with a custom strategy', () => {
         '.er, .full-height .ge.th {}'
       );
     });
+
+    it("doesn't map excluded regexes", async () => {
+      assertPostcss(
+        await run(INPUT, {strategy, except: [/full/]}),
+        '.er, .full-height .ge.full-width {}'
+      );
+    });
   });
 
   describe('in by-part mode', () => {
@@ -423,6 +505,17 @@ describe('with a custom strategy', () => {
           by: 'part',
         }),
         '.er, .full-height .ge.ll-th {}'
+      );
+    });
+
+    it("doesn't map excluded regexes", async () => {
+      assertPostcss(
+        await run(INPUT, {
+          strategy,
+          except: [/full/],
+          by: 'part',
+        }),
+        '.er, .full-height .ge.full-width {}'
       );
     });
   });
