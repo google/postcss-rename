@@ -1,6 +1,0 @@
-dist: xenial  # Ubuntu 16.04
-language: node_js
-node_js:
-  - lts/*
-
-script: yarn test

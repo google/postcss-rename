@@ -1,4 +1,4 @@
-[![Build status](https://travis-ci.org/google/postcss-rename.svg?branch=master)](https://travis-ci.org/google/postcss-rename)
+[![Build status](https://github.com/google/postcss-rename/actions/workflows/ci.yml/badge.svg)](https://github.com/google/postcss-rename/actions)
 
 A [PostCSS](https://github.com/postcss/postcss) plugin to replace class names
 based on a customizable renaming scheme.
