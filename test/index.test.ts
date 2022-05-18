@@ -45,6 +45,14 @@ async function assertMapEquals(
 
 const INPUT = '.container, .full-height .image.full-width {}';
 
+const KEYFRAMES = `
+@keyframes name {
+  from {opacity: 0}
+  0.1% {opacity: 0.1}
+  90% {opacity: 0.9}
+  to {opacity: 1}
+}`;
+
 describe('with strategy "none"', () => {
   it('does nothing with no options', async () => {
     assertPostcss(await run(INPUT), INPUT);
@@ -163,6 +171,10 @@ describe('with strategy "none"', () => {
         {prefix: 'pf-', by: 'part'}
       );
     });
+  });
+
+  it("doesn't modify keyframes", async () => {
+    assertPostcss(await run(KEYFRAMES), KEYFRAMES);
   });
 });
 
@@ -283,6 +295,10 @@ describe('with strategy "debug"', () => {
         '.container_, .full-height_ .image_.full-width_ {}'
       );
     });
+  });
+
+  it("doesn't modify keyframes", async () => {
+    assertPostcss(await run(KEYFRAMES, {strategy: 'debug'}), KEYFRAMES);
   });
 });
 
@@ -423,6 +439,10 @@ describe('with strategy "minimal"', () => {
       expect(toShortName(3394)).toEqual('caa');
     });
   });
+
+  it("doesn't modify keyframes", async () => {
+    assertPostcss(await run(KEYFRAMES, {strategy: 'minimal'}), KEYFRAMES);
+  });
 });
 
 describe('with a custom strategy', () => {
@@ -518,5 +538,9 @@ describe('with a custom strategy', () => {
         '.er, .full-height .ge.full-width {}'
       );
     });
+  });
+
+  it("doesn't modify keyframes", async () => {
+    assertPostcss(await run(KEYFRAMES, {strategy}), KEYFRAMES);
   });
 });
