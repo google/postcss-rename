@@ -105,7 +105,12 @@ const plugin = ({
 
       return {
         Rule(ruleNode) {
-          selectorProcessor.process(ruleNode);
+          if (
+            ruleNode.parent.type !== 'atrule' ||
+            ruleNode.parent.name !== 'keyframes'
+          ) {
+            selectorProcessor.process(ruleNode);
+          }
         },
         OnceExit() {
           if (outputMapCallback) outputMapCallback(outputMap);
