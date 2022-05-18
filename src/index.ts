@@ -107,7 +107,7 @@ const plugin = ({
         Rule(ruleNode) {
           if (
             ruleNode.parent.type !== 'atrule' ||
-            ruleNode.parent.name !== 'keyframes'
+            !ruleNode.parent.name.endsWith('keyframes')
           ) {
             selectorProcessor.process(ruleNode);
           }

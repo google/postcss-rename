@@ -46,6 +46,13 @@ async function assertMapEquals(
 const INPUT = '.container, .full-height .image.full-width {}';
 
 const KEYFRAMES = `
+@-webkit-keyframes name {
+  from {opacity: 0}
+  0.1% {opacity: 0.1}
+  90% {opacity: 0.9}
+  to {opacity: 1}
+}
+
 @keyframes name {
   from {opacity: 0}
   0.1% {opacity: 0.1}
