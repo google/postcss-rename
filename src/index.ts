@@ -16,104 +16,247 @@
  */
 
 import selectorParser from 'postcss-selector-parser';
+import valueParser from 'postcss-value-parser';
 
 import {MinimalRenamer} from './minimal-renamer';
+
+type RenamingStrategy = 'none' | 'debug' | 'minimal' | ((string) => string);
+type RenamingMap = {[key: string]: string};
+
+interface SharedOptions {
+  strategy: RenamingStrategy;
+  prefix?: string;
+  outputMapCallback?(map: RenamingMap): void; // { 'var': 'renamed-var' }
+  except?: Iterable<string | RegExp>; // ['--var', 'var']
+}
+
+interface VariableRenamingOptions extends SharedOptions {}
+interface ClassRenamingOptions extends SharedOptions {
+  by?: 'whole' | 'part';
+}
+
+/**
+ * Default renaming options. Works for both classes and variables.
+ */
+const DEFAULT_RENAMING_OPTIONS: VariableRenamingOptions | ClassRenamingOptions =
+  {
+    strategy: 'none',
+    prefix: '',
+    except: [],
+    by: 'whole',
+  };
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
 namespace plugin {
   export interface Options {
-    strategy?: 'none' | 'debug' | 'minimal' | ((string) => string);
-    by?: 'whole' | 'part';
-    prefix?: string;
-    except?: Iterable<string | RegExp>;
-    ids?: boolean;
-    outputMapCallback?(map: {[key: string]: string}): void;
+    classRenamingOptions: ClassRenamingOptions;
+    variableRenamingOptions: VariableRenamingOptions;
+  }
+}
+
+/**
+ * Creates a predicate that filters against an except set
+ * @param except - A list of strings or regexes that should be skipped
+ * @returns skip predicate
+ */
+function createSkip(except?: Iterable<string | RegExp>): (string) => boolean {
+  const exceptSet = new Set(except);
+  const exceptRegexes = except.filter((val) => val instanceof RegExp);
+
+  return (nodeValue: string): boolean => {
+    return (
+      exceptSet.has(nodeValue) ||
+      exceptRegexes.some((regex) => regex.test(nodeValue))
+    );
+  };
+}
+
+/**
+ * Produces a renaming function from the given strategy
+ * @param strategy
+ * @returns renaming function
+ * @throws if strategy isn't a function or one of 'none', 'debug', 'minimal'
+ */
+function createStrategy(strategy: RenamingStrategy): (string) => string {
+  if (typeof strategy === 'function') {
+    return strategy;
+  }
+
+  switch (strategy) {
+    case 'none':
+      return (name) => name;
+    case 'debug':
+      return (name) => name + '_';
+    case 'minimal':
+      const renamer = new MinimalRenamer(skip);
+      return (name) => renamer.rename(name);
+    default:
+      throw new Error(`Unknown strategy "${strategy}".`);
   }
 }
 
 // eslint-disable-next-line no-redeclare
 const plugin = ({
-  strategy = 'none',
-  by = 'whole',
-  prefix = '',
-  except = [],
-  ids = false,
-  outputMapCallback,
+  classRenamingOptions,
+  variableRenamingOptions,
 }: plugin.Options = {}) => {
-  const exceptSet = new Set(except);
+  const {
+    strategy: classStrategy,
+    prefix: classPrefix,
+    outputMapCallback: classOutputMapCallback,
+    except: classExcept,
+    by: classBy,
+  } = classRenamingOptions || DEFAULT_RENAMING_OPTIONS;
+
+  const {
+    strategy: variableStrategy,
+    prefix: variablePrefix,
+    outputMapCallback: variableOutputMapCallback,
+    except: variableExcept,
+  } = variableRenamingOptions || DEFAULT_RENAMING_OPTIONS;
+
+  const skipClass = createSkip(classExcept);
+  const skipVariable = createSkip(variableExcept);
+
+  const renameClass = createStrategy(classStrategy);
+  const renameVariable = createStrategy(variableStrategy);
+
+  const classOutputMap: RenamingMap | null = classOutputMapCallback ? {} : null;
+  const variableOutputMap: RenamingMap | null = variableOutputMapCallback
+    ? {}
+    : null;
+
   return {
     postcssPlugin: 'postcss-rename',
     prepare() {
-      if (strategy === 'none' && !outputMapCallback && !prefix) return {};
+      let nodeVisitors = {};
 
-      const outputMap: {[key: string]: string} | null = outputMapCallback
-        ? {}
-        : null;
-
-      let rename: (string) => string;
-      if (strategy === 'none') {
-        rename = name => name;
-      } else if (strategy === 'debug') {
-        rename = name => name + '_';
-      } else if (strategy === 'minimal') {
-        const renamer = new MinimalRenamer(skip);
-        rename = name => renamer.rename(name);
-      } else if (typeof strategy === 'string') {
-        throw new Error(`Unknown strategy "${strategy}".`);
-      } else {
-        rename = strategy;
-      }
-
-      if (by !== 'whole' && by !== 'part') {
-        throw new Error(`Unknown mode "${by}".`);
-      }
-
-      function renameNode(
-        node: selectorParser.ClassName | selectorParser.Identifier
-      ) {
-        if (skip(node.value)) return;
-
-        if (by === 'part') {
-          node.value =
-            prefix +
-            node.value
-              .split('-')
-              .map(part => {
-                const newPart = skip(part) ? part : rename(part);
-                if (outputMap) outputMap[part] = newPart;
-                return newPart;
-              })
-              .join('-');
-        } else {
-          const newName = prefix + rename(node.value);
-          if (outputMap) outputMap[node.value] = newName;
-          node.value = newName;
+      if (classStrategy !== 'none' || classOutputMapCallback || classPrefix) {
+        if (classBy !== 'whole' && classBy !== 'part') {
+          throw new Error(`Unknown mode "${classBy}".`);
         }
-      }
 
-      function skip(nodeValue: string): boolean {
-        if (exceptSet.has(nodeValue)) return true;
-        for (const val of exceptSet)
-          if (val instanceof RegExp && val.test(nodeValue)) return true;
-        return false;
-      }
+        function renameClassNode(
+          node: selectorParser.ClassName | selectorParser.Identifier,
+        ) {
+          if (skipClass(node.value)) return;
 
-      const selectorProcessor = selectorParser(selectors => {
-        selectors.walkClasses(renameNode);
-        if (ids) selectors.walkIds(renameNode);
-      });
+          if (classBy === 'part') {
+            node.value =
+              classPrefix +
+              node.value
+                .split('-')
+                .map((part) => {
+                  const newPart = skipClass(part) ? part : renameClass(part);
+                  if (classOutputMap) classOutputMap[part] = newPart;
+                  return newPart;
+                })
+                .join('-');
+          } else {
+            const newName = classPrefix + renameClass(node.value);
+            if (classOutputMap) classOutputMap[node.value] = newName;
+            node.value = newName;
+          }
+        }
 
-      return {
-        Rule(ruleNode) {
+        const selectorProcessor = selectorParser((selectors) => {
+          selectors.walkClasses(renameClassNode);
+          if (ids) selectors.walkIds(renameClassNode);
+        });
+
+        nodeVisitors.Rule = function (ruleNode) {
           if (
             ruleNode.parent.type !== 'atrule' ||
             !ruleNode.parent.name.endsWith('keyframes')
           ) {
             selectorProcessor.process(ruleNode);
           }
-        },
+        };
+      }
+
+      if (
+        variableStrategy !== 'none' ||
+        variableOutputMapCallback ||
+        variablePrefix
+      ) {
+        function renameVariableNode(variable: string): string {
+            const variable = prop.match(/^\-\-(.+)$/)[1];
+
+            if (!variable) {
+              throw new Error('this shouldn\'t happen');
+            }
+
+            const newVariable = variablePrefix
+              ? variablePrefix + '-' + renameVariable(variable);
+              : renameVariable(variable);
+
+            if (variableOutputMap) {
+              variableOutputMap[variable] = newVariable;
+            }
+
+            return newVariable;
+        }
+
+        nodeVisitors.Declaration = function(declarationNode) {
+          const prop = declarationNode.prop;
+
+          if (prop.startsWith('--')) {
+            // CSS variable; rename and put into outputMap
+            const variable = prop.match(/^\-\-(.+)$/)[1];
+
+            if (!variable) {
+              throw new Error('this shouldn\'t happen');
+            }
+
+            const newVariable = renameVariableNode(variable);
+            declarationNode.prop = newVariable;
+          }
+        };
+
+        function renameVariableUse(node) {
+          if (node.type !== 'function' || node.value !== 'var') return;
+
+          const renamedChildren = node.nodes.map((child) => {
+            if (child.type !== 'word') {
+              return child;
+            }
+
+            const value = child.value;
+            if (value.startsWith('--')) {
+              // CSS variable; rename and put into outputMap
+              const variable = prop.match(/^\-\-(.+)$/)[1];
+
+              if (!variable) {
+                throw new Error('this shouldn\'t happen');
+              }
+
+              return renameVariableNode(variable);
+            }
+          });
+
+          node.nodes = renamedChildren;
+        }
+
+        nodeVisitors.Root = function(rootNode) {
+          const parsed = valueParser.walk(rootNode, renameVariableUse);
+        };
+      }
+
+      return {
+        ...nodeVisitors,
         OnceExit() {
-          if (outputMapCallback) outputMapCallback(outputMap);
+          if (classRenamingOptions.outputMapCallback) {
+            classRenamingOptions.outputMapCallback(outputMap);
+          }
+
+          if (variableRenamingOptions.outputMapCallback) {
+            variableRenamingOptions.outputMapCallback(outputMap);
+          }
+        },
+        AtRule(atRule) {
+          if (atRule.name == 'property') {
+            // ...
+          }
         },
       };
     },
