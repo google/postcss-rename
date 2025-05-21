@@ -24,7 +24,7 @@ type RenamingStrategy = 'none' | 'debug' | 'minimal' | ((string) => string);
 type RenamingMap = {[key: string]: string};
 
 interface SharedOptions {
-  strategy: RenamingStrategy;
+  strategy?: RenamingStrategy;
   prefix?: string;
   outputMapCallback?(map: RenamingMap): void; // { 'var': 'renamed-var' }
   except?: Iterable<string | RegExp>; // ['--var', 'var']
@@ -115,19 +115,19 @@ const plugin = ({
   variableRenamingOptions,
 }: plugin.Options = {}) => {
   const {
-    strategy: classStrategy,
-    prefix: classPrefix,
+    strategy: classStrategy = 'none',
+    prefix: classPrefix = '',
     outputMapCallback: classOutputMapCallback,
-    except: classExcept,
-    by: classBy,
-    ids: classIds,
+    except: classExcept = [],
+    by: classBy = 'whole',
+    ids: classIds = false,
   } = classRenamingOptions || DEFAULT_RENAMING_OPTIONS;
 
   const {
-    strategy: variableStrategy,
-    prefix: variablePrefix,
+    strategy: variableStrategy = 'none',
+    prefix: variablePrefix = '',
     outputMapCallback: variableOutputMapCallback,
-    except: variableExcept,
+    except: variableExcept = [],
   } = variableRenamingOptions || DEFAULT_RENAMING_OPTIONS;
 
   const skipClass = createSkip(classExcept);
