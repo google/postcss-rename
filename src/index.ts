@@ -144,7 +144,9 @@ const plugin = ({
   return {
     postcssPlugin: 'postcss-rename',
     prepare() {
-      let nodeVisitors = {};
+      // TODO(jiramide): figure out how to type this w/o making a dependency on postcss
+      // (how do I get the Plugin type? preferably without writing it myself)
+      let nodeVisitors: any = {};
 
       if (classStrategy !== 'none' || classOutputMapCallback || classPrefix) {
         if (classBy !== 'whole' && classBy !== 'part') {
