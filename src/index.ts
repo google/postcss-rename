@@ -33,6 +33,7 @@ interface SharedOptions {
 interface VariableRenamingOptions extends SharedOptions {}
 interface ClassRenamingOptions extends SharedOptions {
   by?: 'whole' | 'part';
+  ids?: boolean;
 }
 
 /**
@@ -44,6 +45,7 @@ const DEFAULT_RENAMING_OPTIONS: VariableRenamingOptions | ClassRenamingOptions =
     prefix: '',
     except: [],
     by: 'whole',
+    ids: false,
   };
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -106,6 +108,7 @@ const plugin = ({
     outputMapCallback: classOutputMapCallback,
     except: classExcept,
     by: classBy,
+    ids: classIds,
   } = classRenamingOptions || DEFAULT_RENAMING_OPTIONS;
 
   const {
@@ -161,7 +164,7 @@ const plugin = ({
 
         const selectorProcessor = selectorParser((selectors) => {
           selectors.walkClasses(renameClassNode);
-          if (ids) selectors.walkIds(renameClassNode);
+          if (classIds) selectors.walkIds(renameClassNode);
         });
 
         nodeVisitors.Rule = function (ruleNode) {
