@@ -260,12 +260,12 @@ const plugin = ({
       return {
         ...nodeVisitors,
         OnceExit() {
-          if (classRenamingOptions.outputMapCallback) {
-            classRenamingOptions.outputMapCallback(classOutputMap);
+          if (classOutputMapCallback) {
+            classOutputMapCallback(classOutputMap);
           }
 
-          if (variableRenamingOptions.outputMapCallback) {
-            variableRenamingOptions.outputMapCallback(variableOutputMap);
+          if (variableOutputMapCallback) {
+            variableOutputMapCallback(variableOutputMap);
           }
         },
         AtRule(atRule) {
