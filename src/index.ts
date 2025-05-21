@@ -62,8 +62,16 @@ namespace plugin {
  * @returns skip predicate
  */
 function createSkip(except?: Iterable<string | RegExp>): (string) => boolean {
-  const exceptSet = new Set(except);
-  const exceptRegexes = except.filter((val) => val instanceof RegExp);
+  const exceptSet: Set<string> = new Set();
+  const exceptRegexes: RegExp[] = [];
+
+  for (const val of except) {
+    if (val instanceof RegExp) {
+      exceptRegexes.push(val);
+    } else {
+      exceptSet.add(val);
+    }
+  }
 
   return (nodeValue: string): boolean => {
     return (
