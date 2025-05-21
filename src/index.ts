@@ -183,24 +183,24 @@ const plugin = ({
         variablePrefix
       ) {
         function renameVariableNode(variable: string): string {
-            const variable = prop.match(/^\-\-(.+)$/)[1];
+          const variable = prop.match(/^\-\-(.+)$/)[1];
 
-            if (!variable) {
-              throw new Error('this shouldn\'t happen');
-            }
+          if (!variable) {
+            throw new Error("this shouldn't happen");
+          }
 
-            const newVariable = variablePrefix
-              ? variablePrefix + '-' + renameVariable(variable);
-              : renameVariable(variable);
+          const newVariable = variablePrefix
+            ? variablePrefix + '-' + renameVariable(variable)
+            : renameVariable(variable);
 
-            if (variableOutputMap) {
-              variableOutputMap[variable] = newVariable;
-            }
+          if (variableOutputMap) {
+            variableOutputMap[variable] = newVariable;
+          }
 
-            return newVariable;
+          return newVariable;
         }
 
-        nodeVisitors.Declaration = function(declarationNode) {
+        nodeVisitors.Declaration = function (declarationNode) {
           const prop = declarationNode.prop;
 
           if (prop.startsWith('--')) {
@@ -208,7 +208,7 @@ const plugin = ({
             const variable = prop.match(/^\-\-(.+)$/)[1];
 
             if (!variable) {
-              throw new Error('this shouldn\'t happen');
+              throw new Error("this shouldn't happen");
             }
 
             const newVariable = renameVariableNode(variable);
@@ -227,10 +227,10 @@ const plugin = ({
             const value = child.value;
             if (value.startsWith('--')) {
               // CSS variable; rename and put into outputMap
-              const variable = prop.match(/^\-\-(.+)$/)[1];
+              const variable = value.match(/^\-\-(.+)$/)[1];
 
               if (!variable) {
-                throw new Error('this shouldn\'t happen');
+                throw new Error("this shouldn't happen");
               }
 
               return renameVariableNode(variable);
@@ -240,7 +240,7 @@ const plugin = ({
           node.nodes = renamedChildren;
         }
 
-        nodeVisitors.Root = function(rootNode) {
+        nodeVisitors.Root = function (rootNode) {
           const parsed = valueParser.walk(rootNode, renameVariableUse);
         };
       }
