@@ -259,11 +259,11 @@ const plugin = ({
         ...nodeVisitors,
         OnceExit() {
           if (classRenamingOptions.outputMapCallback) {
-            classRenamingOptions.outputMapCallback(outputMap);
+            classRenamingOptions.outputMapCallback(classOutputMap);
           }
 
           if (variableRenamingOptions.outputMapCallback) {
-            variableRenamingOptions.outputMapCallback(outputMap);
+            variableRenamingOptions.outputMapCallback(variableOutputMap);
           }
         },
         AtRule(atRule) {
