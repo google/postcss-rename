@@ -30,7 +30,7 @@ interface SharedOptions {
   except?: Iterable<string | RegExp>; // ['--var', 'var']
 }
 
-interface VariableRenamingOptions extends SharedOptions {}
+type VariableRenamingOptions = SharedOptions;
 interface ClassRenamingOptions extends SharedOptions {
   by?: 'whole' | 'part';
   ids?: boolean;
@@ -39,14 +39,15 @@ interface ClassRenamingOptions extends SharedOptions {
 /**
  * Default renaming options. Works for both classes and variables.
  */
-const DEFAULT_RENAMING_OPTIONS: VariableRenamingOptions | ClassRenamingOptions =
-  {
-    strategy: 'none',
-    prefix: '',
-    except: [],
-    by: 'whole',
-    ids: false,
-  };
+const DEFAULT_RENAMING_OPTIONS:
+  | VariableRenamingOptions
+  | ClassRenamingOptions = {
+  strategy: 'none',
+  prefix: '',
+  except: [],
+  by: 'whole',
+  ids: false,
+};
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
 namespace plugin {
@@ -76,7 +77,7 @@ function createSkip(except?: Iterable<string | RegExp>): (string) => boolean {
   return (nodeValue: string): boolean => {
     return (
       exceptSet.has(nodeValue) ||
-      exceptRegexes.some((regex) => regex.test(nodeValue))
+      exceptRegexes.some(regex => regex.test(nodeValue))
     );
   };
 }
@@ -90,7 +91,7 @@ function createSkip(except?: Iterable<string | RegExp>): (string) => boolean {
  */
 function createStrategy(
   strategy: RenamingStrategy,
-  skip: (string) => boolean,
+  skip: (string) => boolean
 ): (string) => string {
   if (typeof strategy === 'function') {
     return strategy;
@@ -98,12 +99,13 @@ function createStrategy(
 
   switch (strategy) {
     case 'none':
-      return (name) => name;
+      return name => name;
     case 'debug':
-      return (name) => name + '_';
-    case 'minimal':
+      return name => name + '_';
+    case 'minimal': {
       const renamer = new MinimalRenamer(skip);
-      return (name) => renamer.rename(name);
+      return name => renamer.rename(name);
+    }
     default:
       throw new Error(`Unknown strategy "${strategy}".`);
   }
@@ -146,7 +148,7 @@ const plugin = ({
     prepare() {
       // TODO(jiramide): figure out how to type this w/o making a dependency on postcss
       // (how do I get the Plugin type? preferably without writing it myself)
-      let nodeVisitors: any = {};
+      const nodeVisitors: any = {};
 
       if (classStrategy !== 'none' || classOutputMapCallback || classPrefix) {
         if (classBy !== 'whole' && classBy !== 'part') {
@@ -154,7 +156,7 @@ const plugin = ({
         }
 
         function renameClassNode(
-          node: selectorParser.ClassName | selectorParser.Identifier,
+          node: selectorParser.ClassName | selectorParser.Identifier
         ) {
           if (skipClass(node.value)) return;
 
@@ -163,7 +165,7 @@ const plugin = ({
               classPrefix +
               node.value
                 .split('-')
-                .map((part) => {
+                .map(part => {
                   const newPart = skipClass(part) ? part : renameClass(part);
                   if (classOutputMap) classOutputMap[part] = newPart;
                   return newPart;
@@ -176,7 +178,7 @@ const plugin = ({
           }
         }
 
-        const selectorProcessor = selectorParser((selectors) => {
+        const selectorProcessor = selectorParser(selectors => {
           selectors.walkClasses(renameClassNode);
           if (classIds) selectors.walkIds(renameClassNode);
         });
@@ -217,7 +219,7 @@ const plugin = ({
 
           if (prop.startsWith('--')) {
             // CSS variable; rename and put into outputMap
-            const variable = prop.match(/^\-\-(.+)$/)[1];
+            const variable = prop.match(/^--(.+)$/)[1];
 
             if (!variable) {
               throw new Error("this shouldn't happen");
@@ -231,7 +233,7 @@ const plugin = ({
         function renameVariableUse(node) {
           if (node.type !== 'function' || node.value !== 'var') return;
 
-          const renamedChildren = node.nodes.map((child) => {
+          const renamedChildren = node.nodes.map(child => {
             if (child.type !== 'word') {
               return child;
             }
@@ -239,7 +241,7 @@ const plugin = ({
             const value = child.value;
             if (value.startsWith('--')) {
               // CSS variable; rename and put into outputMap
-              const variable = value.match(/^\-\-(.+)$/)[1];
+              const variable = value.match(/^--(.+)$/)[1];
 
               if (!variable) {
                 throw new Error("this shouldn't happen");
@@ -253,7 +255,7 @@ const plugin = ({
         }
 
         nodeVisitors.Root = function (rootNode) {
-          const parsed = valueParser.walk(rootNode, renameVariableUse);
+          valueParser.walk(rootNode, renameVariableUse);
         };
       }
 
@@ -269,7 +271,7 @@ const plugin = ({
           }
         },
         AtRule(atRule) {
-          if (atRule.name == 'property') {
+          if (atRule.name === 'property') {
             // ...
           }
         },

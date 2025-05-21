@@ -36,11 +36,11 @@ async function assertMapEquals(
   input: string,
   classExpected: {[key: string]: string},
   variableExpected: {[key: string]: string},
-  options: plugin.Options = {},
+  options: plugin.Options = {}
 ): Promise<void> {
   const {classRenamingOptions = {}, variableRenamingOptions = {}} = options;
-  const classOutputMapCallback = (map) => expect(map).toEqual(classExpected);
-  const variableOutputMapCallback = (map) =>
+  const classOutputMapCallback = map => expect(map).toEqual(classExpected);
+  const variableOutputMapCallback = map =>
     expect(map).toEqual(variableExpected);
 
   await run(input, {
@@ -80,7 +80,7 @@ describe('with strategy "none"', () => {
   it('does nothing with an explicit strategy', async () => {
     assertPostcss(
       await run(INPUT, {classRenamingOptions: {strategy: 'none'}}),
-      INPUT,
+      INPUT
     );
   });
 
@@ -88,7 +88,7 @@ describe('with strategy "none"', () => {
     it('adds a prefix', async () => {
       assertPostcss(
         await run(INPUT, {classRenamingOptions: {prefix: 'pf-'}}),
-        '.pf-container, .pf-full-height .pf-image.pf-full-width {}',
+        '.pf-container, .pf-full-height .pf-image.pf-full-width {}'
       );
     });
 
@@ -101,7 +101,7 @@ describe('with strategy "none"', () => {
           image: 'image',
           'full-width': 'full-width',
         },
-        {},
+        {}
       );
     });
 
@@ -114,7 +114,7 @@ describe('with strategy "none"', () => {
           'full-width': 'full-width',
         },
         {},
-        {classRenamingOptions: {except: ['full-height']}},
+        {classRenamingOptions: {except: ['full-height']}}
       );
     });
 
@@ -126,7 +126,7 @@ describe('with strategy "none"', () => {
           image: 'image',
         },
         {},
-        {classRenamingOptions: {except: [/full/]}},
+        {classRenamingOptions: {except: [/full/]}}
       );
     });
 
@@ -140,7 +140,7 @@ describe('with strategy "none"', () => {
           'full-width': 'pf-full-width',
         },
         {},
-        {classRenamingOptions: {prefix: 'pf-'}},
+        {classRenamingOptions: {prefix: 'pf-'}}
       );
     });
   });
@@ -157,7 +157,7 @@ describe('with strategy "none"', () => {
           width: 'width',
         },
         {},
-        {classRenamingOptions: {by: 'part'}},
+        {classRenamingOptions: {by: 'part'}}
       );
     });
 
@@ -171,7 +171,7 @@ describe('with strategy "none"', () => {
           width: 'width',
         },
         {},
-        {classRenamingOptions: {except: ['full-height'], by: 'part'}},
+        {classRenamingOptions: {except: ['full-height'], by: 'part'}}
       );
     });
 
@@ -186,7 +186,7 @@ describe('with strategy "none"', () => {
           height: 'height',
         },
         {},
-        {classRenamingOptions: {except: ['full-.*'], by: 'part'}},
+        {classRenamingOptions: {except: ['full-.*'], by: 'part'}}
       );
     });
 
@@ -201,7 +201,7 @@ describe('with strategy "none"', () => {
           width: 'width',
         },
         {},
-        {classRenamingOptions: {prefix: 'pf-', by: 'part'}},
+        {classRenamingOptions: {prefix: 'pf-', by: 'part'}}
       );
     });
   });
@@ -216,7 +216,7 @@ describe('with strategy "debug"', () => {
     it('adds underscores after every name', async () => {
       assertPostcss(
         await run(INPUT, {classRenamingOptions: {strategy: 'debug'}}),
-        '.container_, .full-height_ .image_.full-width_ {}',
+        '.container_, .full-height_ .image_.full-width_ {}'
       );
     });
 
@@ -230,7 +230,7 @@ describe('with strategy "debug"', () => {
           'full-width': 'full-width_',
         },
         {},
-        {classRenamingOptions: {strategy: 'debug'}},
+        {classRenamingOptions: {strategy: 'debug'}}
       );
     });
 
@@ -239,7 +239,7 @@ describe('with strategy "debug"', () => {
         await run(INPUT, {
           classRenamingOptions: {strategy: 'debug', except: ['full-height']},
         }),
-        '.container_, .full-height .image_.full-width_ {}',
+        '.container_, .full-height .image_.full-width_ {}'
       );
     });
 
@@ -248,7 +248,7 @@ describe('with strategy "debug"', () => {
         await run(INPUT, {
           classRenamingOptions: {strategy: 'debug', except: [/full/]},
         }),
-        '.container_, .full-height .image_.full-width {}',
+        '.container_, .full-height .image_.full-width {}'
       );
     });
 
@@ -259,7 +259,7 @@ describe('with strategy "debug"', () => {
             strategy: 'debug',
           },
         }),
-        '#container, #full-height, #image.full-width_ {}',
+        '#container, #full-height, #image.full-width_ {}'
       );
     });
 
@@ -271,7 +271,7 @@ describe('with strategy "debug"', () => {
             ids: true,
           },
         }),
-        '#container_, #full-height_, #image_.full-width_ {}',
+        '#container_, #full-height_, #image_.full-width_ {}'
       );
     });
   });
@@ -282,7 +282,7 @@ describe('with strategy "debug"', () => {
         await run(INPUT, {
           classRenamingOptions: {strategy: 'debug', by: 'part'},
         }),
-        '.container_, .full_-height_ .image_.full_-width_ {}',
+        '.container_, .full_-height_ .image_.full_-width_ {}'
       );
     });
 
@@ -291,7 +291,7 @@ describe('with strategy "debug"', () => {
         await run(INPUT, {
           classRenamingOptions: {strategy: 'debug', prefix: 'pf-', by: 'part'},
         }),
-        '.pf-container_, .pf-full_-height_ .pf-image_.pf-full_-width_ {}',
+        '.pf-container_, .pf-full_-height_ .pf-image_.pf-full_-width_ {}'
       );
     });
 
@@ -306,7 +306,7 @@ describe('with strategy "debug"', () => {
           width: 'width_',
         },
         {},
-        {classRenamingOptions: {strategy: 'debug', by: 'part'}},
+        {classRenamingOptions: {strategy: 'debug', by: 'part'}}
       );
     });
 
@@ -319,7 +319,7 @@ describe('with strategy "debug"', () => {
             by: 'part',
           },
         }),
-        '.container_, .full-height .image_.full_-width_ {}',
+        '.container_, .full-height .image_.full_-width_ {}'
       );
     });
 
@@ -332,7 +332,7 @@ describe('with strategy "debug"', () => {
             by: 'part',
           },
         }),
-        '.container_, .full-height .image_.full-width {}',
+        '.container_, .full-height .image_.full-width {}'
       );
     });
 
@@ -345,7 +345,7 @@ describe('with strategy "debug"', () => {
             by: 'part',
           },
         }),
-        '.container_, .full-height_ .image_.full-width_ {}',
+        '.container_, .full-height_ .image_.full-width_ {}'
       );
     });
   });
@@ -353,7 +353,7 @@ describe('with strategy "debug"', () => {
   it("doesn't modify keyframes", async () => {
     assertPostcss(
       await run(KEYFRAMES, {classRenamingOptions: {strategy: 'debug'}}),
-      KEYFRAMES,
+      KEYFRAMES
     );
   });
 });
@@ -363,7 +363,7 @@ describe('with strategy "minimal"', () => {
     it('maps names to the shortest possible strings', async () => {
       assertPostcss(
         await run(INPUT, {classRenamingOptions: {strategy: 'minimal'}}),
-        '.a, .b .c.d {}',
+        '.a, .b .c.d {}'
       );
     });
 
@@ -372,7 +372,7 @@ describe('with strategy "minimal"', () => {
         await run(INPUT, {
           classRenamingOptions: {strategy: 'minimal', prefix: 'pf-'},
         }),
-        '.pf-a, .pf-b .pf-c.pf-d {}',
+        '.pf-a, .pf-b .pf-c.pf-d {}'
       );
     });
 
@@ -386,7 +386,7 @@ describe('with strategy "minimal"', () => {
           'full-width': 'd',
         },
         {},
-        {classRenamingOptions: {strategy: 'minimal'}},
+        {classRenamingOptions: {strategy: 'minimal'}}
       );
     });
 
@@ -395,7 +395,7 @@ describe('with strategy "minimal"', () => {
         await run(INPUT, {
           classRenamingOptions: {strategy: 'minimal', except: ['full-height']},
         }),
-        '.a, .full-height .b.c {}',
+        '.a, .full-height .b.c {}'
       );
     });
 
@@ -404,7 +404,7 @@ describe('with strategy "minimal"', () => {
         await run(INPUT, {
           classRenamingOptions: {strategy: 'minimal', except: [/full/]},
         }),
-        '.a, .full-height .b.full-width {}',
+        '.a, .full-height .b.full-width {}'
       );
     });
 
@@ -413,7 +413,7 @@ describe('with strategy "minimal"', () => {
         await run(INPUT, {
           classRenamingOptions: {strategy: 'minimal', except: ['b']},
         }),
-        '.a, .c .d.e {}',
+        '.a, .c .d.e {}'
       );
     });
 
@@ -422,7 +422,7 @@ describe('with strategy "minimal"', () => {
         await run(INPUT, {
           classRenamingOptions: {strategy: 'minimal', except: [/^a|b$/]},
         }),
-        '.c, .d .e.f {}',
+        '.c, .d .e.f {}'
       );
     });
   });
@@ -433,7 +433,7 @@ describe('with strategy "minimal"', () => {
         await run(INPUT, {
           classRenamingOptions: {strategy: 'minimal', by: 'part'},
         }),
-        '.a, .b-c .d.b-e {}',
+        '.a, .b-c .d.b-e {}'
       );
     });
 
@@ -446,7 +446,7 @@ describe('with strategy "minimal"', () => {
             by: 'part',
           },
         }),
-        '.pf-a, .pf-b-c .pf-d.pf-b-e {}',
+        '.pf-a, .pf-b-c .pf-d.pf-b-e {}'
       );
     });
 
@@ -461,7 +461,7 @@ describe('with strategy "minimal"', () => {
           width: 'e',
         },
         {},
-        {classRenamingOptions: {strategy: 'minimal', by: 'part'}},
+        {classRenamingOptions: {strategy: 'minimal', by: 'part'}}
       );
     });
 
@@ -474,7 +474,7 @@ describe('with strategy "minimal"', () => {
             by: 'part',
           },
         }),
-        '.a, .full-height .b.c-d {}',
+        '.a, .full-height .b.c-d {}'
       );
     });
 
@@ -487,7 +487,7 @@ describe('with strategy "minimal"', () => {
             by: 'part',
           },
         }),
-        '.a, .full-height .b.full-width {}',
+        '.a, .full-height .b.full-width {}'
       );
     });
 
@@ -500,7 +500,7 @@ describe('with strategy "minimal"', () => {
             by: 'part',
           },
         }),
-        '.a, .c-d .e.c-f {}',
+        '.a, .c-d .e.c-f {}'
       );
     });
 
@@ -513,7 +513,7 @@ describe('with strategy "minimal"', () => {
             by: 'part',
           },
         }),
-        '.c, .d-e .f.d-g {}',
+        '.c, .d-e .f.d-g {}'
       );
     });
   });
@@ -538,26 +538,26 @@ describe('with strategy "minimal"', () => {
   it("doesn't modify keyframes", async () => {
     assertPostcss(
       await run(KEYFRAMES, {classRenamingOptions: {strategy: 'minimal'}}),
-      KEYFRAMES,
+      KEYFRAMES
     );
   });
 });
 
 describe('with a custom strategy', () => {
-  const strategy = (name) => name.substring(name.length - 2, name.length);
+  const strategy = name => name.substring(name.length - 2, name.length);
 
   describe('in by-whole mode', () => {
     it('maps names to the shortest possible strings', async () => {
       assertPostcss(
         await run(INPUT, {classRenamingOptions: {strategy}}),
-        '.er, .ht .ge.th {}',
+        '.er, .ht .ge.th {}'
       );
     });
 
     it('adds a prefix after renaming', async () => {
       assertPostcss(
         await run(INPUT, {classRenamingOptions: {strategy, prefix: 'pf-'}}),
-        '.pf-er, .pf-ht .pf-ge.pf-th {}',
+        '.pf-er, .pf-ht .pf-ge.pf-th {}'
       );
     });
 
@@ -571,7 +571,7 @@ describe('with a custom strategy', () => {
           'full-width': 'th',
         },
         {},
-        {classRenamingOptions: {strategy}},
+        {classRenamingOptions: {strategy}}
       );
     });
 
@@ -580,14 +580,14 @@ describe('with a custom strategy', () => {
         await run(INPUT, {
           classRenamingOptions: {strategy, except: ['full-height']},
         }),
-        '.er, .full-height .ge.th {}',
+        '.er, .full-height .ge.th {}'
       );
     });
 
     it("doesn't map excluded regexes", async () => {
       assertPostcss(
         await run(INPUT, {classRenamingOptions: {strategy, except: [/full/]}}),
-        '.er, .full-height .ge.full-width {}',
+        '.er, .full-height .ge.full-width {}'
       );
     });
   });
@@ -596,7 +596,7 @@ describe('with a custom strategy', () => {
     it('maps parts to the shortest possible strings', async () => {
       assertPostcss(
         await run(INPUT, {classRenamingOptions: {strategy, by: 'part'}}),
-        '.er, .ll-ht .ge.ll-th {}',
+        '.er, .ll-ht .ge.ll-th {}'
       );
     });
 
@@ -605,7 +605,7 @@ describe('with a custom strategy', () => {
         await run(INPUT, {
           classRenamingOptions: {strategy, prefix: 'pf-', by: 'part'},
         }),
-        '.pf-er, .pf-ll-ht .pf-ge.pf-ll-th {}',
+        '.pf-er, .pf-ll-ht .pf-ge.pf-ll-th {}'
       );
     });
 
@@ -620,7 +620,7 @@ describe('with a custom strategy', () => {
           width: 'th',
         },
         {},
-        {classRenamingOptions: {strategy, by: 'part'}},
+        {classRenamingOptions: {strategy, by: 'part'}}
       );
     });
 
@@ -633,7 +633,7 @@ describe('with a custom strategy', () => {
             by: 'part',
           },
         }),
-        '.er, .full-height .ge.ll-th {}',
+        '.er, .full-height .ge.ll-th {}'
       );
     });
 
@@ -646,7 +646,7 @@ describe('with a custom strategy', () => {
             by: 'part',
           },
         }),
-        '.er, .full-height .ge.full-width {}',
+        '.er, .full-height .ge.full-width {}'
       );
     });
   });
@@ -654,7 +654,7 @@ describe('with a custom strategy', () => {
   it("doesn't modify keyframes", async () => {
     assertPostcss(
       await run(KEYFRAMES, {classRenamingOptions: {strategy}}),
-      KEYFRAMES,
+      KEYFRAMES
     );
   });
 });
