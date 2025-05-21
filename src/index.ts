@@ -199,6 +199,10 @@ const plugin = ({
         variablePrefix
       ) {
         function renameVariableNode(variable: string): string {
+          if (skipVariable(variable)) {
+            return variable;
+          }
+
           if (!variable) {
             throw new Error("this shouldn't happen");
           }
