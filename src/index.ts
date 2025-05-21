@@ -218,7 +218,44 @@ const plugin = ({
           return newVariable;
         }
 
+        function renameVariableUse(node) {
+          if (node.type !== 'function' || node.value !== 'var') return;
+
+          for (const childIdx in node.nodes) {
+            const child = node.nodes[childIdx];
+
+            if (child.type !== 'word') {
+              continue;
+            }
+
+            if (processedNodes.has(child)) {
+              continue;
+            }
+
+            processedNodes.add(child);
+
+            const value = child.value;
+            if (value.startsWith('--')) {
+              // CSS variable; rename and put into outputMap
+              const variable = value.match(/^--(.+)$/)[1];
+
+              if (!variable) {
+                throw new Error("this shouldn't happen");
+              }
+
+              const newVariable = renameVariableNode(variable);
+              node.nodes[childIdx].value = '--' + newVariable;
+            }
+          }
+        }
+
         nodeVisitors.Declaration = function (declarationNode) {
+          if (processedNodes.has(declarationNode)) {
+            return;
+          }
+
+          processedNodes.add(declarationNode);
+
           const prop = declarationNode.prop;
 
           if (prop.startsWith('--')) {
@@ -230,36 +267,12 @@ const plugin = ({
             }
 
             const newVariable = renameVariableNode(variable);
-            declarationNode.prop = newVariable;
+            declarationNode.prop = '--' + newVariable;
           }
-        };
 
-        function renameVariableUse(node) {
-          if (node.type !== 'function' || node.value !== 'var') return;
-
-          const renamedChildren = node.nodes.map(child => {
-            if (child.type !== 'word') {
-              return child;
-            }
-
-            const value = child.value;
-            if (value.startsWith('--')) {
-              // CSS variable; rename and put into outputMap
-              const variable = value.match(/^--(.+)$/)[1];
-
-              if (!variable) {
-                throw new Error("this shouldn't happen");
-              }
-
-              return renameVariableNode(variable);
-            }
-          });
-
-          node.nodes = renamedChildren;
-        }
-
-        nodeVisitors.Root = function (rootNode) {
-          valueParser.walk(rootNode, renameVariableUse);
+          const valueNodes = valueParser(declarationNode.value);
+          valueNodes.walk(renameVariableUse);
+          declarationNode.value = valueNodes.toString();
         };
       }
 
