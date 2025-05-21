@@ -51,8 +51,8 @@ const DEFAULT_RENAMING_OPTIONS: VariableRenamingOptions | ClassRenamingOptions =
 // eslint-disable-next-line @typescript-eslint/no-namespace
 namespace plugin {
   export interface Options {
-    classRenamingOptions: ClassRenamingOptions;
-    variableRenamingOptions: VariableRenamingOptions;
+    classRenamingOptions?: ClassRenamingOptions;
+    variableRenamingOptions?: VariableRenamingOptions;
   }
 }
 
