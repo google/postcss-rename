@@ -34,15 +34,24 @@ function assertPostcss(result: Result, output: string): void {
  */
 async function assertMapEquals(
   input: string,
-  expected: {[key: string]: string},
+  classExpected: {[key: string]: string},
+  variableExpected: {[key: string]: string},
   options: plugin.Options = {},
 ): Promise<void> {
   const {classRenamingOptions = {}, variableRenamingOptions = {}} = options;
-  const outputMapCallback = (map) => expect(map).toEqual(expected);
+  const classOutputMapCallback = (map) => expect(map).toEqual(classExpected);
+  const variableOutputMapCallback = (map) =>
+    expect(map).toEqual(variableExpected);
 
   await run(input, {
-    classRenamingOptions: {...classRenamingOptions, outputMapCallback},
-    variableRenamingOptions: {...variableRenamingOptions, outputMapCallback},
+    classRenamingOptions: {
+      ...classRenamingOptions,
+      outputMapCallback: classOutputMapCallback,
+    },
+    variableRenamingOptions: {
+      ...variableRenamingOptions,
+      outputMapCallback: variableOutputMapCallback,
+    },
   });
 }
 
@@ -84,12 +93,16 @@ describe('with strategy "none"', () => {
     });
 
     it('emits an output map', async () => {
-      await assertMapEquals(INPUT, {
-        container: 'container',
-        'full-height': 'full-height',
-        image: 'image',
-        'full-width': 'full-width',
-      });
+      await assertMapEquals(
+        INPUT,
+        {
+          container: 'container',
+          'full-height': 'full-height',
+          image: 'image',
+          'full-width': 'full-width',
+        },
+        {},
+      );
     });
 
     it('omits excluded names from the output map', async () => {
@@ -100,6 +113,7 @@ describe('with strategy "none"', () => {
           image: 'image',
           'full-width': 'full-width',
         },
+        {},
         {classRenamingOptions: {except: ['full-height']}},
       );
     });
@@ -111,6 +125,7 @@ describe('with strategy "none"', () => {
           container: 'container',
           image: 'image',
         },
+        {},
         {classRenamingOptions: {except: [/full/]}},
       );
     });
@@ -124,6 +139,7 @@ describe('with strategy "none"', () => {
           image: 'pf-image',
           'full-width': 'pf-full-width',
         },
+        {},
         {classRenamingOptions: {prefix: 'pf-'}},
       );
     });
@@ -140,6 +156,7 @@ describe('with strategy "none"', () => {
           image: 'image',
           width: 'width',
         },
+        {},
         {classRenamingOptions: {by: 'part'}},
       );
     });
@@ -153,6 +170,7 @@ describe('with strategy "none"', () => {
           image: 'image',
           width: 'width',
         },
+        {},
         {classRenamingOptions: {except: ['full-height'], by: 'part'}},
       );
     });
@@ -167,6 +185,7 @@ describe('with strategy "none"', () => {
           width: 'width',
           height: 'height',
         },
+        {},
         {classRenamingOptions: {except: ['full-.*'], by: 'part'}},
       );
     });
@@ -181,6 +200,7 @@ describe('with strategy "none"', () => {
           image: 'image',
           width: 'width',
         },
+        {},
         {classRenamingOptions: {prefix: 'pf-', by: 'part'}},
       );
     });
@@ -209,6 +229,7 @@ describe('with strategy "debug"', () => {
           image: 'image_',
           'full-width': 'full-width_',
         },
+        {},
         {classRenamingOptions: {strategy: 'debug'}},
       );
     });
@@ -284,6 +305,7 @@ describe('with strategy "debug"', () => {
           image: 'image_',
           width: 'width_',
         },
+        {},
         {classRenamingOptions: {strategy: 'debug', by: 'part'}},
       );
     });
@@ -363,6 +385,7 @@ describe('with strategy "minimal"', () => {
           image: 'c',
           'full-width': 'd',
         },
+        {},
         {classRenamingOptions: {strategy: 'minimal'}},
       );
     });
@@ -437,6 +460,7 @@ describe('with strategy "minimal"', () => {
           image: 'd',
           width: 'e',
         },
+        {},
         {classRenamingOptions: {strategy: 'minimal', by: 'part'}},
       );
     });
@@ -546,6 +570,7 @@ describe('with a custom strategy', () => {
           image: 'ge',
           'full-width': 'th',
         },
+        {},
         {classRenamingOptions: {strategy}},
       );
     });
@@ -594,6 +619,7 @@ describe('with a custom strategy', () => {
           image: 'ge',
           width: 'th',
         },
+        {},
         {classRenamingOptions: {strategy, by: 'part'}},
       );
     });
