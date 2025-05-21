@@ -195,8 +195,6 @@ const plugin = ({
         variablePrefix
       ) {
         function renameVariableNode(variable: string): string {
-          const variable = prop.match(/^\-\-(.+)$/)[1];
-
           if (!variable) {
             throw new Error("this shouldn't happen");
           }
