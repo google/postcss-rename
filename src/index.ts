@@ -125,6 +125,8 @@ const plugin = ({
     ids: classIds = false,
   } = classRenamingOptions || DEFAULT_RENAMING_OPTIONS;
 
+  const processedNodes: Set<any> = new Set();
+
   const {
     strategy: variableStrategy = 'none',
     prefix: variablePrefix = '',
