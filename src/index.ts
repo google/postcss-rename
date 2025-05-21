@@ -84,10 +84,14 @@ function createSkip(except?: Iterable<string | RegExp>): (string) => boolean {
 /**
  * Produces a renaming function from the given strategy
  * @param strategy
+ * @param skip
  * @returns renaming function
  * @throws if strategy isn't a function or one of 'none', 'debug', 'minimal'
  */
-function createStrategy(strategy: RenamingStrategy): (string) => string {
+function createStrategy(
+  strategy: RenamingStrategy,
+  skip: (string) => boolean,
+): (string) => string {
   if (typeof strategy === 'function') {
     return strategy;
   }
@@ -129,8 +133,8 @@ const plugin = ({
   const skipClass = createSkip(classExcept);
   const skipVariable = createSkip(variableExcept);
 
-  const renameClass = createStrategy(classStrategy);
-  const renameVariable = createStrategy(variableStrategy);
+  const renameClass = createStrategy(classStrategy, skipClass);
+  const renameVariable = createStrategy(variableStrategy, skipVariable);
 
   const classOutputMap: RenamingMap | null = classOutputMapCallback ? {} : null;
   const variableOutputMap: RenamingMap | null = variableOutputMapCallback
