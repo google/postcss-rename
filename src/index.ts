@@ -276,6 +276,25 @@ const plugin = ({
           valueNodes.walk(renameVariableUse);
           declarationNode.value = valueNodes.toString();
         };
+
+        nodeVisitors.AtRule = function (atRuleNode) {
+          if (atRuleNode.name === 'property') {
+            if (processedNodes.has(atRuleNode)) {
+              return;
+            }
+
+            processedNodes.add(atRuleNode);
+
+            const variable = atRuleNode.params.match(/^--(.+)$/)[1];
+
+            if (!variable) {
+              throw new Error("this shouldn't happen");
+            }
+
+            const newVariable = renameVariableNode(variable);
+            atRuleNode.params = '--' + newVariable;
+          }
+        };
       }
 
       return {
@@ -287,11 +306,6 @@ const plugin = ({
 
           if (variableOutputMapCallback) {
             variableOutputMapCallback(variableOutputMap);
-          }
-        },
-        AtRule(atRule) {
-          if (atRule.name === 'property') {
-            // ...
           }
         },
       };
