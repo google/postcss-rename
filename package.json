@@ -25,7 +25,8 @@
   "license": "Apache-2.0",
   "repository": "https://github.com/google/postcss-rename",
   "dependencies": {
-    "postcss-selector-parser": "^6.0.4"
+    "postcss-selector-parser": "^6.0.4",
+    "postcss-value-parser": "^4.2.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.6.0",
