@@ -68,9 +68,7 @@ const plugin = ({
         throw new Error(`Unknown mode "${by}".`);
       }
 
-      const alreadySeenNodes: Set<
-        selectorParser.ClassName | selectorParser.Identifier
-      > = new Set();
+      const alreadySeenNodes = new Set();
 
       function renameNode(
         node: selectorParser.ClassName | selectorParser.Identifier
