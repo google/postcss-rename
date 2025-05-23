@@ -109,7 +109,7 @@ const plugin = ({
             ruleNode.parent.type !== 'atrule' ||
             !ruleNode.parent.name.endsWith('keyframes')
           ) {
-            selectorProcessor.process(ruleNode);
+            selectorProcessor.processSync(ruleNode, {updateSelector: true});
           }
         },
         OnceExit() {
