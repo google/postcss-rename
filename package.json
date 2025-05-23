@@ -1,6 +1,6 @@
 {
   "name": "postcss-rename",
-  "version": "0.6.1",
+  "version": "0.7.1-dev",
   "description": "A PostCSS plugin to replace class names based on a customizable renaming scheme.",
   "keywords": [
     "postcss",
@@ -25,28 +25,19 @@
   "license": "Apache-2.0",
   "repository": "https://github.com/google/postcss-rename",
   "dependencies": {
-    "postcss-selector-parser": "^6.0.4"
+    "postcss-selector-parser": "^7.1.0"
   },
   "devDependencies": {
-    "@babel/cli": "^7.6.0",
-    "@babel/core": "^7.7.7",
-    "@babel/preset-env": "^7.7.7",
-    "@bazel/typescript": "^1.0.1",
-    "@types/conditional": "^5.3.0",
-    "@types/jest": "^26.0.20",
-    "@types/node": "^12.12.7",
-    "babel-jest": "^24.9.0",
-    "gts": "^3.1.0",
-    "jest": "^27.0.4",
-    "jest-cli": "^27.0.4",
-    "postcss": "^8.2.6",
-    "ts-jest": "^27.0.3",
-    "typescript": "^3.8.0"
-  },
-  "peerDependencies": {
-    "postcss": "^8.2.6"
+    "@types/jest": "^26.0.24",
+    "@types/node": "^12.20.55",
+    "gts": "^6.0.2",
+    "jest": "^29.7.0",
+    "jest-cli": "^29.7.0",
+    "postcss": "^8.5.3",
+    "ts-jest": "^29.3.4",
+    "typescript": "^5.8.3"
   },
   "engines": {
-    "node": ">=8.3.0"
+    "node": ">=20.0.0"
   }
 }
