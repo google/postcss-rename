@@ -1,4 +1,4 @@
-## 0.7.0-dev
+## 0.7.0
 
 * Changed the plugin to run synchronously. This is a breaking change if you
 expect this plugin to run asynchronously.
