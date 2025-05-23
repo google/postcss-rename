@@ -18,11 +18,12 @@
 import selectorParser from 'postcss-selector-parser';
 
 import {MinimalRenamer} from './minimal-renamer';
+import postcss, {AnyNode} from 'postcss';
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
 namespace plugin {
   export interface Options {
-    strategy?: 'none' | 'debug' | 'minimal' | ((string) => string);
+    strategy?: 'none' | 'debug' | 'minimal' | ((part: string) => string);
     by?: 'whole' | 'part';
     prefix?: string;
     except?: Iterable<string | RegExp>;
@@ -31,15 +32,14 @@ namespace plugin {
   }
 }
 
-// eslint-disable-next-line no-redeclare
-const plugin = ({
+function plugin({
   strategy = 'none',
   by = 'whole',
   prefix = '',
   except = [],
   ids = false,
   outputMapCallback,
-}: plugin.Options = {}) => {
+}: plugin.Options = {}): postcss.Plugin {
   const exceptSet = new Set(except);
   return {
     postcssPlugin: 'postcss-rename',
@@ -50,7 +50,7 @@ const plugin = ({
         ? {}
         : null;
 
-      let rename: (string) => string;
+      let rename: (part: string) => string;
       if (strategy === 'none') {
         rename = name => name;
       } else if (strategy === 'debug') {
@@ -69,8 +69,8 @@ const plugin = ({
       }
 
       function renameNode(
-        node: selectorParser.ClassName | selectorParser.Identifier
-      ) {
+        node: selectorParser.ClassName | selectorParser.Identifier,
+      ): void {
         if (skip(node.value)) return;
 
         if (by === 'part') {
@@ -104,20 +104,20 @@ const plugin = ({
       });
 
       return {
-        Rule(ruleNode) {
-          if (
-            ruleNode.parent.type !== 'atrule' ||
-            !ruleNode.parent.name.endsWith('keyframes')
-          ) {
+        Rule(ruleNode: postcss.Rule) {
+          const parent = ruleNode.parent as AnyNode;
+          if (parent.type !== 'atrule' || !parent.name.endsWith('keyframes')) {
+            // TODO(goodwine): Use processSync().
+            // eslint-disable-next-line @typescript-eslint/no-floating-promises
             selectorProcessor.process(ruleNode);
           }
         },
         OnceExit() {
-          if (outputMapCallback) outputMapCallback(outputMap);
+          if (outputMapCallback) outputMapCallback(outputMap ?? {});
         },
       };
     },
   };
-};
+}
 
 export = plugin;
