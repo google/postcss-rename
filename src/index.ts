@@ -68,6 +68,10 @@ const plugin = ({
         throw new Error(`Unknown mode "${by}".`);
       }
 
+      const alreadySeenNodes: Set<
+        selectorParser.ClassName | selectorParser.Identifier
+      > = new Set();
+
       function renameNode(
         node: selectorParser.ClassName | selectorParser.Identifier
       ) {
@@ -109,6 +113,11 @@ const plugin = ({
             ruleNode.parent.type !== 'atrule' ||
             !ruleNode.parent.name.endsWith('keyframes')
           ) {
+            if (alreadySeenNodes.has(ruleNode)) {
+              return;
+            }
+
+            alreadySeenNodes.add(ruleNode);
             selectorProcessor.processSync(ruleNode, {updateSelector: true});
           }
         },
