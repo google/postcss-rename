@@ -1,35 +1,17 @@
 {
   "extends": "./node_modules/gts/tsconfig-google.json",
   "compilerOptions": {
+    "resolveJsonModule": true,
+    "rootDir": ".",
+    "useUnknownInCatchVariables": false,
+    "declaration": true,
     "outDir": "build",
     "module": "commonjs",
-    "baseUrl": ".",
     "esModuleInterop": true,
-    "lib": [
-      "es5",
-      "es6",
-      "es2015.collection",
-      "es2015.iterable",
-      "es2015.core",
-      "dom"
-    ],
-    "types": [
-      "node",
-      "jest"
-    ],
-    "target": "es2015",
-    "strict": false,
+    "lib": ["es2022"],
+    "types": ["node", "jest"],
     "allowJs": true
   },
-  "include": [
-    "src/**/*.ts",
-    "test/**/*.ts"
-  ],
-  "exclude": [
-    "bazel-*/",
-    "build/",
-    "test/",
-    "jest.config.js",
-    "prettier.config.js"
-  ]
+  "include": ["src/**/*.ts", "test/**/*.ts"],
+  "exclude": ["build/", "jest.config.js", "prettier.config.js"]
 }
