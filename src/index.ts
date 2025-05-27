@@ -20,7 +20,7 @@ import selectorParser from 'postcss-selector-parser';
 import postcss, {AnyNode} from 'postcss';
 import {MinimalRenamer} from './minimal-renamer';
 import {type ClassRenamingOptions} from './options';
-import {type SkipPredicate, createSkip} from './skip';
+import {type SkipPredicate, createSkipPredicate} from './skip';
 import {type RenamingFunction, createStrategy} from './strategy';
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -46,7 +46,7 @@ function plugin({
         ? {}
         : null;
 
-      const skip: SkipPredicate = createSkip(except);
+      const skip: SkipPredicate = createSkipPredicate(except);
       const rename: RenamingFunction = createStrategy(strategy, skip);
 
       if (by !== 'whole' && by !== 'part') {
