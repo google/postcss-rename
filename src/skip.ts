@@ -23,7 +23,7 @@
 export type SkipPredicate = (name: string) => boolean;
 
 /**
- * Creates a SkipPredicate that filters against the given strings or
+ * Creates a {@link SkipPredicate} that filters against the given strings or
  * regular expressions.
  * @param except
  * @returns SkipPredicate

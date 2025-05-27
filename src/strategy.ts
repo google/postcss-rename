@@ -33,7 +33,7 @@ export type RenamingFunction = (original: string) => string;
  * - 'none' performs no renaming.
  * - 'debug' appends an underscore ('_') at the end of the name.
  * - 'minimal' uses a minimal renamer (@see minimal-renamer.ts).
- * - a custom renaming function
+ * - {@link RenamingFunction} allows passing a custom renaming function.
  */
 export type RenamingStrategy = 'none' | 'debug' | 'minimal' | RenamingFunction;
 
