@@ -15,9 +15,12 @@
  * limitations under the License.
  */
 
+import postcss from 'postcss';
+import {type VariableRenamingOptions} from './options';
+
 // eslint-disable-next-line @typescript-eslint/no-namespace
 namespace plugin {
-  export type Options = 'stub';
+  export type Options = VariableRenamingOptions;
 }
 
 // eslint-disable-next-line no-redeclare
@@ -26,7 +29,7 @@ const plugin = ({
   prefix = '',
   outputMapCallback,
   except = [],
-}: plugin.Options = {}) => {
+}: plugin.Options = {}): postcss.Plugin => {
   return {
     postcssPlugin: 'postcss-variable-rename',
     prepare() {
