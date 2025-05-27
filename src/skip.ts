@@ -36,7 +36,7 @@ export function createSkipPredicate(
     return name => false;
   }
 
-  const disallowedNames = new Set();
+  const disallowedNames = new Set<string>();
   const disallowedPatterns: RegExp[] = [];
 
   for (const disallowed of except) {
