@@ -25,7 +25,7 @@ export type SkipPredicate = (name: string) => boolean;
 /**
  * Creates a {@link SkipPredicate} that filters against the given strings or
  * regular expressions.
- * @param except
+ * @param except - strings or regular expressions to filter against
  * @returns SkipPredicate
  */
 export function createSkipPredicate(
