@@ -31,7 +31,7 @@ export type SkipPredicate = (name: string) => boolean;
 export function createSkipPredicate(
   except?: Iterable<string | RegExp>,
 ): SkipPredicate {
-  if (except === undefined) {
+  if (!except) {
     // If no `except` is given, then assume everything is allowed
     return name => false;
   }
