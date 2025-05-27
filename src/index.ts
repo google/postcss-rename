@@ -106,4 +106,6 @@ function plugin({
   };
 }
 
+plugin.postcss = true;
+
 export = plugin;
