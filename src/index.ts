@@ -76,13 +76,6 @@ function plugin({
         }
       }
 
-      function skip(nodeValue: string): boolean {
-        if (exceptSet.has(nodeValue)) return true;
-        for (const val of exceptSet)
-          if (val instanceof RegExp && val.test(nodeValue)) return true;
-        return false;
-      }
-
       const selectorProcessor = selectorParser(selectors => {
         selectors.walkClasses(renameNode);
         if (ids) selectors.walkIds(renameNode);
