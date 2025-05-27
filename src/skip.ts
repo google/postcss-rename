@@ -22,6 +22,29 @@
  */
 export type SkipPredicate = (name: string) => boolean;
 
-export function createSkip(except: Iterable<string | RegExp>): SkipPredicate {
-  return undefined as SkipPredicate; // stub
+export function createSkip(except?: Iterable<string | RegExp>): SkipPredicate {
+  if (except === undefined) {
+    // If no `except` is given, then assume everything is allowed
+    return (name) => false;
+  }
+
+  const disallowedNames = new Set();
+  const disallowedPatterns: RegExp[] = [];
+
+  for (const disallowed of except) {
+    if (typeof disallowed === 'string') {
+      disallowedNames.add(disallowed);
+    } else {
+      disallowedPatterns.push(disallowed);
+    }
+  }
+
+  return (name: string) => {
+    return (
+      disallowedNames.has(name) ||
+      disallowedPatterns.some((disallowedPattern) =>
+        disallowedPattern.test(name),
+      )
+    );
+  };
 }
