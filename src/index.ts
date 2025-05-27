@@ -20,6 +20,8 @@ import selectorParser from 'postcss-selector-parser';
 import postcss, {AnyNode} from 'postcss';
 import {MinimalRenamer} from './minimal-renamer';
 import {type ClassRenamingOptions} from './options';
+import {type SkipPredicate, createSkip} from './skip';
+import {type RenamingFunction, createStrategy} from './strategy';
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
 namespace plugin {
@@ -44,19 +46,8 @@ function plugin({
         ? {}
         : null;
 
-      let rename: (part: string) => string;
-      if (strategy === 'none') {
-        rename = name => name;
-      } else if (strategy === 'debug') {
-        rename = name => name + '_';
-      } else if (strategy === 'minimal') {
-        const renamer = new MinimalRenamer(skip);
-        rename = name => renamer.rename(name);
-      } else if (typeof strategy === 'string') {
-        throw new Error(`Unknown strategy "${strategy}".`);
-      } else {
-        rename = strategy;
-      }
+      const skip: SkipPredicate = createSkip(except);
+      const rename: RenamingFunction = createStrategy(strategy, skip);
 
       if (by !== 'whole' && by !== 'part') {
         throw new Error(`Unknown mode "${by}".`);
