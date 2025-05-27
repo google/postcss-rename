@@ -23,7 +23,10 @@ import {type RenamingStrategy} from './strategy';
 export type RenamingMap = {[originalName: string]: string};
 
 /**
- * Options for renaming CSS names.
+ * Base options for renaming CSS entities.
+ *
+ * This interface is not meant to be used directly. It must be extended by more
+ * specific renaming option interfaces.
  */
 interface RenamingOptions {
   /**
