@@ -27,7 +27,7 @@ export type RenamingMap = {[originalName: string]: string};
  */
 interface RenamingOptions {
   /**
-   * The strategy to use when renaming.
+   * The strategy to use when renaming CSS names.
    * @see strategy.ts
    */
   strategy?: RenamingStrategy;
