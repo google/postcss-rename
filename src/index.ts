@@ -17,19 +17,13 @@
 
 import selectorParser from 'postcss-selector-parser';
 
+import postcss, {AnyNode} from 'postcss';
 import {MinimalRenamer} from './minimal-renamer';
-import postcss from 'postcss';
+import {type ClassRenamingOptions} from './options';
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
 namespace plugin {
-  export interface Options {
-    strategy?: 'none' | 'debug' | 'minimal' | ((name: string) => string);
-    by?: 'whole' | 'part';
-    prefix?: string;
-    except?: Iterable<string | RegExp>;
-    ids?: boolean;
-    outputMapCallback?(map: {[key: string]: string}): void;
-  }
+  export type Options = ClassRenamingOptions;
 }
 
 function plugin({
