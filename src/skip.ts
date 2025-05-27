@@ -22,6 +22,12 @@
  */
 export type SkipPredicate = (name: string) => boolean;
 
+/**
+ * Creates a SkipPredicate that filters against the given set of strings or
+ * regexes.
+ * @param except
+ * @returns SkipPredicate
+ */
 export function createSkip(except?: Iterable<string | RegExp>): SkipPredicate {
   if (except === undefined) {
     // If no `except` is given, then assume everything is allowed
