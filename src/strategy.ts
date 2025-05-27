@@ -20,26 +20,25 @@ import {type SkipPredicate} from './skip';
 
 /**
  * Renaming function.
+ *
  * A renaming function must satisfy the following:
- * - a renaming function always produces the same output for a specific input
- * - a renaming function does not produce anything that is in the user-specified
- *   skiplist
+ * - A renaming function always produces the same output for a specific input.
+ * - A renaming function does not produce anything that is in the user-specified
+ *   skiplist.
  */
 export type RenamingFunction = (original: string) => string;
 
 /**
  * Defines a way to rename variables.
- * 'none' performs no renaming
- * 'debug' appends an underscore ('_') at the end of the name
- * 'minimal' uses a minimal renamer (@see minimal-renamer.ts)
- * custom renaming function
+ * - 'none' performs no renaming.
+ * - 'debug' appends an underscore ('_') at the end of the name.
+ * - 'minimal' uses a minimal renamer (@see minimal-renamer.ts).
+ * - a custom renaming function
  */
 export type RenamingStrategy = 'none' | 'debug' | 'minimal' | RenamingFunction;
 
 /**
- * Produces a renaming function from the given strategy
- * @param strategy
- * @param skip
+ * Produces a renaming function from the given `strategy`
  * @returns renaming function
  * @throws if strategy isn't a function or one of 'none', 'debug', 'minimal'
  */

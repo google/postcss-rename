@@ -18,10 +18,13 @@
 import {type RenamingStrategy} from './strategy';
 
 /**
- * Maps un-renamed names to their renamings
+ * Maps original names to their new names.
  */
-export type RenamingMap = {[key: string]: string};
+export type RenamingMap = {[originalName: string]: string};
 
+/**
+ * Options for renaming CSS names.
+ */
 interface RenamingOptions {
   /**
    * The strategy to use when renaming.
@@ -30,7 +33,7 @@ interface RenamingOptions {
   strategy?: RenamingStrategy;
 
   /**
-   * A prefix to prepend onto the renamed variables.
+   * A prefix to prepend onto the renamed CSS names.
    */
   prefix?: string;
 
@@ -40,29 +43,29 @@ interface RenamingOptions {
   outputMapCallback?(map: RenamingMap): void;
 
   /**
-   * A list of objects to skip renaming and disallowed renamings.
+   * A list of CSS names or patterns to exclude from renaming.
    */
   except?: Iterable<string | RegExp>;
 }
 
 /**
- * Options for renaming variables.
+ * Options for renaming CSS variables.
  */
 export type VariableRenamingOptions = RenamingOptions;
 
 /**
- * Options for renaming classes.
+ * Options for renaming CSS class selectors.
  */
 export interface ClassRenamingOptions extends RenamingOptions {
   /**
    * Controls how class names are split when renaming.
-   * 'whole' takes the entire name as input into the renaming strategy
-   * 'part' splits the class name by '-' and renames each part individually
+   * - 'whole' takes the entire name as input into the renaming strategy.
+   * - 'part' splits the class name by '-' and renames each part individually.
    */
   by?: 'whole' | 'part';
 
   /**
-   * Whether to also rename ids.
+   * Whether to also rename id selectors.
    */
   ids?: boolean;
 }
