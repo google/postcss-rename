@@ -53,12 +53,12 @@ export function createStrategy(
 
   switch (strategy) {
     case 'none':
-      return (name) => name;
+      return name => name;
     case 'debug':
-      return (name) => name + '_';
+      return name => name + '_';
     case 'minimal': {
       const renamer = new MinimalRenamer(skip);
-      return (name) => renamer.rename(name);
+      return name => renamer.rename(name);
     }
     default:
       throw new Error(`Unknown strategy "${strategy}".`);
