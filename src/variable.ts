@@ -34,7 +34,7 @@ const plugin = ({
     postcssPlugin: 'postcss-variable-rename',
     prepare() {
       // TODO(jiramide): add variable renaming logic
-      return;
+      return {};
     },
   };
 };
