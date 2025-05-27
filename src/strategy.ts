@@ -16,6 +16,7 @@
  */
 
 import {MinimalRenamer} from './minimal-renamer';
+import {type SkipPredicate} from './skip';
 
 /**
  * Renaming function.
@@ -44,7 +45,7 @@ export type RenamingStrategy = 'none' | 'debug' | 'minimal' | RenamingFunction;
  */
 export function createStrategy(
   strategy: RenamingStrategy,
-  skip: (string) => boolean,
+  skip: SkipPredicate,
 ): RenamingFunction {
   if (typeof strategy === 'function') {
     return strategy;
