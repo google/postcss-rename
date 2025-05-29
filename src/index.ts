@@ -23,7 +23,7 @@ import postcss from 'postcss';
 // eslint-disable-next-line @typescript-eslint/no-namespace
 namespace plugin {
   export interface Options {
-    strategy?: 'none' | 'debug' | 'minimal' | ((part: string) => string);
+    strategy?: 'none' | 'debug' | 'minimal' | ((name: string) => string);
     by?: 'whole' | 'part';
     prefix?: string;
     except?: Iterable<string | RegExp>;
@@ -107,6 +107,9 @@ function plugin({
 
       return {
         Rule(ruleNode: postcss.Rule) {
+          // Cast `parent` to `postcss.AnyNode` for stricter `type` checking.
+          // Otherwise, `parent` is typed as `postcss.ContainerWithChildren`
+          // which declares `type` as a `string` rather than a sum type.
           const parent = ruleNode.parent as postcss.AnyNode;
           if (parent.type !== 'atrule' || !parent.name.endsWith('keyframes')) {
             if (alreadySeenNodes.has(ruleNode)) {
