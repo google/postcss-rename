@@ -18,11 +18,12 @@
 import selectorParser from 'postcss-selector-parser';
 
 import {MinimalRenamer} from './minimal-renamer';
+import postcss from 'postcss';
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
 namespace plugin {
   export interface Options {
-    strategy?: 'none' | 'debug' | 'minimal' | ((string) => string);
+    strategy?: 'none' | 'debug' | 'minimal' | ((name: string) => string);
     by?: 'whole' | 'part';
     prefix?: string;
     except?: Iterable<string | RegExp>;
@@ -31,15 +32,14 @@ namespace plugin {
   }
 }
 
-// eslint-disable-next-line no-redeclare
-const plugin = ({
+function plugin({
   strategy = 'none',
   by = 'whole',
   prefix = '',
   except = [],
   ids = false,
   outputMapCallback,
-}: plugin.Options = {}) => {
+}: plugin.Options = {}): postcss.Plugin {
   const exceptSet = new Set(except);
   return {
     postcssPlugin: 'postcss-rename',
@@ -50,7 +50,7 @@ const plugin = ({
         ? {}
         : null;
 
-      let rename: (string) => string;
+      let rename: (part: string) => string;
       if (strategy === 'none') {
         rename = name => name;
       } else if (strategy === 'debug') {
@@ -68,11 +68,9 @@ const plugin = ({
         throw new Error(`Unknown mode "${by}".`);
       }
 
-      const alreadySeenNodes = new Set();
-
       function renameNode(
-        node: selectorParser.ClassName | selectorParser.Identifier
-      ) {
+        node: selectorParser.ClassName | selectorParser.Identifier,
+      ): void {
         if (skip(node.value)) return;
 
         if (by === 'part') {
@@ -105,12 +103,15 @@ const plugin = ({
         if (ids) selectors.walkIds(renameNode);
       });
 
+      const alreadySeenNodes = new Set<postcss.AnyNode>();
+
       return {
-        Rule(ruleNode) {
-          if (
-            ruleNode.parent.type !== 'atrule' ||
-            !ruleNode.parent.name.endsWith('keyframes')
-          ) {
+        Rule(ruleNode: postcss.Rule) {
+          // Cast `parent` to `postcss.AnyNode` for stricter `type` checking.
+          // Otherwise, `parent` is typed as `postcss.ContainerWithChildren`
+          // which declares `type` as a `string` rather than a sum type.
+          const parent = ruleNode.parent as postcss.AnyNode;
+          if (parent.type !== 'atrule' || !parent.name.endsWith('keyframes')) {
             if (alreadySeenNodes.has(ruleNode)) {
               return;
             }
@@ -120,11 +121,11 @@ const plugin = ({
           }
         },
         OnceExit() {
-          if (outputMapCallback) outputMapCallback(outputMap);
+          if (outputMapCallback) outputMapCallback(outputMap ?? {});
         },
       };
     },
   };
-};
+}
 
 export = plugin;
