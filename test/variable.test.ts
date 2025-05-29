@@ -23,7 +23,7 @@ function run(input: string, options?: plugin.Options): LazyResult {
   return postcss([plugin(options)]).process(input, {from: undefined});
 }
 
-function assertPostcss(result: Result, output: string): void {
+function assertPostcss(result: LazyResult, output: string): void {
   expect(result.css).toEqual(output);
   expect(result.warnings()).toHaveLength(0);
 }
