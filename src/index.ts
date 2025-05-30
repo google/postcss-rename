@@ -17,8 +17,7 @@
 
 import selectorParser from 'postcss-selector-parser';
 
-import postcss, {AnyNode} from 'postcss';
-import {MinimalRenamer} from './minimal-renamer';
+import postcss from 'postcss';
 import {type ClassRenamingOptions} from './options';
 import {type SkipPredicate, createSkipPredicate} from './skip';
 import {type RenamingFunction, createStrategy} from './strategy';
@@ -36,7 +35,6 @@ function plugin({
   ids = false,
   outputMapCallback,
 }: plugin.Options = {}): postcss.Plugin {
-  const exceptSet = new Set(except);
   return {
     postcssPlugin: 'postcss-rename',
     prepare() {
