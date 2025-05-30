@@ -950,8 +950,8 @@ describe('with strategy "debug"', () => {
       assertMapEquals(
         input,
         {
-          foo: 'foo',
-          bar: 'bar',
+          foo: 'foo_',
+          bar: 'bar_',
         },
         {strategy: 'debug'},
       );
@@ -961,9 +961,10 @@ describe('with strategy "debug"', () => {
       assertMapEquals(
         input,
         {
-          bar: 'bar',
+          bar: 'bar_',
         },
         {
+          strategy: 'debug',
           except: ['foo'],
         },
       );
@@ -973,9 +974,10 @@ describe('with strategy "debug"', () => {
       assertMapEquals(
         input,
         {
-          foo: 'foo',
+          foo: 'foo_',
         },
         {
+          strategy: 'debug',
           except: [/ba/],
         },
       );
@@ -985,10 +987,11 @@ describe('with strategy "debug"', () => {
       assertMapEquals(
         input,
         {
-          foo: 'pf-foo',
-          bar: 'pf-bar',
+          foo: 'pf-foo_',
+          bar: 'pf-bar_',
         },
         {
+          strategy: 'debug',
           prefix: 'pf',
         },
       );
@@ -996,27 +999,22 @@ describe('with strategy "debug"', () => {
   });
 
   describe('with deeply nested functions', () => {
-    const input = `
-      .class {
-        number: var(--foo, rgb(var(--bar), var(--baz, var(--biz)), var(--boz)));
-      }
-    `;
-
-    it('does nothing with no options', () => {
-      assertPostcss(run(input), input);
-    });
+    const input = `.class { number: var(--foo, rgb(var(--bar), var(--baz, var(--biz)), var(--boz))); }`;
 
     it('does nothing with an explicit strategy', () => {
-      assertPostcss(run(input, {strategy: 'none'}), input);
+      assertPostcss(
+        run(input, {strategy: 'debug'}),
+        '.class { number: var(--foo_, rgb(var(--bar_), var(--baz_, var(--biz_)), var(--boz_))); }',
+      );
     });
 
     it('emits an output map', () => {
       assertMapEquals(input, {
-        foo: 'foo',
-        bar: 'bar',
-        baz: 'baz',
-        biz: 'biz',
-        boz: 'boz',
+        foo: 'foo_',
+        bar: 'bar_',
+        baz: 'baz_',
+        biz: 'biz_',
+        boz: 'boz_',
       });
     });
 
@@ -1024,9 +1022,9 @@ describe('with strategy "debug"', () => {
       assertMapEquals(
         input,
         {
-          bar: 'bar',
-          baz: 'baz',
-          biz: 'biz',
+          bar: 'bar_',
+          baz: 'baz_',
+          biz: 'biz_',
         },
         {
           except: ['foo', 'boz'],
@@ -1038,7 +1036,7 @@ describe('with strategy "debug"', () => {
       assertMapEquals(
         input,
         {
-          foo: 'foo',
+          foo: 'foo_',
         },
         {
           except: [/b/],
@@ -1050,11 +1048,11 @@ describe('with strategy "debug"', () => {
       assertMapEquals(
         input,
         {
-          foo: 'pf-foo',
-          bar: 'pf-bar',
-          baz: 'pf-baz',
-          biz: 'pf-biz',
-          boz: 'pf-boz',
+          foo: 'pf-foo_',
+          bar: 'pf-bar_',
+          baz: 'pf-baz_',
+          biz: 'pf-biz_',
+          boz: 'pf-boz_',
         },
         {
           prefix: 'pf',
