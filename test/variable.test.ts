@@ -950,8 +950,8 @@ describe('with strategy "debug"', () => {
       assertMapEquals(
         input,
         {
-          // foo: 'foo',
-          // bar: 'bar',
+          foo: 'foo',
+          bar: 'bar',
         },
         {strategy: 'debug'},
       );
