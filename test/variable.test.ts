@@ -36,7 +36,7 @@ function assertMapEquals(
   run(input, {
     ...options,
     outputMapCallback: map => expect(map).toEqual(expected),
-  });
+  }).sync();
 }
 
 // TODO(jiramide): add tests
