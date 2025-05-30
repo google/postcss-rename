@@ -24,12 +24,12 @@ namespace plugin {
 }
 
 // eslint-disable-next-line no-redeclare
-const plugin = ({
+function plugin({
   strategy = 'none',
   prefix = '',
   outputMapCallback,
   except = [],
-}: plugin.Options = {}): postcss.Plugin => {
+}: plugin.Options = {}): postcss.Plugin {
   return {
     postcssPlugin: 'postcss-variable-rename',
     prepare() {
@@ -37,7 +37,7 @@ const plugin = ({
       return {};
     },
   };
-};
+}
 
 plugin.postcss = true;
 
