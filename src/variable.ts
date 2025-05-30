@@ -67,6 +67,11 @@ function plugin({
         }
 
         const strippedVariable = stripVariable(variable);
+
+        if (skip(strippedVariable)) {
+          return variable;
+        }
+
         const renamedVariable = prefix
           ? prefix + '-' + rename(strippedVariable)
           : rename(strippedVariable);
