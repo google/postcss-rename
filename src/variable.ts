@@ -78,22 +78,32 @@ function plugin({
         return '--' + renamedVariable;
       }
 
+      // TODO(jiramide): type this better
+      /**
+       * Walks the given AST node and renames any variables it spots as it goes
+       * NOTE: This function does not explicitly check for `var(...)`
+       * function-nodes, and it indiscriminately renames any word-type nodes
+       * it sees that has the custom CSS property prefix. As of May 30, 2025,
+       * nothing in the CSS spec suggests that this does not work, but this
+       * may break in the future in case a new CSS feature is added that
+       * reuses the double-dash prefix in a new way.
+       * @param node - The root of the AST to walk through
+       */
+      function walk(node: any): void {
+        if ('nodes' in node) {
+          for (const child of node.nodes) {
+            walk(child);
+          }
+        }
+
+        node.value = renameVariable(node.value);
+      }
+
       function renameValue(value: string): string {
         const parsed = valueParser(value);
-        parsed.walk(node => {
-          if (node.type !== 'function' || node.value !== 'var') {
-            return;
-          }
-
-          /**
-           * `node` is one-of:
-           * - var(--x)
-           * - var(--x, value)
-           *
-           * `value` can, itself, be another `var` call. This means that we
-           * need to deeply explore in case `value` itself is a variable use.
-           */
-        });
+        for (const node of parsed.nodes) {
+          walk(node);
+        }
 
         return parsed.toString();
       }
