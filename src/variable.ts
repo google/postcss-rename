@@ -109,7 +109,14 @@ function plugin({
         declarationNode.value = renameValue(declarationNode.value);
       }
 
-      return {};
+      return {
+        Declaration: renameDeclaration,
+        OnceExit() {
+          if (outputMapCallback) {
+            outputMapCallback(outputMap ?? {});
+          }
+        },
+      };
     },
   };
 }
