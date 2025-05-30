@@ -541,47 +541,524 @@ describe('with strategy "none"', () => {
 
   // TODO(jiramide):
 });
+
+describe('with strategy "debug"', () => {
+  describe('with no variables', () => {
+    const input = `
+      .no-variables-here {
+        absolutely: "nothing";
+      }`;
+
+    const options: plugin.Options = {
+      strategy: 'debug',
+    };
+
+    it('does nothing', () => {
+      assertPostcss(run(input, options), input);
+    });
+  });
+
+  describe('with single declaration', () => {
+    const input = `.some-class-here { --some-variable-here: 999px; }`;
+
+    it('adds an underscore after every name', () => {
+      assertPostcss(
+        run(input, {strategy: 'debug'}),
+        `.some-class-here { --some-variable-here_: 999px; }`,
+      );
+    });
+
+    it('emits an output map', () => {
+      assertMapEquals(
+        input,
+        {
+          'some-variable-here': 'some-variable-here_',
+        },
+        {
+          strategy: 'debug',
+        },
+      );
+    });
+
+    it('omits excluded names from the output map', () => {
+      assertMapEquals(
+        input,
+        {},
+        {
+          strategy: 'debug',
+          except: ['some-variable-here'],
+        },
+      );
+    });
+
+    it('omits excluded regexes from the output map', () => {
+      assertMapEquals(
+        input,
+        {},
+        {
+          strategy: 'debug',
+          except: [/some/],
+        },
+      );
+    });
+
+    it('includes the prefix in the output map', () => {
+      assertMapEquals(
+        input,
+        {
+          'some-variable-here': 'pf-some-variable-here_',
+        },
+        {
+          strategy: 'debug',
+          prefix: 'pf',
+        },
+      );
+    });
+  });
+
+  describe('with single use with no default', () => {
+    const input = `.some-other-class-here { color: var(--some-color-here); }`;
+
+    it('adds an underscore after every name', () => {
+      assertPostcss(
+        run(input, {strategy: 'debug'}),
+        `.some-other-class-here { color: var(--some-color-here_); }`,
+      );
+    });
+
+    it('emits an output map', () => {
+      assertMapEquals(
+        input,
+        {
+          'some-color-here': 'some-color-here_',
+        },
+        {strategy: 'debug'},
+      );
+    });
+
+    it('omits excluded names from the output map', () => {
+      assertMapEquals(
+        input,
+        {},
+        {
+          strategy: 'debug',
+          except: ['some-color-here'],
+        },
+      );
+    });
+
+    it('omits excluded regexes from the output map', () => {
+      assertMapEquals(
+        input,
+        {},
+        {
+          strategy: 'debug',
+          except: [/some/],
+        },
+      );
+    });
+
+    it('includes the prefix in the output map', () => {
+      assertMapEquals(
+        input,
+        {
+          'some-color-here': 'pf-some-color-here_',
+        },
+        {
+          strategy: 'debug',
+          prefix: 'pf',
+        },
+      );
+    });
   });
 
   describe('with single use with default', () => {
-    const input = `
-      .some-other-class-here {
-        color: var(--some-color-here, 123px);
-      }
-    `;
+    const input = `.some-other-class-here { color: var(--some-color-here, 123px); }`;
+
+    it('adds an underscore after every name', () => {
+      assertPostcss(
+        run(input, {strategy: 'debug'}),
+        '.some-other-class-here { color: var(--some-color-here_, 123px); }',
+      );
+    });
+
+    it('emits an output map', () => {
+      assertMapEquals(
+        input,
+        {
+          'some-color-here': 'some-color-here_',
+        },
+        {strategy: 'debug'},
+      );
+    });
+
+    it('omits excluded names from the output map', () => {
+      assertMapEquals(
+        input,
+        {},
+        {
+          strategy: 'debug',
+          except: ['some-color-here'],
+        },
+      );
+    });
+
+    it('omits excluded regexes from the output map', () => {
+      assertMapEquals(
+        input,
+        {},
+        {
+          strategy: 'debug',
+          except: [/some/],
+        },
+      );
+    });
+
+    it('includes the prefix in the output map', () => {
+      assertMapEquals(
+        input,
+        {
+          'some-color-here': 'pf-some-color-here_',
+        },
+        {
+          strategy: 'debug',
+          prefix: 'pf',
+        },
+      );
+    });
   });
 
   // TODO(jiramide): add cases with deeply nested var calls (e.g. var(--a, var(--b, var(--c))))
   describe('with deeply nested var uses', () => {
-    const input = `
-      .foo {
-        color: var(--foo, var(--bar, var(--baz, var(--qux, #c0ffee))));
-      }
-    `;
+    const input = `.foo { color: var(--foo, var(--bar, var(--baz, var(--qux, #c0ffee)))); }`;
+
+    it('adds an underscore after every name', () => {
+      assertPostcss(
+        run(input, {strategy: 'debug'}),
+        `.foo { color: var(--foo_, var(--bar_, var(--baz_, var(--qux_, #c0ffee)))); }`,
+      );
+    });
+
+    it('emits an output map', () => {
+      assertMapEquals(
+        input,
+        {
+          foo: 'foo_',
+          bar: 'bar_',
+          baz: 'baz_',
+          qux: 'qux_',
+        },
+        {strategy: 'debug'},
+      );
+    });
+
+    it('omits excluded names from the output map', () => {
+      assertMapEquals(
+        input,
+        {
+          bar: 'bar_',
+          baz: 'baz_',
+        },
+        {
+          strategy: 'debug',
+          except: ['foo', 'qux'],
+        },
+      );
+    });
+
+    it('omits excluded regexes from the output map', () => {
+      assertMapEquals(
+        input,
+        {
+          foo: 'foo_',
+          qux: 'qux_',
+        },
+        {
+          strategy: 'debug',
+          except: [/ba/],
+        },
+      );
+    });
+
+    it('includes the prefix in the output map', () => {
+      assertMapEquals(
+        input,
+        {
+          foo: 'pf-foo_',
+          bar: 'pf-bar_',
+          baz: 'pf-baz_',
+          qux: 'pf-qux_',
+        },
+        {
+          strategy: 'debug',
+          prefix: 'pf',
+        },
+      );
+    });
   });
 
   // TODO(jiramide): add cases with (var(...)) expressions (extraneous parens cause parsing difficulty with postcss-value-parser)
   describe('with extraneous parentheses', () => {
-    const input1 = `
-      .extraneous-parens {
-        not-a-custom-property: (var(--one-extra-paren));
-      }
-    `;
+    const input1 = `.extraneous-parens { not-a-custom-property: (var(--one-extra-paren)); }`;
 
-    const input2 = `
-      .extraneous-parens {
-        not-a-custom-property: ((var(--two-extra-paren)));
-      }
-    `;
+    const input2 = `.extraneous-parens { not-a-custom-property: ((var(--two-extra-paren))); }`;
 
-    const input3 = `
-      .extraneous-parens {
-        not-a-custom-property: (((var(--three-extra-paren))));
-      }
-    `;
+    const input3 = `.extraneous-parens { not-a-custom-property: (((var(--three-extra-paren)))); }`;
+
+    it('adds an underscore after every name', () => {
+      assertPostcss(
+        run(input1, {strategy: 'debug'}),
+        '.extraneous-parens { not-a-custom-property: (var(--one-extra-paren_)); }',
+      );
+      assertPostcss(
+        run(input2, {strategy: 'debug'}),
+        '.extraneous-parens { not-a-custom-property: ((var(--two-extra-paren_))); }',
+      );
+      assertPostcss(
+        run(input3, {strategy: 'debug'}),
+        '.extraneous-parens { not-a-custom-property: (((var(--three-extra-paren_)))); }',
+      );
+    });
+
+    it('emits an output map', () => {
+      assertMapEquals(
+        input1,
+        {
+          'one-extra-paren': 'one-extra-paren_',
+        },
+        {strategy: 'debug'},
+      );
+      assertMapEquals(
+        input2,
+        {
+          'two-extra-paren': 'two-extra-paren_',
+        },
+        {strategy: 'debug'},
+      );
+      assertMapEquals(
+        input2,
+        {
+          'three-extra-paren': 'three-extra-paren_',
+        },
+        {strategy: 'debug'},
+      );
+    });
+
+    it('omits excluded names from the output map', () => {
+      assertMapEquals(
+        input1,
+        {},
+        {
+          strategy: 'debug',
+          except: ['one-extra-paren'],
+        },
+      );
+      assertMapEquals(
+        input2,
+        {},
+        {
+          strategy: 'debug',
+          except: ['two-extra-paren'],
+        },
+      );
+      assertMapEquals(
+        input3,
+        {},
+        {
+          strategy: 'debug',
+          except: ['three-extra-paren'],
+        },
+      );
+    });
+
+    it('omits excluded regexes from the output map', () => {
+      assertMapEquals(
+        input1,
+        {},
+        {
+          strategy: 'debug',
+          except: [/extra/],
+        },
+      );
+      assertMapEquals(
+        input2,
+        {},
+        {
+          strategy: 'debug',
+          except: [/extra/],
+        },
+      );
+      assertMapEquals(
+        input3,
+        {},
+        {
+          strategy: 'debug',
+          except: [/extra/],
+        },
+      );
+    });
+
+    it('includes the prefix in the output map', () => {
+      assertMapEquals(
+        input1,
+        {
+          'one-extra-paren': 'pf-one-extra-paren_',
+        },
+        {
+          strategy: 'debug',
+          prefix: 'pf',
+        },
+      );
+      assertMapEquals(
+        input2,
+        {
+          'two-extra-paren': 'pf-two-extra-paren_',
+        },
+        {
+          strategy: 'debug',
+          prefix: 'pf',
+        },
+      );
+      assertMapEquals(
+        input3,
+        {
+          'three-extra-paren': 'pf-three-extra-paren_',
+        },
+        {
+          strategy: 'debug',
+          prefix: 'pf',
+        },
+      );
+    });
   });
 
   // TODO(jiramide): add cases with calc
+  describe('with calc', () => {
+    const input = `.class { number: var(--foo, calc(1 + var(--bar))); }`;
+
+    it('does nothing with an explicit strategy', () => {
+      assertPostcss(
+        run(input, {strategy: 'debug'}),
+        '.class { number: var(--foo_, calc(1 + var(--bar_))); }',
+      );
+    });
+
+    it('emits an output map', () => {
+      assertMapEquals(
+        input,
+        {
+          // foo: 'foo',
+          // bar: 'bar',
+        },
+        {strategy: 'debug'},
+      );
+    });
+
+    it('omits excluded names from the output map', () => {
+      assertMapEquals(
+        input,
+        {
+          bar: 'bar',
+        },
+        {
+          except: ['foo'],
+        },
+      );
+    });
+
+    it('omits excluded regexes from the output map', () => {
+      assertMapEquals(
+        input,
+        {
+          foo: 'foo',
+        },
+        {
+          except: [/ba/],
+        },
+      );
+    });
+
+    it('includes the prefix in the output map', () => {
+      assertMapEquals(
+        input,
+        {
+          foo: 'pf-foo',
+          bar: 'pf-bar',
+        },
+        {
+          prefix: 'pf',
+        },
+      );
+    });
+  });
+
+  describe('with deeply nested functions', () => {
+    const input = `
+      .class {
+        number: var(--foo, rgb(var(--bar), var(--baz, var(--biz)), var(--boz)));
+      }
+    `;
+
+    it('does nothing with no options', () => {
+      assertPostcss(run(input), input);
+    });
+
+    it('does nothing with an explicit strategy', () => {
+      assertPostcss(run(input, {strategy: 'none'}), input);
+    });
+
+    it('emits an output map', () => {
+      assertMapEquals(input, {
+        foo: 'foo',
+        bar: 'bar',
+        baz: 'baz',
+        biz: 'biz',
+        boz: 'boz',
+      });
+    });
+
+    it('omits excluded names from the output map', () => {
+      assertMapEquals(
+        input,
+        {
+          bar: 'bar',
+          baz: 'baz',
+          biz: 'biz',
+        },
+        {
+          except: ['foo', 'boz'],
+        },
+      );
+    });
+
+    it('omits excluded regexes from the output map', () => {
+      assertMapEquals(
+        input,
+        {
+          foo: 'foo',
+        },
+        {
+          except: [/b/],
+        },
+      );
+    });
+
+    it('includes the prefix in the output map', () => {
+      assertMapEquals(
+        input,
+        {
+          foo: 'pf-foo',
+          bar: 'pf-bar',
+          baz: 'pf-baz',
+          biz: 'pf-biz',
+          boz: 'pf-boz',
+        },
+        {
+          prefix: 'pf',
+        },
+      );
+    });
+  });
 
   // TODO(jiramide):
 });
