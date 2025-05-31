@@ -47,10 +47,7 @@ export function createSkipPredicate(
     }
   }
 
-  return (name: string) => {
-    return (
-      disallowedNames.has(name) ||
-      disallowedPatterns.some(disallowedPattern => disallowedPattern.test(name))
-    );
-  };
+  return (name: string) =>
+    disallowedNames.has(name) ||
+    disallowedPatterns.some(disallowedPattern => disallowedPattern.test(name));
 }
