@@ -33,7 +33,7 @@ export function createSkipPredicate(
 ): SkipPredicate {
   if (!except) {
     // If no `except` is given, then assume everything is allowed
-    return name => false;
+    return () => false;
   }
 
   const disallowedNames = new Set<string>();
