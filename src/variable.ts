@@ -46,8 +46,6 @@ function plugin({
   return {
     postcssPlugin: 'postcss-variable-rename',
     prepare() {
-      // TODO(jiramide): add variable renaming logic
-
       if (strategy === 'none' && !outputMapCallback && !prefix) return {};
 
       const outputMap: RenamingMap | null = outputMapCallback ? {} : null;
