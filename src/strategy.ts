@@ -23,8 +23,6 @@ import {type SkipPredicate} from './skip';
  *
  * A renaming function must satisfy the following:
  * - A renaming function always produces the same output for a specific input.
- * - A renaming function does not produce anything that is in the user-specified
- *   skiplist.
  */
 export type RenamingFunction = (original: string) => string;
 
