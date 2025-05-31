@@ -17,19 +17,14 @@
 
 import selectorParser from 'postcss-selector-parser';
 
-import {MinimalRenamer} from './minimal-renamer';
 import postcss from 'postcss';
+import {type ClassRenamingOptions} from './options';
+import {type SkipPredicate, createSkipPredicate} from './skip';
+import {type RenamingFunction, createStrategy} from './strategy';
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
 namespace plugin {
-  export interface Options {
-    strategy?: 'none' | 'debug' | 'minimal' | ((name: string) => string);
-    by?: 'whole' | 'part';
-    prefix?: string;
-    except?: Iterable<string | RegExp>;
-    ids?: boolean;
-    outputMapCallback?(map: {[key: string]: string}): void;
-  }
+  export type Options = ClassRenamingOptions;
 }
 
 function plugin({
@@ -40,7 +35,6 @@ function plugin({
   ids = false,
   outputMapCallback,
 }: plugin.Options = {}): postcss.Plugin {
-  const exceptSet = new Set(except);
   return {
     postcssPlugin: 'postcss-rename',
     prepare() {
@@ -50,19 +44,8 @@ function plugin({
         ? {}
         : null;
 
-      let rename: (part: string) => string;
-      if (strategy === 'none') {
-        rename = name => name;
-      } else if (strategy === 'debug') {
-        rename = name => name + '_';
-      } else if (strategy === 'minimal') {
-        const renamer = new MinimalRenamer(skip);
-        rename = name => renamer.rename(name);
-      } else if (typeof strategy === 'string') {
-        throw new Error(`Unknown strategy "${strategy}".`);
-      } else {
-        rename = strategy;
-      }
+      const skip: SkipPredicate = createSkipPredicate(except);
+      const rename: RenamingFunction = createStrategy(strategy, skip);
 
       if (by !== 'whole' && by !== 'part') {
         throw new Error(`Unknown mode "${by}".`);
@@ -89,13 +72,6 @@ function plugin({
           if (outputMap) outputMap[node.value] = newName;
           node.value = newName;
         }
-      }
-
-      function skip(nodeValue: string): boolean {
-        if (exceptSet.has(nodeValue)) return true;
-        for (const val of exceptSet)
-          if (val instanceof RegExp && val.test(nodeValue)) return true;
-        return false;
       }
 
       const selectorProcessor = selectorParser(selectors => {
@@ -127,5 +103,7 @@ function plugin({
     },
   };
 }
+
+plugin.postcss = true;
 
 export = plugin;
