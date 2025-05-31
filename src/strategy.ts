@@ -37,7 +37,6 @@ export type RenamingStrategy = 'none' | 'debug' | 'minimal' | RenamingFunction;
 
 /**
  * Produces a renaming function from the given `strategy`
- * @returns renaming function
  * @throws if `strategy` isn't a function or one of 'none', 'debug', 'minimal'
  */
 export function createStrategy(
