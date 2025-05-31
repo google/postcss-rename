@@ -329,7 +329,7 @@ describe('with strategy "none"', () => {
       assertMapEquals(input2, {
         'two-extra-paren': 'two-extra-paren',
       });
-      assertMapEquals(input2, {
+      assertMapEquals(input3, {
         'three-extra-paren': 'three-extra-paren',
       });
     });
@@ -839,7 +839,7 @@ describe('with strategy "debug"', () => {
         {strategy: 'debug'},
       );
       assertMapEquals(
-        input2,
+        input3,
         {
           'three-extra-paren': 'three-extra-paren_',
         },
