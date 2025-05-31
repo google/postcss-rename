@@ -583,6 +583,13 @@ describe('with strategy "debug"', () => {
       );
     });
 
+    it('omits excluded names from final css', () => {
+      assertPostcss(
+        run(input, {strategy: 'debug', except: ['some-variable-here']}),
+        `.some-class-here { --some-variable-here: 999px; }`,
+      );
+    });
+
     it('omits excluded names from the output map', () => {
       assertMapEquals(
         input,
@@ -591,6 +598,13 @@ describe('with strategy "debug"', () => {
           strategy: 'debug',
           except: ['some-variable-here'],
         },
+      );
+    });
+
+    it('omits excluded regexes from final css', () => {
+      assertPostcss(
+        run(input, {strategy: 'debug', except: [/some/]}),
+        `.some-class-here { --some-variable-here: 999px; }`,
       );
     });
 
@@ -639,6 +653,13 @@ describe('with strategy "debug"', () => {
       );
     });
 
+    it('omits excluded names from the final css', () => {
+      assertPostcss(
+        run(input, {strategy: 'debug', except: ['some-color-here']}),
+        `.some-other-class-here { color: var(--some-color-here); }`,
+      );
+    });
+
     it('omits excluded names from the output map', () => {
       assertMapEquals(
         input,
@@ -647,6 +668,13 @@ describe('with strategy "debug"', () => {
           strategy: 'debug',
           except: ['some-color-here'],
         },
+      );
+    });
+
+    it('omits excluded regexes from the final css', () => {
+      assertPostcss(
+        run(input, {strategy: 'debug', except: [/some/]}),
+        `.some-other-class-here { color: var(--some-color-here); }`,
       );
     });
 
