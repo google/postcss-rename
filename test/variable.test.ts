@@ -1037,13 +1037,19 @@ describe('with strategy "debug"', () => {
     });
 
     it('emits an output map', () => {
-      assertMapEquals(input, {
-        foo: 'foo_',
-        bar: 'bar_',
-        baz: 'baz_',
-        biz: 'biz_',
-        boz: 'boz_',
-      });
+      assertMapEquals(
+        input,
+        {
+          foo: 'foo_',
+          bar: 'bar_',
+          baz: 'baz_',
+          biz: 'biz_',
+          boz: 'boz_',
+        },
+        {
+          strategy: 'debug',
+        },
+      );
     });
 
     it('omits excluded names from the output map', () => {
@@ -1055,6 +1061,7 @@ describe('with strategy "debug"', () => {
           biz: 'biz_',
         },
         {
+          strategy: 'debug',
           except: ['foo', 'boz'],
         },
       );
@@ -1067,6 +1074,7 @@ describe('with strategy "debug"', () => {
           foo: 'foo_',
         },
         {
+          strategy: 'debug',
           except: [/b/],
         },
       );
@@ -1083,6 +1091,7 @@ describe('with strategy "debug"', () => {
           boz: 'pf-boz_',
         },
         {
+          strategy: 'debug',
           prefix: 'pf',
         },
       );
