@@ -17,8 +17,7 @@
 
 import postcss, {Declaration} from 'postcss';
 import valueParser from 'postcss-value-parser';
-import {MinimalRenamer} from './minimal-renamer';
-import {type VariableRenamingOptions, type RenamingMap} from './options';
+import {type RenamingMap, type VariableRenamingOptions} from './options';
 import {type SkipPredicate, createSkipPredicate} from './skip';
 import {type RenamingFunction, createStrategy} from './strategy';
 

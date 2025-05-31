@@ -567,12 +567,12 @@ describe('with strategy "debug"', () => {
   });
 
   describe('with single declaration', () => {
-    const input = `.some-class-here { --some-variable-here: 999px; }`;
+    const input = '.some-class-here { --some-variable-here: 999px; }';
 
     it('adds an underscore after every name', () => {
       assertPostcss(
         run(input, {strategy: 'debug'}),
-        `.some-class-here { --some-variable-here_: 999px; }`,
+        '.some-class-here { --some-variable-here_: 999px; }',
       );
     });
 
@@ -591,7 +591,7 @@ describe('with strategy "debug"', () => {
     it('omits excluded names from final css', () => {
       assertPostcss(
         run(input, {strategy: 'debug', except: ['some-variable-here']}),
-        `.some-class-here { --some-variable-here: 999px; }`,
+        '.some-class-here { --some-variable-here: 999px; }',
       );
     });
 
@@ -609,7 +609,7 @@ describe('with strategy "debug"', () => {
     it('omits excluded regexes from final css', () => {
       assertPostcss(
         run(input, {strategy: 'debug', except: [/some/]}),
-        `.some-class-here { --some-variable-here: 999px; }`,
+        '.some-class-here { --some-variable-here: 999px; }',
       );
     });
 
@@ -639,12 +639,12 @@ describe('with strategy "debug"', () => {
   });
 
   describe('with single use with no default', () => {
-    const input = `.some-other-class-here { color: var(--some-color-here); }`;
+    const input = '.some-other-class-here { color: var(--some-color-here); }';
 
     it('adds an underscore after every name', () => {
       assertPostcss(
         run(input, {strategy: 'debug'}),
-        `.some-other-class-here { color: var(--some-color-here_); }`,
+        '.some-other-class-here { color: var(--some-color-here_); }',
       );
     });
 
@@ -661,7 +661,7 @@ describe('with strategy "debug"', () => {
     it('omits excluded names from the final css', () => {
       assertPostcss(
         run(input, {strategy: 'debug', except: ['some-color-here']}),
-        `.some-other-class-here { color: var(--some-color-here); }`,
+        '.some-other-class-here { color: var(--some-color-here); }',
       );
     });
 
@@ -679,7 +679,7 @@ describe('with strategy "debug"', () => {
     it('omits excluded regexes from the final css', () => {
       assertPostcss(
         run(input, {strategy: 'debug', except: [/some/]}),
-        `.some-other-class-here { color: var(--some-color-here); }`,
+        '.some-other-class-here { color: var(--some-color-here); }',
       );
     });
 
@@ -709,7 +709,8 @@ describe('with strategy "debug"', () => {
   });
 
   describe('with single use with default', () => {
-    const input = `.some-other-class-here { color: var(--some-color-here, 123px); }`;
+    const input =
+      '.some-other-class-here { color: var(--some-color-here, 123px); }';
 
     it('adds an underscore after every name', () => {
       assertPostcss(
@@ -766,12 +767,13 @@ describe('with strategy "debug"', () => {
 
   // TODO(jiramide): add cases with deeply nested var calls (e.g. var(--a, var(--b, var(--c))))
   describe('with deeply nested var uses', () => {
-    const input = `.foo { color: var(--foo, var(--bar, var(--baz, var(--qux, #c0ffee)))); }`;
+    const input =
+      '.foo { color: var(--foo, var(--bar, var(--baz, var(--qux, #c0ffee)))); }';
 
     it('adds an underscore after every name', () => {
       assertPostcss(
         run(input, {strategy: 'debug'}),
-        `.foo { color: var(--foo_, var(--bar_, var(--baz_, var(--qux_, #c0ffee)))); }`,
+        '.foo { color: var(--foo_, var(--bar_, var(--baz_, var(--qux_, #c0ffee)))); }',
       );
     });
 
@@ -835,11 +837,14 @@ describe('with strategy "debug"', () => {
 
   // TODO(jiramide): add cases with (var(...)) expressions (extraneous parens cause parsing difficulty with postcss-value-parser)
   describe('with extraneous parentheses', () => {
-    const input1 = `.extraneous-parens { not-a-custom-property: (var(--one-extra-paren)); }`;
+    const input1 =
+      '.extraneous-parens { not-a-custom-property: (var(--one-extra-paren)); }';
 
-    const input2 = `.extraneous-parens { not-a-custom-property: ((var(--two-extra-paren))); }`;
+    const input2 =
+      '.extraneous-parens { not-a-custom-property: ((var(--two-extra-paren))); }';
 
-    const input3 = `.extraneous-parens { not-a-custom-property: (((var(--three-extra-paren)))); }`;
+    const input3 =
+      '.extraneous-parens { not-a-custom-property: (((var(--three-extra-paren)))); }';
 
     it('adds an underscore after every name', () => {
       assertPostcss(
@@ -970,7 +975,7 @@ describe('with strategy "debug"', () => {
 
   // TODO(jiramide): add cases with calc
   describe('with calc', () => {
-    const input = `.class { number: var(--foo, calc(1 + var(--bar))); }`;
+    const input = '.class { number: var(--foo, calc(1 + var(--bar))); }';
 
     it('does nothing with an explicit strategy', () => {
       assertPostcss(
@@ -1032,7 +1037,8 @@ describe('with strategy "debug"', () => {
   });
 
   describe('with deeply nested functions', () => {
-    const input = `.class { number: var(--foo, rgb(var(--bar), var(--baz, var(--biz)), var(--boz))); }`;
+    const input =
+      '.class { number: var(--foo, rgb(var(--bar), var(--baz, var(--biz)), var(--boz))); }';
 
     it('does nothing with an explicit strategy', () => {
       assertPostcss(
