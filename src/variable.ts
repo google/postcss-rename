@@ -80,7 +80,6 @@ function plugin({
         return '--' + renamedVariable;
       }
 
-      // TODO(jiramide): type this better
       /**
        * Walks the given AST node and renames any variables it spots as it goes
        * NOTE: This function does not explicitly check for `var(...)`
@@ -91,7 +90,7 @@ function plugin({
        * reuses the double-dash prefix in a new way.
        * @param node - The root of the AST to walk through
        */
-      function walk(node: any): void {
+      function walk(node: valueParser.Node): void {
         if ('nodes' in node) {
           for (const child of node.nodes) {
             walk(child);
