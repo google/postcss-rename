@@ -48,7 +48,6 @@ function plugin({
       if (strategy === 'none' && !outputMapCallback && !prefix) return {};
 
       const outputMap: RenamingMap | null = outputMapCallback ? {} : null;
-      const alreadyProcessedNodes = new Set<Declaration>();
 
       const skip: SkipPredicate = createSkipPredicate(except);
       const rename: RenamingFunction = createStrategy(strategy, skip);
@@ -109,6 +108,7 @@ function plugin({
         return parsed.toString();
       }
 
+      const alreadyProcessedNodes = new Set<Declaration>();
       function renameDeclaration(declarationNode: Declaration): void {
         if (alreadyProcessedNodes.has(declarationNode)) {
           return;
