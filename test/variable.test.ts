@@ -289,29 +289,29 @@ describe('with strategy "none"', () => {
   });
 
   describe('with extraneous parentheses', () => {
-    const input3 = `
+    const input = `
       .extraneous-parens {
         not-a-custom-property: (((var(--three-extra-paren))));
       }
     `;
 
     it('does nothing with no options', () => {
-      assertPostcss(run(input3), input3);
+      assertPostcss(run(input), input);
     });
 
     it('does nothing with an explicit strategy', () => {
-      assertPostcss(run(input3, {strategy: 'none'}), input3);
+      assertPostcss(run(input, {strategy: 'none'}), input);
     });
 
     it('emits an output map', () => {
-      assertMapEquals(input3, {
+      assertMapEquals(input, {
         'three-extra-paren': 'three-extra-paren',
       });
     });
 
     it('omits excluded names from the output map', () => {
       assertMapEquals(
-        input3,
+        input,
         {},
         {
           except: ['three-extra-paren'],
@@ -321,7 +321,7 @@ describe('with strategy "none"', () => {
 
     it('omits excluded regexes from the output map', () => {
       assertMapEquals(
-        input3,
+        input,
         {},
         {
           except: [/extra/],
@@ -331,7 +331,7 @@ describe('with strategy "none"', () => {
 
     it('includes the prefix in the output map', () => {
       assertMapEquals(
-        input3,
+        input,
         {
           'three-extra-paren': 'pf-three-extra-paren',
         },
@@ -756,19 +756,19 @@ describe('with strategy "debug"', () => {
   });
 
   describe('with extraneous parentheses', () => {
-    const input3 =
+    const input =
       '.extraneous-parens { not-a-custom-property: (((var(--three-extra-paren)))); }';
 
     it('adds an underscore after every name', () => {
       assertPostcss(
-        run(input3, {strategy: 'debug'}),
+        run(input, {strategy: 'debug'}),
         '.extraneous-parens { not-a-custom-property: (((var(--three-extra-paren_)))); }',
       );
     });
 
     it('emits an output map', () => {
       assertMapEquals(
-        input3,
+        input,
         {
           'three-extra-paren': 'three-extra-paren_',
         },
@@ -778,7 +778,7 @@ describe('with strategy "debug"', () => {
 
     it('omits excluded names from the output map', () => {
       assertMapEquals(
-        input3,
+        input,
         {},
         {
           strategy: 'debug',
@@ -789,7 +789,7 @@ describe('with strategy "debug"', () => {
 
     it('omits excluded regexes from the output map', () => {
       assertMapEquals(
-        input3,
+        input,
         {},
         {
           strategy: 'debug',
@@ -800,7 +800,7 @@ describe('with strategy "debug"', () => {
 
     it('includes the prefix in the output map', () => {
       assertMapEquals(
-        input3,
+        input,
         {
           'three-extra-paren': 'pf-three-extra-paren_',
         },
