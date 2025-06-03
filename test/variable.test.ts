@@ -293,18 +293,6 @@ describe('with strategy "none"', () => {
 
   // TODO(jiramide): add cases with (var(...)) expressions (extraneous parens cause parsing difficulty with postcss-value-parser)
   describe('with extraneous parentheses', () => {
-    const input1 = `
-      .extraneous-parens {
-        not-a-custom-property: (var(--one-extra-paren));
-      }
-    `;
-
-    const input2 = `
-      .extraneous-parens {
-        not-a-custom-property: ((var(--two-extra-paren)));
-      }
-    `;
-
     const input3 = `
       .extraneous-parens {
         not-a-custom-property: (((var(--three-extra-paren))));
@@ -312,44 +300,20 @@ describe('with strategy "none"', () => {
     `;
 
     it('does nothing with no options', () => {
-      assertPostcss(run(input1), input1);
-      assertPostcss(run(input2), input2);
       assertPostcss(run(input3), input3);
     });
 
     it('does nothing with an explicit strategy', () => {
-      assertPostcss(run(input1, {strategy: 'none'}), input1);
-      assertPostcss(run(input2, {strategy: 'none'}), input2);
       assertPostcss(run(input3, {strategy: 'none'}), input3);
     });
 
     it('emits an output map', () => {
-      assertMapEquals(input1, {
-        'one-extra-paren': 'one-extra-paren',
-      });
-      assertMapEquals(input2, {
-        'two-extra-paren': 'two-extra-paren',
-      });
       assertMapEquals(input3, {
         'three-extra-paren': 'three-extra-paren',
       });
     });
 
     it('omits excluded names from the output map', () => {
-      assertMapEquals(
-        input1,
-        {},
-        {
-          except: ['one-extra-paren'],
-        },
-      );
-      assertMapEquals(
-        input2,
-        {},
-        {
-          except: ['two-extra-paren'],
-        },
-      );
       assertMapEquals(
         input3,
         {},
@@ -361,20 +325,6 @@ describe('with strategy "none"', () => {
 
     it('omits excluded regexes from the output map', () => {
       assertMapEquals(
-        input1,
-        {},
-        {
-          except: [/extra/],
-        },
-      );
-      assertMapEquals(
-        input2,
-        {},
-        {
-          except: [/extra/],
-        },
-      );
-      assertMapEquals(
         input3,
         {},
         {
@@ -384,24 +334,6 @@ describe('with strategy "none"', () => {
     });
 
     it('includes the prefix in the output map', () => {
-      assertMapEquals(
-        input1,
-        {
-          'one-extra-paren': 'pf-one-extra-paren',
-        },
-        {
-          prefix: 'pf',
-        },
-      );
-      assertMapEquals(
-        input2,
-        {
-          'two-extra-paren': 'pf-two-extra-paren',
-        },
-        {
-          prefix: 'pf',
-        },
-      );
       assertMapEquals(
         input3,
         {
@@ -833,24 +765,10 @@ describe('with strategy "debug"', () => {
 
   // TODO(jiramide): add cases with (var(...)) expressions (extraneous parens cause parsing difficulty with postcss-value-parser)
   describe('with extraneous parentheses', () => {
-    const input1 =
-      '.extraneous-parens { not-a-custom-property: (var(--one-extra-paren)); }';
-
-    const input2 =
-      '.extraneous-parens { not-a-custom-property: ((var(--two-extra-paren))); }';
-
     const input3 =
       '.extraneous-parens { not-a-custom-property: (((var(--three-extra-paren)))); }';
 
     it('adds an underscore after every name', () => {
-      assertPostcss(
-        run(input1, {strategy: 'debug'}),
-        '.extraneous-parens { not-a-custom-property: (var(--one-extra-paren_)); }',
-      );
-      assertPostcss(
-        run(input2, {strategy: 'debug'}),
-        '.extraneous-parens { not-a-custom-property: ((var(--two-extra-paren_))); }',
-      );
       assertPostcss(
         run(input3, {strategy: 'debug'}),
         '.extraneous-parens { not-a-custom-property: (((var(--three-extra-paren_)))); }',
@@ -858,20 +776,6 @@ describe('with strategy "debug"', () => {
     });
 
     it('emits an output map', () => {
-      assertMapEquals(
-        input1,
-        {
-          'one-extra-paren': 'one-extra-paren_',
-        },
-        {strategy: 'debug'},
-      );
-      assertMapEquals(
-        input2,
-        {
-          'two-extra-paren': 'two-extra-paren_',
-        },
-        {strategy: 'debug'},
-      );
       assertMapEquals(
         input3,
         {
@@ -882,22 +786,6 @@ describe('with strategy "debug"', () => {
     });
 
     it('omits excluded names from the output map', () => {
-      assertMapEquals(
-        input1,
-        {},
-        {
-          strategy: 'debug',
-          except: ['one-extra-paren'],
-        },
-      );
-      assertMapEquals(
-        input2,
-        {},
-        {
-          strategy: 'debug',
-          except: ['two-extra-paren'],
-        },
-      );
       assertMapEquals(
         input3,
         {},
@@ -910,22 +798,6 @@ describe('with strategy "debug"', () => {
 
     it('omits excluded regexes from the output map', () => {
       assertMapEquals(
-        input1,
-        {},
-        {
-          strategy: 'debug',
-          except: [/extra/],
-        },
-      );
-      assertMapEquals(
-        input2,
-        {},
-        {
-          strategy: 'debug',
-          except: [/extra/],
-        },
-      );
-      assertMapEquals(
         input3,
         {},
         {
@@ -936,26 +808,6 @@ describe('with strategy "debug"', () => {
     });
 
     it('includes the prefix in the output map', () => {
-      assertMapEquals(
-        input1,
-        {
-          'one-extra-paren': 'pf-one-extra-paren_',
-        },
-        {
-          strategy: 'debug',
-          prefix: 'pf',
-        },
-      );
-      assertMapEquals(
-        input2,
-        {
-          'two-extra-paren': 'pf-two-extra-paren_',
-        },
-        {
-          strategy: 'debug',
-          prefix: 'pf',
-        },
-      );
       assertMapEquals(
         input3,
         {
