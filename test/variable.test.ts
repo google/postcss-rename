@@ -33,18 +33,14 @@ function assertMapEquals(
   expected: RenamingMap,
   options: plugin.Options = {},
 ): void {
-  // TODO(jiramide): figure out why Jest is complaining when an expect call is done in outputMapCallback
-  // (seems to only be the case when sync() is present, but if sync() is missing, the test isn't run at
-  // all)
-  // UPDATE (May 30, 2025, 5:44PM UTC-7): Jest seems to complain when the expectation
-  // in `outputMapCallback` fails. It may be productive to figure out how to
-  // prevent this since currently when the expectation fails, it consumes
-  // any useful failure messages, which make it difficult to figure out
-  // what's failing.
+  let outputMap: RenamingMap | null = null;
   run(input, {
     ...options,
-    outputMapCallback: map => expect(map).toEqual(expected),
+    outputMapCallback: map => {
+      outputMap = map;
+    },
   }).sync();
+  expect(outputMap).toEqual(expected);
 }
 
 // TODO(jiramide): add tests
