@@ -31,7 +31,7 @@ namespace plugin {
  * @param variable CSS variable to strip prefix of
  * @return string variable without double-dash prefix
  */
-function stripVariable(variable: string): string {
+function stripVariablePrefix(variable: string): string {
   return variable.startsWith('--') ? variable.substring(2) : variable;
 }
 
@@ -63,7 +63,7 @@ function plugin({
           return variable;
         }
 
-        const strippedVariable = stripVariable(variable);
+        const strippedVariable = stripVariablePrefix(variable);
 
         if (skip(strippedVariable)) {
           return variable;
