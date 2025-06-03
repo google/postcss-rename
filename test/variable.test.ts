@@ -43,8 +43,6 @@ function assertMapEquals(
   expect(outputMap).toEqual(expected);
 }
 
-// TODO(jiramide): add tests
-
 describe('with strategy "none"', () => {
   describe('with no variables', () => {
     const input = `
@@ -224,7 +222,6 @@ describe('with strategy "none"', () => {
     });
   });
 
-  // TODO(jiramide): add cases with deeply nested var calls (e.g. var(--a, var(--b, var(--c))))
   describe('with deeply nested var uses', () => {
     const input = `
       .foo {
@@ -291,7 +288,6 @@ describe('with strategy "none"', () => {
     });
   });
 
-  // TODO(jiramide): add cases with (var(...)) expressions (extraneous parens cause parsing difficulty with postcss-value-parser)
   describe('with extraneous parentheses', () => {
     const input3 = `
       .extraneous-parens {
@@ -346,7 +342,6 @@ describe('with strategy "none"', () => {
     });
   });
 
-  // TODO(jiramide): add cases with calc
   describe('with calc', () => {
     const input = `
       .class {
@@ -474,8 +469,6 @@ describe('with strategy "none"', () => {
       );
     });
   });
-
-  // TODO(jiramide):
 });
 
 describe('with strategy "debug"', () => {
@@ -693,7 +686,6 @@ describe('with strategy "debug"', () => {
     });
   });
 
-  // TODO(jiramide): add cases with deeply nested var calls (e.g. var(--a, var(--b, var(--c))))
   describe('with deeply nested var uses', () => {
     const input =
       '.foo { color: var(--foo, var(--bar, var(--baz, var(--qux, #c0ffee)))); }';
@@ -763,7 +755,6 @@ describe('with strategy "debug"', () => {
     });
   });
 
-  // TODO(jiramide): add cases with (var(...)) expressions (extraneous parens cause parsing difficulty with postcss-value-parser)
   describe('with extraneous parentheses', () => {
     const input3 =
       '.extraneous-parens { not-a-custom-property: (((var(--three-extra-paren)))); }';
@@ -821,7 +812,6 @@ describe('with strategy "debug"', () => {
     });
   });
 
-  // TODO(jiramide): add cases with calc
   describe('with calc', () => {
     const input = '.class { number: var(--foo, calc(1 + var(--bar))); }';
 
@@ -956,6 +946,4 @@ describe('with strategy "debug"', () => {
       );
     });
   });
-
-  // TODO(jiramide):
 });
