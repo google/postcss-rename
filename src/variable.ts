@@ -81,8 +81,9 @@ function plugin({
 
       /**
        * Walks the given AST node and renames any variables it spots as it goes
+       *
        * NOTE: This function does not explicitly check for `var(...)`
-       * function-nodes, and it indiscriminately renames any word-type nodes
+       * function-nodes, and it indiscriminately rename any word-type nodes
        * it sees that has the custom CSS property prefix. As of May 30, 2025,
        * nothing in the CSS spec suggests that this does not work, but this
        * may break in the future in case a new CSS feature is added that
