@@ -1,14 +1,17 @@
 {
   "name": "postcss-rename",
-  "version": "0.7.0-dev",
-  "description": "A PostCSS plugin to replace class names based on a customizable renaming scheme.",
+  "version": "0.8.0-dev",
+  "description": "A PostCSS plugin to replace CSS names based on a customizable renaming scheme.",
   "keywords": [
     "postcss",
     "css",
     "postcss-plugin"
   ],
-  "main": "build/index.js",
-  "types": "build/index.d.ts",
+  "exports": {
+    ".": "./build/src/index.js",
+    "./variable": "./build/src/variable.js"
+  },
+  "types": "build/src/index.d.ts",
   "files": [
     "build"
   ],
