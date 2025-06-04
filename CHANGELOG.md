@@ -1,3 +1,8 @@
+## 0.8.0
+
+* Added variable renaming capabilities.
+
+
 ## 0.7.0
 
 * Changed the plugin to run synchronously. This is a breaking change if you
