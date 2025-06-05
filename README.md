@@ -1,20 +1,20 @@
 [![Build status](https://github.com/google/postcss-rename/actions/workflows/ci.yml/badge.svg)](https://github.com/google/postcss-rename/actions)
 
-A [PostCSS](https://github.com/postcss/postcss) plugin to replace class names
+A [PostCSS](https://github.com/postcss/postcss) plugin to replace CSS names
 based on a customizable renaming scheme.
 
 * [Usage](#usage)
 * [Options](#options)
   * [`strategy`](#strategy)
-  * [`by`](#by)
+  * [`by`](#by) - for class renaming
   * [`prefix`](#prefix)
   * [`except`](#except)
-  * [`ids`](#ids)
+  * [`ids`](#ids) for class renaming
   * [`outputMapCallback`](#outputMapCallback)
 
 ## Usage
 
-`postcss-rename` makes it possible to rename CSS class names in the generated
+`postcss-rename` makes it possible to rename CSS names in the generated
 stylesheet, which helps reduce the size of the CSS that is sent down to your
 users. It's designed to be used along with a plugin for a build system like
 Webpack that can rewrite HTML templates and/or references in JS. If you write
@@ -48,6 +48,9 @@ Whether to rename in "by-whole mode" or "by-part mode".
 * `"part"`: Rename each hyphenated section of a name separately, so for example
   `.tall-image` might become `.a-b`.
 
+This only applies to classes, and variables are always renamed in "by-whole
+mode"
+
 ### `prefix`
 
 A string prefix to add before every renamed class. This applies even if
@@ -56,6 +59,9 @@ A string prefix to add before every renamed class. This applies even if
 In by-part mode, the prefix is applied to the entire class, but it isn't
 included in the [output map](#outputMapCallback).
 
+When a prefix is given while renaming variables, a dash ("-") is added in
+between the prefix and the renamed CSS variable.
+
 ### `except`
 
 An array (or other `Iterable`) of names that shouldn't be renamed.
@@ -63,6 +69,7 @@ An array (or other `Iterable`) of names that shouldn't be renamed.
 ### `ids`
 
 Whether to rename ID selectors as well as class selectors. Defaults to `false`.
+This does not apply to variable renaming.
 
 ### `outputMapCallback`
 
