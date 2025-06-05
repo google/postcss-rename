@@ -10,10 +10,12 @@
   "exports": {
     ".": {
       "require": "./build/src/index.js",
+      "import": "./build/src/index.js",
       "types": "./build/src/index.d.ts"
     },
     "./variable": {
       "require": "./build/src/variable.js",
+      "import": "./build/src/variable.js",
       "types": "./build/src/variable.d.ts"
     },
     "./types": {
@@ -21,16 +23,6 @@
     }
   },
   "types": "build/src/types.d.ts",
-  "typesVersion": {
-    "*": {
-      ".": [
-        "./build/src/index.d.ts"
-      ],
-      "variable": [
-        "./build/src/variable.d.ts"
-      ]
-    }
-  },
   "files": [
     "build"
   ],
@@ -40,7 +32,8 @@
     "clean": "gts clean",
     "compile": "tsc -p .",
     "fix": "gts fix",
-    "prepare": "npm run compile && npm-dts generate --output ./build/src/types.d.ts",
+    "dts": "npm-dts generate --output ./build/types.d.ts && sed 's|/src/|/|g' -i ./build/types.d.ts",
+    "prepare": "npm run compile && npm run dts",
     "pretest": "npm run compile",
     "posttest": "npm run check"
   },
