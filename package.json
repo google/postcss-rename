@@ -8,10 +8,27 @@
     "postcss-plugin"
   ],
   "exports": {
-    ".": "./build/src/index.js",
-    "./variable": "./build/src/variable.js"
+    ".": {
+      "require": "./build/src/index.js",
+      "import": "./build/src/index.js",
+      "types": "./build/src/index.d.ts"
+    },
+    "./variable": {
+      "require": "./build/src/variable.js",
+      "import": "./build/src/variable.js",
+      "types": "./build/src/variable.d.ts"
+    }
   },
-  "types": "build/src/index.d.ts",
+  "typesVersion": {
+    "*": {
+      ".": [
+        "./build/src/index.d.ts"
+      ],
+      "variable": [
+        "./build/src/variable.d.ts"
+      ]
+    }
+  },
   "files": [
     "build"
   ],
