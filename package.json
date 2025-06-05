@@ -10,15 +10,17 @@
   "exports": {
     ".": {
       "require": "./build/src/index.js",
-      "import": "./build/src/index.js",
       "types": "./build/src/index.d.ts"
     },
     "./variable": {
       "require": "./build/src/variable.js",
-      "import": "./build/src/variable.js",
       "types": "./build/src/variable.d.ts"
+    },
+    "./types": {
+      "require": "./build/src/types.d.ts"
     }
   },
+  "types": "build/src/types.d.ts",
   "typesVersion": {
     "*": {
       ".": [
