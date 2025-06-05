@@ -1,0 +1,25 @@
+name: Release
+
+on:
+  workflow_call:
+
+jobs:
+  release:
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+      - run: npm install
+
+      # Use node pointing to the Google releasing registry.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          registry-url: 'https://wombat-dressing-room.appspot.com/'
+      - run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
