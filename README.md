@@ -6,10 +6,10 @@ based on a customizable renaming scheme.
 * [Usage](#usage)
 * [Options](#options)
   * [`strategy`](#strategy)
-  * [`by`](#by) - for class renaming
+  * [`by`](#by)
   * [`prefix`](#prefix)
   * [`except`](#except)
-  * [`ids`](#ids) for class renaming
+  * [`ids`](#ids)
   * [`outputMapCallback`](#outputMapCallback)
 
 ## Usage
@@ -40,6 +40,8 @@ mode and the part in by-part mode) and returns its renamed value.
 
 ### `by`
 
+> *Note*: this option only works for selector renaming.
+
 Whether to rename in "by-whole mode" or "by-part mode".
 
 * `"whole"`: Rename the entire name at once, so for example `.tall-image` might
@@ -67,6 +69,8 @@ between the prefix and the renamed CSS variable.
 An array (or other `Iterable`) of names that shouldn't be renamed.
 
 ### `ids`
+
+> *Note*: this option only works for selector renaming.
 
 Whether to rename ID selectors as well as class selectors. Defaults to `false`.
 This does not apply to variable renaming.
