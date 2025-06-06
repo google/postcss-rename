@@ -15,12 +15,8 @@
     "./variable": {
       "require": "./build/src/variable.js",
       "types": "./build/src/variable.d.ts"
-    },
-    "./types": {
-      "require": "./build/src/types.d.ts"
     }
   },
-  "types": "build/src/types.d.ts",
   "files": [
     "build"
   ],
