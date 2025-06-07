@@ -3,6 +3,7 @@
 A [PostCSS](https://github.com/postcss/postcss) plugin to replace CSS names
 based on a customizable renaming scheme.
 
+* [Getting Started](#getting-started)
 * [Usage](#usage)
 * [Options](#options)
   * [`strategy`](#strategy)
@@ -11,6 +12,30 @@ based on a customizable renaming scheme.
   * [`except`](#except)
   * [`ids`](#ids)
   * [`outputMapCallback`](#outputMapCallback)
+
+## Getting Started
+If using TypeScript, you will need `"moduleResolution"` to be `"node16"` or
+higher.
+
+Install the plugin using npm
+
+```
+npm install --save-dev postcss postcss-rename
+```
+
+You can insert these plugins into your PostCSS stack
+
+```cjs
+const postcss = require('postcss');
+const classRename = import('postcss-rename');
+const variableRename = import('postcss-rename/variable');
+
+const myProcessedCss = postcss([
+    classRename({ /* class renaming options here, see Options */ }),
+    variableRename({ /* variable renaming options here, see Options */ }),
+]).process(css).css;
+```
+
 
 ## Usage
 
