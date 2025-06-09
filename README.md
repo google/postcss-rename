@@ -27,13 +27,13 @@ You can insert these plugins into your PostCSS stack
 
 ```cjs
 const postcss = require('postcss');
-const classRename = import('postcss-rename');
-const variableRename = import('postcss-rename/variable');
+const classRename = require('postcss-rename');
+const variableRename = require('postcss-rename/variable');
 
 const myProcessedCss = postcss([
     classRename({ /* class renaming options here, see Options */ }),
     variableRename({ /* variable renaming options here, see Options */ }),
-]).process(css).css;
+]).process(input).css;
 ```
 
 
