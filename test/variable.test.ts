@@ -469,6 +469,19 @@ describe('with strategy "none"', () => {
       );
     });
   });
+
+  describe('with @property (contains initial-value)', () => {
+    const input =
+      '@property --test-property { syntax: "<angle>"; initial-value: var(--initial); }';
+
+    it('does nothing with no options', () => {
+      assertPostcss(run(input), input);
+    });
+
+    it('does nothing with an explicit strategy', () => {
+      assertPostcss(run(input, {strategy: 'none'}), input);
+    });
+  });
 });
 
 describe('with strategy "debug"', () => {
@@ -941,6 +954,165 @@ describe('with strategy "debug"', () => {
         },
         {
           strategy: 'debug',
+          prefix: 'pf',
+        },
+      );
+    });
+  });
+
+  describe('with @property (contains initial-value)', () => {
+    const input =
+      '@property --test-property { syntax: "<angle>"; initial-value: var(--initial); }';
+
+    it('adds an underscore after every name', () => {
+      assertPostcss(
+        run(input, {strategy: 'debug'}),
+        '@property --test-property_ { syntax: "<angle>"; initial-value: var(--initial_); }',
+      );
+    });
+
+    it('emits an output map', () => {
+      assertMapEquals(
+        input,
+        {
+          initial: 'initial_',
+          'test-property': 'test-property_',
+        },
+        {
+          strategy: 'debug',
+        },
+      );
+    });
+
+    it('includes the prefix in the output map', () => {
+      assertMapEquals(
+        input,
+        {
+          initial: 'pf-initial_',
+          'test-property': 'pf-test-property_',
+        },
+        {
+          strategy: 'debug',
+          prefix: 'pf',
+        },
+      );
+    });
+
+    it('omits excluded names from the output map', () => {
+      assertMapEquals(
+        input,
+        {
+          'test-property': 'test-property_',
+        },
+        {
+          strategy: 'debug',
+          except: ['initial'],
+        },
+      );
+    });
+  });
+
+  describe('with declaration + @property (contains initial-value) + declaration', () => {
+    it('adds an underscore after every name', () => {
+      const input = `
+        --initial: 45;
+        
+        @property --test-property {
+          syntax: "<angle>";
+          initial-value: var(--initial);
+        }
+
+        --test-property: 45;
+      `;
+
+      const expected = `
+        --initial_: 45;
+        
+        @property --test-property_ {
+          syntax: "<angle>";
+          initial-value: var(--initial_);
+        }
+
+        --test-property_: 45;
+      `;
+
+      assertPostcss(run(input, {strategy: 'debug'}), expected);
+    });
+  });
+});
+
+describe('with strategy "minimal"', () => {
+  describe('with declaration + @property (contains initial-value) + declaration', () => {
+    const input1 = `
+      --test-property: 45;
+        
+      @property --test-property {
+        syntax: "<angle>";
+        initial-value: var(--initial);
+      }
+
+      --initial: 45;
+    `;
+
+    const expected1 = `
+      --a: 45;
+        
+      @property --a {
+        syntax: "<angle>";
+        initial-value: var(--b);
+      }
+
+      --b: 45;
+    `;
+
+    const input2 = `
+      --initial: 45;
+        
+      @property --test-property {
+        syntax: "<angle>";
+        initial-value: var(--initial);
+      }
+
+      --test-property: 45;
+    `;
+
+    const expected2 = `
+      --a: 45;
+        
+      @property --b {
+        syntax: "<angle>";
+        initial-value: var(--a);
+      }
+
+      --b: 45;
+    `;
+
+    it('respects declaration order', () => {
+      assertPostcss(run(input1, {strategy: 'minimal'}), expected1);
+      assertPostcss(run(input2, {strategy: 'minimal'}), expected2);
+    });
+
+    it('includes the prefix in the output map', () => {
+      assertMapEquals(
+        input1,
+        {
+          initial: 'pf-b',
+          'test-property': 'pf-a',
+        },
+        {
+          strategy: 'minimal',
+          prefix: 'pf',
+        },
+      );
+
+      assertMapEquals(
+        input2,
+        {
+          initial: 'pf-a',
+          'test-property': 'pf-b',
+        },
+        {
+          strategy: 'minimal',
           prefix: 'pf',
         },
       );

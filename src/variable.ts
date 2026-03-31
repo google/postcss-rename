@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import postcss, {Declaration} from 'postcss';
+import postcss, {AtRule, Declaration} from 'postcss';
 import valueParser from 'postcss-value-parser';
 import {type RenamingMap, type VariableRenamingOptions} from './options';
 import {type SkipPredicate, createSkipPredicate} from './skip';
@@ -109,19 +109,39 @@ function plugin({
         return parsed.toString();
       }
 
-      const alreadyProcessedNodes = new Set<Declaration>();
+      const alreadyProcessedDeclarationNodes = new Set<Declaration>();
+
       function renameDeclaration(declarationNode: Declaration): void {
-        if (alreadyProcessedNodes.has(declarationNode)) {
+        if (alreadyProcessedDeclarationNodes.has(declarationNode)) {
           return;
         }
 
-        alreadyProcessedNodes.add(declarationNode);
+        alreadyProcessedDeclarationNodes.add(declarationNode);
 
         declarationNode.prop = renameVariable(declarationNode.prop);
         declarationNode.value = renameValue(declarationNode.value);
       }
 
+      const alreadyProcessedAtRulePropertyNodes = new Set<AtRule>();
+
+      function renameAtRuleProperty(atRuleNode: AtRule): void {
+        if (alreadyProcessedAtRulePropertyNodes.has(atRuleNode)) {
+          return;
+        }
+
+        alreadyProcessedAtRulePropertyNodes.add(atRuleNode);
+
+        atRuleNode.params = renameVariable(atRuleNode.params);
+
+        atRuleNode.walkDecls(declarationNode => {
+          renameDeclaration(declarationNode);
+        });
+      }
+
       return {
+        AtRule: {
+          property: renameAtRuleProperty,
+        },
         Declaration: renameDeclaration,
         OnceExit() {
           if (outputMapCallback) {
