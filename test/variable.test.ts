@@ -470,9 +470,13 @@ describe('with strategy "none"', () => {
     });
   });
 
-  describe('with @property (contains initial-value)', () => {
-    const input =
-      '@property --test-property { syntax: "<angle>"; initial-value: var(--initial); }';
+  describe('with @property', () => {
+    const input = `
+      @property --test-property {
+        syntax: "<angle>";
+        inherits: false;
+        initial-value: 45deg;
+      }`;
 
     it('does nothing with no options', () => {
       assertPostcss(run(input), input);
@@ -960,22 +964,29 @@ describe('with strategy "debug"', () => {
     });
   });
 
-  describe('with @property (contains initial-value)', () => {
-    const input =
-      '@property --test-property { syntax: "<angle>"; initial-value: var(--initial); }';
+  describe('with @property', () => {
+    const input = `
+      @property --test-property {
+        syntax: "<angle>";
+        inherits: false;
+        initial-value: 45deg;
+      }`;
+
+    const expected = `
+      @property --test-property_ {
+        syntax: "<angle>";
+        inherits: false;
+        initial-value: 45deg;
+      }`;
 
     it('adds an underscore after every name', () => {
-      assertPostcss(
-        run(input, {strategy: 'debug'}),
-        '@property --test-property_ { syntax: "<angle>"; initial-value: var(--initial_); }',
-      );
+      assertPostcss(run(input, {strategy: 'debug'}), expected);
     });
 
     it('emits an output map', () => {
       assertMapEquals(
         input,
         {
-          initial: 'initial_',
           'test-property': 'test-property_',
         },
         {
@@ -988,7 +999,6 @@ describe('with strategy "debug"', () => {
       assertMapEquals(
         input,
         {
-          initial: 'pf-initial_',
           'test-property': 'pf-test-property_',
         },
         {
@@ -1001,102 +1011,42 @@ describe('with strategy "debug"', () => {
     it('omits excluded names from the output map', () => {
       assertMapEquals(
         input,
-        {
-          'test-property': 'test-property_',
-        },
+        {},
         {
           strategy: 'debug',
-          except: ['initial'],
+          except: ['test-property'],
         },
       );
-    });
-  });
-
-  describe('with declaration + @property (contains initial-value) + declaration', () => {
-    it('adds an underscore after every name', () => {
-      const input = `
-        --initial: 45;
-        
-        @property --test-property {
-          syntax: "<angle>";
-          initial-value: var(--initial);
-        }
-
-        --test-property: 45;
-      `;
-
-      const expected = `
-        --initial_: 45;
-        
-        @property --test-property_ {
-          syntax: "<angle>";
-          initial-value: var(--initial_);
-        }
-
-        --test-property_: 45;
-      `;
-
-      assertPostcss(run(input, {strategy: 'debug'}), expected);
     });
   });
 });
 
 describe('with strategy "minimal"', () => {
-  describe('with declaration + @property (contains initial-value) + declaration', () => {
-    const input1 = `
-      --test-property: 45;
+  describe('with declaration + @property', () => {
+    const input = `
+      --test-property: 45deg;
         
       @property --test-property {
         syntax: "<angle>";
-        initial-value: var(--initial);
-      }
+        inherits: false;
+      }`;
 
-      --initial: 45;
-    `;
-
-    const expected1 = `
-      --a: 45;
+    const expected = `
+      --a: 45deg;
         
       @property --a {
         syntax: "<angle>";
-        initial-value: var(--b);
-      }
+        inherits: false;
+      }`;
 
-      --b: 45;
-    `;
-
-    const input2 = `
-      --initial: 45;
-        
-      @property --test-property {
-        syntax: "<angle>";
-        initial-value: var(--initial);
-      }
-
-      --test-property: 45;
-    `;
-
-    const expected2 = `
-      --a: 45;
-        
-      @property --b {
-        syntax: "<angle>";
-        initial-value: var(--a);
-      }
-
-      --b: 45;
-    `;
-
-    it('respects declaration order', () => {
-      assertPostcss(run(input1, {strategy: 'minimal'}), expected1);
-      assertPostcss(run(input2, {strategy: 'minimal'}), expected2);
+    it('maps names to the shortest possible strings', () => {
+      assertPostcss(run(input, {strategy: 'minimal'}), expected);
     });
 
     it('includes the prefix in the output map', () => {
       assertMapEquals(
-        input1,
+        input,
         {
-          initial: 'pf-b',
           'test-property': 'pf-a',
         },
         {
@@ -1104,12 +1054,35 @@ describe('with strategy "minimal"', () => {
           prefix: 'pf',
         },
       );
+    });
+  });
 
+  describe('with @property + declaration', () => {
+    const input = `  
+      @property --test-property {
+        syntax: "<angle>";
+        inherits: false;
+      }
+
+      --test-property: 45deg;`;
+
+    const expected = `  
+      @property --a {
+        syntax: "<angle>";
+        inherits: false;
+      }
+
+      --a: 45deg;`;
+
+    it('maps names to the shortest possible strings', () => {
+      assertPostcss(run(input, {strategy: 'minimal'}), expected);
+    });
+
+    it('includes the prefix in the output map', () => {
       assertMapEquals(
-        input2,
+        input,
         {
-          initial: 'pf-a',
-          'test-property': 'pf-b',
+          'test-property': 'pf-a',
         },
         {
           strategy: 'minimal',

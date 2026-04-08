@@ -132,10 +132,6 @@ function plugin({
         alreadyProcessedAtRulePropertyNodes.add(atRuleNode);
 
         atRuleNode.params = renameVariable(atRuleNode.params);
-
-        atRuleNode.walkDecls(declarationNode => {
-          renameDeclaration(declarationNode);
-        });
       }
 
       return {
