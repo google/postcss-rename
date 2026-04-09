@@ -476,7 +476,8 @@ describe('with strategy "none"', () => {
         syntax: "<angle>";
         inherits: false;
         initial-value: 45deg;
-      }`;
+      }
+    `;
 
     it('does nothing with no options', () => {
       assertPostcss(run(input), input);
@@ -493,7 +494,8 @@ describe('with strategy "debug"', () => {
     const input = `
       .no-variables-here {
         absolutely: "nothing";
-      }`;
+      }
+    `;
 
     const options: plugin.Options = {
       strategy: 'debug',
@@ -970,14 +972,16 @@ describe('with strategy "debug"', () => {
         syntax: "<angle>";
         inherits: false;
         initial-value: 45deg;
-      }`;
+      }
+    `;
 
     const expected = `
       @property --test-property_ {
         syntax: "<angle>";
         inherits: false;
         initial-value: 45deg;
-      }`;
+      }
+    `;
 
     it('adds an underscore after every name', () => {
       assertPostcss(run(input, {strategy: 'debug'}), expected);

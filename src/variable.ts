@@ -109,35 +109,31 @@ function plugin({
         return parsed.toString();
       }
 
-      const alreadyProcessedDeclarationNodes = new Set<Declaration>();
-
+      const alreadyProcessedDeclarations = new Set<Declaration>();
       function renameDeclaration(declarationNode: Declaration): void {
-        if (alreadyProcessedDeclarationNodes.has(declarationNode)) {
+        if (alreadyProcessedDeclarations.has(declarationNode)) {
           return;
         }
 
-        alreadyProcessedDeclarationNodes.add(declarationNode);
+        alreadyProcessedDeclarations.add(declarationNode);
 
         declarationNode.prop = renameVariable(declarationNode.prop);
         declarationNode.value = renameValue(declarationNode.value);
       }
 
-      const alreadyProcessedAtRulePropertyNodes = new Set<AtRule>();
-
+      const alreadyProcessedAtRules = new Set<AtRule>();
       function renameAtRuleProperty(atRuleNode: AtRule): void {
-        if (alreadyProcessedAtRulePropertyNodes.has(atRuleNode)) {
+        if (alreadyProcessedAtRules.has(atRuleNode)) {
           return;
         }
 
-        alreadyProcessedAtRulePropertyNodes.add(atRuleNode);
+        alreadyProcessedAtRules.add(atRuleNode);
 
         atRuleNode.params = renameVariable(atRuleNode.params);
       }
 
       return {
-        AtRule: {
-          property: renameAtRuleProperty,
-        },
+        AtRule: {property: renameAtRuleProperty},
         Declaration: renameDeclaration,
         OnceExit() {
           if (outputMapCallback) {
