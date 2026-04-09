@@ -1,3 +1,7 @@
+## 0.8.1
+
+* Variable renaming now also renames variables defined by the `@property` rule.
+
 ## 0.8.0
 
 * Added variable renaming capabilities. Users who are interested in using the
