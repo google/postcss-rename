@@ -1027,7 +1027,7 @@ describe('with strategy "minimal"', () => {
       --test-property: 45deg;
         
       @property --test-property {
-        syntax: "<angle>";
+        syntax: "*";
         inherits: false;
       }`;
 
@@ -1035,7 +1035,7 @@ describe('with strategy "minimal"', () => {
       --a: 45deg;
         
       @property --a {
-        syntax: "<angle>";
+        syntax: "*";
         inherits: false;
       }`;
 
@@ -1060,7 +1060,7 @@ describe('with strategy "minimal"', () => {
   describe('with @property + declaration', () => {
     const input = `  
       @property --test-property {
-        syntax: "<angle>";
+        syntax: "*";
         inherits: false;
       }
 
@@ -1068,7 +1068,7 @@ describe('with strategy "minimal"', () => {
 
     const expected = `  
       @property --a {
-        syntax: "<angle>";
+        syntax: "*";
         inherits: false;
       }
 
