@@ -469,6 +469,24 @@ describe('with strategy "none"', () => {
       );
     });
   });
+
+  describe('with @property', () => {
+    const input = `
+      @property --test-property {
+        syntax: "<angle>";
+        inherits: false;
+        initial-value: 45deg;
+      }
+    `;
+
+    it('does nothing with no options', () => {
+      assertPostcss(run(input), input);
+    });
+
+    it('does nothing with an explicit strategy', () => {
+      assertPostcss(run(input, {strategy: 'none'}), input);
+    });
+  });
 });
 
 describe('with strategy "debug"', () => {
@@ -476,7 +494,8 @@ describe('with strategy "debug"', () => {
     const input = `
       .no-variables-here {
         absolutely: "nothing";
-      }`;
+      }
+    `;
 
     const options: plugin.Options = {
       strategy: 'debug',
@@ -941,6 +960,136 @@ describe('with strategy "debug"', () => {
         },
         {
           strategy: 'debug',
+          prefix: 'pf',
+        },
+      );
+    });
+  });
+
+  describe('with @property', () => {
+    const input = `
+      @property --test-property {
+        syntax: "<angle>";
+        inherits: false;
+        initial-value: 45deg;
+      }
+    `;
+
+    const expected = `
+      @property --test-property_ {
+        syntax: "<angle>";
+        inherits: false;
+        initial-value: 45deg;
+      }
+    `;
+
+    it('adds an underscore after every name', () => {
+      assertPostcss(run(input, {strategy: 'debug'}), expected);
+    });
+
+    it('emits an output map', () => {
+      assertMapEquals(
+        input,
+        {
+          'test-property': 'test-property_',
+        },
+        {
+          strategy: 'debug',
+        },
+      );
+    });
+
+    it('includes the prefix in the output map', () => {
+      assertMapEquals(
+        input,
+        {
+          'test-property': 'pf-test-property_',
+        },
+        {
+          strategy: 'debug',
+          prefix: 'pf',
+        },
+      );
+    });
+
+    it('omits excluded names from the output map', () => {
+      assertMapEquals(
+        input,
+        {},
+        {
+          strategy: 'debug',
+          except: ['test-property'],
+        },
+      );
+    });
+  });
+});
+
+describe('with strategy "minimal"', () => {
+  describe('with declaration + @property', () => {
+    const input = `
+      --test-property: 45deg;
+        
+      @property --test-property {
+        syntax: "*";
+        inherits: false;
+      }`;
+
+    const expected = `
+      --a: 45deg;
+        
+      @property --a {
+        syntax: "*";
+        inherits: false;
+      }`;
+
+    it('maps names to the shortest possible strings', () => {
+      assertPostcss(run(input, {strategy: 'minimal'}), expected);
+    });
+
+    it('includes the prefix in the output map', () => {
+      assertMapEquals(
+        input,
+        {
+          'test-property': 'pf-a',
+        },
+        {
+          strategy: 'minimal',
+          prefix: 'pf',
+        },
+      );
+    });
+  });
+
+  describe('with @property + declaration', () => {
+    const input = `  
+      @property --test-property {
+        syntax: "*";
+        inherits: false;
+      }
+
+      --test-property: 45deg;`;
+
+    const expected = `  
+      @property --a {
+        syntax: "*";
+        inherits: false;
+      }
+
+      --a: 45deg;`;
+
+    it('maps names to the shortest possible strings', () => {
+      assertPostcss(run(input, {strategy: 'minimal'}), expected);
+    });
+
+    it('includes the prefix in the output map', () => {
+      assertMapEquals(
+        input,
+        {
+          'test-property': 'pf-a',
+        },
+        {
+          strategy: 'minimal',
           prefix: 'pf',
         },
       );
