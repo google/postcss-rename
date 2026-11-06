@@ -41,7 +41,7 @@
   },
   "devDependencies": {
     "@types/jest": "^26.0.24",
-    "@types/node": "^12.20.55",
+    "@types/node": "^26.6.6",
     "gts": "^6.0.2",
     "jest": "^29.7.0",
     "jest-cli": "^29.7.0",
