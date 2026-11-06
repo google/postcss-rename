@@ -47,7 +47,7 @@
     "jest-cli": "^29.7.0",
     "postcss": "^8.5.3",
     "ts-jest": "^29.3.4",
-    "typescript": "^5.8.3"
+    "typescript": "^7.0.2"
   },
   "engines": {
     "node": ">=20.0.0"
