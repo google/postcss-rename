@@ -3,23 +3,33 @@ name: Release
 on:
   workflow_call:
 
+permissions: {}
+
+# Prevent an attacker who can write to the cache in a less-privileged action
+# from using it to escalate to a release action.
+cache-mode: none
+
 jobs:
   release:
+    name: Release
     permissions:
       contents: read
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with: {persist-credentials: false}
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: '20.x'
       - run: npm install
 
       # Use node pointing to the Google releasing registry.
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: '20.x'
           registry-url: 'https://wombat-dressing-room.appspot.com/'
-      - run: npm publish
+
+      # Publish via Google's publishing infrastructure
+      - run: npm publish # zizmor: ignore[use-trusted-publishing]
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
