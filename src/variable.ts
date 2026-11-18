@@ -132,8 +132,21 @@ function plugin({
         atRuleNode.params = renameVariable(atRuleNode.params);
       }
 
+      function renameAtRuleContainer(atRuleNode: AtRule): void {
+        if (alreadyProcessedAtRules.has(atRuleNode)) {
+          return;
+        }
+
+        alreadyProcessedAtRules.add(atRuleNode);
+
+        atRuleNode.params = renameValue(atRuleNode.params);
+      }
+
       return {
-        AtRule: {property: renameAtRuleProperty},
+        AtRule: {
+          container: renameAtRuleContainer,
+          property: renameAtRuleProperty,
+        },
         Declaration: renameDeclaration,
         OnceExit() {
           if (outputMapCallback) {
