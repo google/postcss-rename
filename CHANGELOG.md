@@ -1,3 +1,8 @@
+## 0.8.2
+
+* Variable renaming now also renames variables in `@container` queries, such as
+  `@container style(--theme: dark)`.
+
 ## 0.8.1
 
 * Variable renaming now also renames variables defined by the `@property` rule.

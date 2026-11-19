@@ -487,6 +487,24 @@ describe('with strategy "none"', () => {
       assertPostcss(run(input, {strategy: 'none'}), input);
     });
   });
+
+  describe('with @container', () => {
+    const input = `
+      @container style(--test-property: dark) {
+        .foo {
+          color: red;
+        }
+      }
+    `;
+
+    it('does nothing with no options', () => {
+      assertPostcss(run(input), input);
+    });
+
+    it('does nothing with an explicit strategy', () => {
+      assertPostcss(run(input, {strategy: 'none'}), input);
+    });
+  });
 });
 
 describe('with strategy "debug"', () => {
@@ -1023,6 +1041,100 @@ describe('with strategy "debug"', () => {
       );
     });
   });
+
+  describe('with @container', () => {
+    const input = `
+      @container style(--test-property: dark) {
+        .foo {
+          color: red;
+        }
+      }
+    `;
+
+    const expected = `
+      @container style(--test-property_: dark) {
+        .foo {
+          color: red;
+        }
+      }
+    `;
+
+    it('adds an underscore after every name', () => {
+      assertPostcss(run(input, {strategy: 'debug'}), expected);
+    });
+
+    it('emits an output map', () => {
+      assertMapEquals(
+        input,
+        {
+          'test-property': 'test-property_',
+        },
+        {
+          strategy: 'debug',
+        },
+      );
+    });
+
+    it('includes the prefix in the output map', () => {
+      assertMapEquals(
+        input,
+        {
+          'test-property': 'pf-test-property_',
+        },
+        {
+          strategy: 'debug',
+          prefix: 'pf',
+        },
+      );
+    });
+
+    it('omits excluded names from the output map', () => {
+      assertMapEquals(
+        input,
+        {},
+        {
+          strategy: 'debug',
+          except: ['test-property'],
+        },
+      );
+    });
+  });
+
+  describe('with a complex @container query', () => {
+    const input = `
+      @container --test-container (min-width: 400px) and not style(--test-property) {
+        .foo {
+          color: var(--test-color);
+        }
+      }
+    `;
+
+    const expected = `
+      @container --test-container_ (min-width: 400px) and not style(--test-property_) {
+        .foo {
+          color: var(--test-color_);
+        }
+      }
+    `;
+
+    it('adds an underscore after every name', () => {
+      assertPostcss(run(input, {strategy: 'debug'}), expected);
+    });
+  });
+
+  describe('with a @container query that has no variables', () => {
+    const input = `
+      @container card (min-width: 400px) {
+        .foo {
+          color: red;
+        }
+      }
+    `;
+
+    it('does nothing', () => {
+      assertPostcss(run(input, {strategy: 'debug'}), input);
+    });
+  });
 });
 
 describe('with strategy "minimal"', () => {
@@ -1077,6 +1189,67 @@ describe('with strategy "minimal"', () => {
       }
 
       --a: 45deg;`;
+
+    it('maps names to the shortest possible strings', () => {
+      assertPostcss(run(input, {strategy: 'minimal'}), expected);
+    });
+
+    it('includes the prefix in the output map', () => {
+      assertMapEquals(
+        input,
+        {
+          'test-property': 'pf-a',
+        },
+        {
+          strategy: 'minimal',
+          prefix: 'pf',
+        },
+      );
+    });
+  });
+
+  describe('with declaration + @container', () => {
+    const input = `
+      .foo {
+        --test-property: dark;
+      }
+
+      @container style(--test-property: dark) {
+        .bar {
+          color: red;
+        }
+      }`;
+
+    const expected = `
+      .foo {
+        --a: dark;
+      }
+
+      @container style(--a: dark) {
+        .bar {
+          color: red;
+        }
+      }`;
+
+    it('maps names to the shortest possible strings', () => {
+      assertPostcss(run(input, {strategy: 'minimal'}), expected);
+    });
+  });
+
+  describe('with @container + declaration', () => {
+    const input = `
+      @container style(--test-property: dark) {
+        .bar {
+          --test-property: light;
+        }
+      }`;
+
+    const expected = `
+      @container style(--a: dark) {
+        .bar {
+          --a: light;
+        }
+      }`;
 
     it('maps names to the shortest possible strings', () => {
       assertPostcss(run(input, {strategy: 'minimal'}), expected);
