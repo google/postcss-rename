@@ -2,6 +2,10 @@ name: Release
 
 on:
   workflow_call:
+    secrets:
+      NODE_AUTH_TOKEN:
+        description: 'The NPM authentication token'
+        required: true
 
 permissions: {}
 
